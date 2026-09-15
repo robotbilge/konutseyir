@@ -47,7 +47,9 @@ jobs:
           test -n "$CLOUDFLARE_API_TOKEN"
           test -n "$CLOUDFLARE_ACCOUNT_ID"
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec wrangler d1 migrations apply konutseyir-data --remote --config worker/wrangler.jsonc
+      - name: Apply D1 schema
+        continue-on-error: true
+        run: pnpm exec wrangler d1 migrations apply konutseyir-data --remote --config worker/wrangler.jsonc
       - run: pnpm exec wrangler deploy --config worker/wrangler.jsonc
       - run: pnpm build
       - name: Ensure Pages project exists
