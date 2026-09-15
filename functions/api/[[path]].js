@@ -1,0 +1,1 @@
+export async function onRequest(context){if(!context.env.MARKET_API)return Response.json({error:'Veri servisi bağlı değil',status:'not_configured'},{status:503});try{return await context.env.MARKET_API.fetch(context.request)}catch{return Response.json({error:'Veri servisine erişilemiyor',status:'unavailable'},{status:503})}}

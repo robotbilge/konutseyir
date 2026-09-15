@@ -1,0 +1,2 @@
+import {InfoPage} from '../../components/info-page';
+export default function Contact(){const email=import.meta.env.VITE_CONTACT_EMAIL;return <InfoPage eyebrow="İLETİŞİM" title="Hata ve öneri bildirimi">{email?<p><a href={`mailto:${email}`}>{email}</a> adresine yazabilirsiniz.</p>:<p>İletişim kanalı henüz yayıncı tarafından tanımlanmadı.</p>}<p>Hata bildiriminde sayfa bağlantısını, kullandığınız değerleri ve beklediğiniz sonucu paylaşın. Kimlik, tapu veya banka belgesi göndermeyin.</p></InfoPage>}

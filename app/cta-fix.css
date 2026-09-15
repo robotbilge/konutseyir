@@ -1,0 +1,1 @@
+.metric-grid{grid-template-columns:repeat(5,minmax(0,1fr))}.article aside>b{display:block;font-size:1.1rem}.article aside a{display:inline-block;margin-top:.25rem}@media(max-width:1000px){.metric-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:520px){.metric-grid{grid-template-columns:1fr}}

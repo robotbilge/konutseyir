@@ -1,0 +1,19 @@
+import{notFound}from"next/navigation";import{Header,Footer}from"@/components/site-chrome";import{guides}from"@/lib/content";
+const actions:Record<string,{title:string,text:string,href:string,label:string}>={
+ "kira-carpani-nedir":{title:"Kira çarpanını hesaplayın",text:"Satış fiyatı ve aylık kirayı girerek brüt amortisman süresini görün.",href:"/#analiz",label:"Kira çarpanı hesabını aç →"},
+ "ev-pahali-mi":{title:"İlan fiyatını test edin",text:"Metrekare fiyatı, kira getirisi ve reel getiri sonuçlarını birlikte inceleyin.",href:"/#analiz",label:"Ev Analizi’ni aç →"},
+ "net-kira-getirisi":{title:"Net kira getirisini hesaplayın",text:"Aylık kira ile yıllık gideri girin; giderlerden sonra kalan net oranı görün.",href:"/#net-kira",label:"Net kira hesabını aç →"},
+ "reel-konut-getirisi":{title:"Reel getiriyi hesaplayın",text:"Konut artışı, kira getirisi ve TÜFE varsayımını aynı hesapta karşılaştırın.",href:"/#analiz",label:"Reel getiri hesabını aç →"},
+ "ev-mi-mevduat-mi":{title:"Yatırımları karşılaştırın",text:"Aynı başlangıç parasını konut, mevduat ve altın senaryolarında ölçün.",href:"/karsilastir",label:"Karşılaştırma aracını aç →"},
+ "konut-kredisi-maliyeti":{title:"Kredinin toplam maliyetini görün",text:"Kredi tutarı, aylık faiz ve vadeyi girerek taksit ile toplam geri ödemeyi hesaplayın.",href:"/#kredi",label:"Kredi hesabını aç →"},
+ "tapu-kontrolu":{title:"Tapu adımlarını işaretleyin",text:"Malik, bağımsız bölüm, ipotek, haciz ve şerh kontrollerini takip edin.",href:"/kontrol-listesi",label:"Kontrol listesini aç →"},
+ "iskan-kat-mulkiyeti":{title:"Belge kontrollerini takip edin",text:"Kat mülkiyeti, kat irtifakı ve iskân doğrulamasını atlamayın.",href:"/kontrol-listesi",label:"Kontrol listesini aç →"},
+ "deprem-riski-kontrolu":{title:"Resmî ve teknik kontrolleri ayırın",text:"Bölgesel tehlike haritasına gidin, bina incelemesini ayrıca takip edin.",href:"/#kontrol",label:"Resmî kaynakları aç →"},
+ "aidat-borc-kontrolu":{title:"Giderleri net getiriye ekleyin",text:"Aidat ve beklenen bakım giderlerini yıllık gider alanına ekleyin.",href:"/#net-kira",label:"Net kira hesabını aç →"},
+ "kiracili-ev-almak":{title:"Kiracılı ev kontrolünü tamamlayın",text:"Sözleşme, depozito ve tahliye durumunu satın alma dosyanızda takip edin.",href:"/kontrol-listesi",label:"Kontrol listesini aç →"},
+ "brut-net-metrekare":{title:"Metrekare fiyatını karşılaştırın",text:"Aynı alan tanımını kullanarak satış fiyatının metrekare karşılığını hesaplayın.",href:"/#analiz",label:"Metrekare hesabını aç →"},
+ "ilan-fiyati-pazarlik":{title:"Teklif sınırınızı ölçün",text:"Fiyat, kira getirisi ve alternatif yatırım sonucunu birlikte değerlendirin.",href:"/#analiz",label:"Ev Analizi’ni aç →"},
+ "emlak-alim-masraflari":{title:"Toplam maliyeti hesaba katın",text:"Yıllık gider ve finansman maliyetini ayrı ayrı görün; işlem masraflarını teklifinize ekleyin.",href:"/#alim-masrafi",label:"Maliyet hesabını aç →"},
+ "konut-endeksi-okuma":{title:"Endeksi doğru bağlamda kullanın",text:"Kamu verisinin güncellik ve kapsam durumunu inceleyin.",href:"/veri",label:"Veri kaynaklarını aç →"}
+};
+export function generateStaticParams(){return guides.map(g=>({slug:g.slug}))}export default async function Guide({params}:{params:Promise<{slug:string}>}){const{slug}=await params,g=guides.find(x=>x.slug===slug);if(!g)notFound();const a=actions[slug]??{title:"İlanınızı değerlendirin",text:"Rehberdeki ölçütleri kendi ilan bilgilerinizle test edin.",href:"/#analiz",label:"Ev Analizi’ni aç →"};return <><Header/><main className="article"><a className="back" href="/rehber">← Tüm rehberler</a><p className="eyebrow">KONUTSEYİR REHBERİ</p><h1>{g.title}</h1><p className="lead">{g.summary}</p>{g.body.map((p,i)=><p key={i}>{p}</p>)}<aside><b>{a.title}</b><p>{a.text}</p><a href={a.href}>{a.label}</a></aside></main><Footer/></>}

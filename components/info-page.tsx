@@ -1,0 +1,1 @@
+import{Header,Footer}from"@/components/site-chrome";export function InfoPage({eyebrow,title,children}:{eyebrow:string,title:string,children:React.ReactNode}){return <><Header/><main className="article info-article"><p className="eyebrow">{eyebrow}</p><h1>{title}</h1>{children}</main><Footer/></>}

@@ -1,0 +1,10 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {analyze,loan,termDeposit} from '../lib/finance.mjs';
+const base={price:1000000,area:100,rent:10000,costs:100000,expenses:20000,tax:10000,saleCosts:20000,vacancy:2,inflation:20,growth:20,deposit:30,withholding:15,gold:20};
+const near=(a,b)=>assert.ok(Math.abs(a-b)<0.00001,`${a} != ${b}`);
+test('net cash flows include vacancies, expenses and tax exactly once',()=>{const r=analyze(base);assert.equal(r.net,70000);assert.equal(r.home.end,1250000);assert.equal(r.home.profit,150000);near(r.netYield,70000/1100000*100);near(r.home.realProfit,1250000/1.2-1100000)});
+test('loss is preserved and payback is unavailable',()=>{const r=analyze({...base,expenses:200000});assert.equal(r.net,-110000);assert.equal(r.payback,null)});
+test('same capital used for all alternatives and withholding only on interest',()=>{const r=analyze(base);assert.equal(r.depositGross,330000);assert.equal(r.withheld,49500);assert.equal(r.deposit.end,1380500);assert.equal(r.gold.end,1320000)});
+test('zero rent and full vacancy do not divide by zero',()=>{assert.equal(analyze({...base,rent:0}).multiplierMonths,null);assert.equal(analyze({...base,vacancy:12}).net,-30000)});
+test('invalid and empty values are rejected',()=>{for(const p of [{area:0},{price:0},{rent:NaN},{vacancy:13},{inflation:-100},{withholding:101},{costs:-1}])assert.throws(()=>analyze({...base,...p}))});
+test('term deposit uses actual days and deducts withholding once',()=>{const r=termDeposit(100000,36.5,32,17.5);near(r.gross,3200);near(r.withheld,560);near(r.net,2640);near(r.total,102640)});
+test('loan supports zero rate, fees, and a known amortization',()=>{assert.equal(loan(120000,0,12,1000).total,121000);near(loan(100000,1,12).payment,8884.878867834);assert.throws(()=>loan(100,1,0));assert.throws(()=>loan(100,1,1.5))});
