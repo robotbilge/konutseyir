@@ -1,5 +1,7 @@
 # KonutSeyir
 
+Kaynak depo: https://github.com/robotbilge/konutseyir
+
 Konutseyir.com için GitHub + Cloudflare Pages + Worker + D1 dağıtımı. Bu paket henüz canlı hesaba yüklenmedi. Önceki Sites yayını değiştirilmedi.
 
 ## Çalışan kapsam
