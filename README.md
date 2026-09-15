@@ -35,10 +35,10 @@ Statik önizlemede API bağı ayrı çalıştırılmadıysa veri sayfası erişi
 3. GitHub'da özel `konutseyir` deposu oluşturup bu klasörün içeriğini ekleyin. node_modules, .env, .dev.vars, dist ve .render eklemeyin.
 4. GitHub deposunda `production` environment oluşturun. Actions secrets:
    - `CLOUDFLARE_API_TOKEN`: yalnızca ilgili hesabın Pages/Workers/D1 dağıtımı için yetkili token.
-   - `CLOUDFLARE_ACCOUNT_ID`: hesap kimliği.
+   - Cloudflare Account ID yapılandırmaya eklenmiştir.
 5. Repository/environment variables:
-   - `CLOUDFLARE_D1_DATABASE_ID`: D1 UUID.
-   - `VITE_CONTACT_EMAIL`: çalıştığı doğrulanmış, yayında gösterilecek iletişim e-postası. Bu yoksa dağıtım durur.
+   - D1 Database ID yapılandırmaya eklenmiştir.
+   - `VITE_CONTACT_EMAIL`: çalıştığı doğrulanmış, yayında gösterilecek iletişim e-postası. Tanımlanmazsa iletişim sayfası adresin henüz belirlenmediğini gösterir.
    - `EVDS_CPI_SERIES`, `EVDS_HOUSING_SERIES`, `EVDS_DEPOSIT_SERIES`: opsiyonel; aşağıdaki veri koşullarına göre doldurun.
 6. `main` dalına gönderin veya Actions içinden workflow'u çalıştırın. Testler → D1 şeması → Worker → Pages sırasıyla dağıtılır.
 7. Pages projesi → Custom domains bölümünden `konutseyir.com` ve `www.konutseyir.com` ekleyin. Cloudflare'ın o proje için oluşturduğu DNS kaydını kullanın; eski `chatgpt.site` hedefine yönlendirmeyin. Başka hizmetlere ait kayıtları silmeyin. www kök alana 301 yönlenir.
@@ -50,7 +50,7 @@ Servis bağı root wrangler.jsonc içindeki MARKET_API'dir. Worker herkese açı
 
 - Ücretsiz, anahtarsız: TCMB günlük döviz XML. 15.09.2026 tarihinde HTTP 200 ve XML ayrıştırma doğrulandı. Bu, Cloudflare ağında üretim erişiminin test edildiği anlamına gelmez.
 - EVDS adaptörü EVDS 2 uyumlu REST sözleşmesini kullanır. Güncel EVDS hesabınızda endpoint/seri tanımlarını teyit edin. Anahtar olmadan uçtan uca doğrulanmış değildir. Kod alanları bilerek boş; tahmini seri kodu yok.
-- Anahtarı **Worker secret** olarak Cloudflare panelinden `EVDS_API_KEY` adıyla ekleyin veya `pnpm exec wrangler secret put EVDS_API_KEY --config worker/wrangler.deploy.json` kullanın. Sohbete, GitHub koduna veya VITE_ değişkenlerine eklemeyin.
+- Anahtarı **Worker secret** olarak Cloudflare panelinden `EVDS_API_KEY` adıyla ekleyin veya `pnpm exec wrangler secret put EVDS_API_KEY --config worker/wrangler.jsonc` kullanın. Sohbete, GitHub koduna veya VITE_ değişkenlerine eklemeyin.
 - CPI ve housing aylık endeks **seviyesi** olmalı; yıllık değişim serisi kullanmayın. Aynı ayın bir önceki yıl gözlemi yoksa oran hesaplanmaz. Yeniden bazlama/revizyon döneminde tutarlı seri gerekir.
 - Deposit serisi yıllık brüt yüzde cinsinde, temsil ettiği vade açıkça belirlenmiş aylık seri olmalı. Kod, frekans, birim ve dönüşüm gerçek hesapla doğrulanmadan etkinleştirmeyin. Seri banka teklifine eşit değildir.
 - TÜİK il satışları, ilçe fiyatları ve otomatik vergi oranları bu sürümde entegre değildir. Şehir sayfaları kaynak yönlendirmesidir ve veri eklenene kadar noindex tutulur; sitemap'e alınmaz.
