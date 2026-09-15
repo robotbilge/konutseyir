@@ -5,6 +5,5 @@ dist/
 .env*
 .dev.vars*
 !.env.example
-worker/wrangler.deploy.json
 *.zip
 node_modules
