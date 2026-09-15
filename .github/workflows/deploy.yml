@@ -50,4 +50,7 @@ jobs:
       - run: pnpm exec wrangler d1 migrations apply konutseyir-data --remote --config worker/wrangler.jsonc
       - run: pnpm exec wrangler deploy --config worker/wrangler.jsonc
       - run: pnpm build
+      - name: Ensure Pages project exists
+        continue-on-error: true
+        run: pnpm exec wrangler pages project create konutseyir --production-branch main
       - run: pnpm exec wrangler pages deploy dist --project-name konutseyir --branch main
