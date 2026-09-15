@@ -56,7 +56,7 @@ export function Calculator(){
   const[p,set]=useState(initial);
   const field=(k:keyof typeof initial,label:string,hint?:string)=><Input key={k} label={label} hint={hint} value={p[k]} onChange={v=>set(x=>({...x,[k]:v}))}/>;
   return <section id="analiz" className="calc-section main-calculator">
-    <div className="calc-heading"><div><p className="eyebrow">İLANINIZI HESAPLAYIN</p><h2>Bir ev, bütün maliyetleriyle</h2></div><p>Başlangıç değerleri örnek senaryodur. İlanınızı ve beklentilerinizi girin; sonuç anında güncellensin.</p></div>
+    <div className="calc-heading"><div><p className="eyebrow">İLANINIZI HESAPLAYIN</p><h2>Bu ev mantıklı mı?</h2></div><p>İlandaki bilgileri kullanın. Başlangıç değerleri örnek senaryodur; sonuç girdiğiniz rakamlarla anında güncellenir.</p></div>
     <div className="calculator-layout">
       <div className="calc-panel">
         <h3 id="alim-masrafi"><span>01</span>Konut ve alım maliyeti</h3>
@@ -76,7 +76,7 @@ export function Calculator(){
             {[['Toplam başlangıç yatırımı',money(r.capital)],['Net m² fiyatı',money(r.pricePerM2)],['Yıllık brüt kira',`${money(r.gross)} · ${pct(r.grossYield)}`],['Boş kalma kaybı',money(r.emptyLoss)],['Tahsil edilebilir yıllık kira',money(r.collected)],['İşletme gideri + kira vergisi',money(p.expenses+p.tax)],['Aylık ortalama net kira',money(r.monthlyNet)],['Brüt kira çarpanı',r.multiplierMonths===null?'Hesaplanamaz':`${r.multiplierMonths.toFixed(1)} ay / ${(r.multiplierMonths/12).toFixed(1)} yıl`],['Net kira ile geri dönüş',r.payback===null?'Pozitif net kira yok':`${r.payback.toFixed(1)} yıl`]].map(([k,v])=><div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}
           </dl>
           <small>Sabit kira ile basit geri dönüş. Kira getiri oranları alım masrafları dahil başlangıç yatırımına bölünür.</small>
-          <h3>Bir yıl sonra aynı para</h3>
+          <h3>12 ay sonunda tahmini değer</h3>
           <Comparison r={r}/>
           <p className="deposit-summary">Mevduat brüt faiz: <b>{money(r.depositGross)}</b> · stopaj: <b>{money(r.withheld)}</b> · net faiz: <b>{money(r.deposit.profit)}</b>.</p>
           <p className="calc-note">365 günlük, kredisiz ve basit getirili senaryodur. Mevduatta girilen oran yıl boyunca varsayılır; vade yenileme garantisi yoktur. Kira yeniden yatırıma yönlendirilmez. Konut sonucu satış gideri sonrası varsayımsal değerdir. Reel TL, başlangıç gününün satın alma gücüdür.</p>
@@ -89,7 +89,7 @@ export function Calculator(){
 
 export function Credit(){
   const[p,s]=useState({amount:2000000,rate:2.5,months:120,fees:0});
-  return <section id="kredi" className="calc-section"><h2>Konut kredisi hesabı</h2><p>Ayrı finansman hesabıdır; yukarıdaki kredisiz karşılaştırmaya dahil edilmez.</p><div className="fields">{([['amount','Kredi tutarı (TL)'],['rate','Aylık faiz (%)'],['months','Vade (ay)'],['fees','Toplam ek kredi gideri (TL)']]as const).map(([k,label])=><Input key={k} label={label} value={p[k]} onChange={v=>s({...p,[k]:v})}/>)}</div><Safe fn={()=>loan(p.amount,p.rate,p.months,p.fees)}>{r=><div className="metric-row"><p>Aylık taksit <b>{money(r.payment)}</b></p><p>Toplam ödeme + gider <b>{money(r.total)}</b></p><p>Faiz + ek maliyet <b>{money(r.cost)}</b></p></div>}</Safe><small>Sabit faiz, eşit taksit. Banka yuvarlamaları ve dönemsel sigorta giderleri farklı olabilir.</small></section>
+  return <section id="kredi" className="calc-section"><h2>Taksiti değil, toplam maliyeti görün.</h2><p>Oranlar bankaya ve müşteriye göre değişir. Bankanızın aylık oranını girerek senaryo oluşturun.</p><div className="fields">{([['amount','Kredi tutarı (TL)'],['rate','Aylık faiz (%)'],['months','Vade (ay)'],['fees','Toplam ek kredi gideri (TL)']]as const).map(([k,label])=><Input key={k} label={label} value={p[k]} onChange={v=>s({...p,[k]:v})}/>)}</div><Safe fn={()=>loan(p.amount,p.rate,p.months,p.fees)}>{r=><div className="metric-row"><p>Aylık taksit <b>{money(r.payment)}</b></p><p>Toplam ödeme + gider <b>{money(r.total)}</b></p><p>Faiz + ek maliyet <b>{money(r.cost)}</b></p></div>}</Safe><small>Sabit faiz, eşit taksit. Tahsis, ekspertiz, sigorta ve diğer masrafları “Toplam ek kredi gideri” alanına ekleyin.</small></section>
 }
 
 export function Deposit(){
