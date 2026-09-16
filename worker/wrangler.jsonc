@@ -3,7 +3,7 @@
  "main":"index.mjs",
  "compatibility_date":"2026-09-01",
  "workers_dev":false,
- "triggers":{"crons":["*/5 * * * *"]},
+ "triggers":{"crons":["30 13 * * 1-5"]},
  "d1_databases":[{"binding":"DB","database_name":"konutseyir-data","database_id":"f64a1ff1-d591-4129-896e-240c833feb49","migrations_dir":"../migrations"}],
  "vars":{"EVDS_CPI_SERIES":"TP.TUKFIY2025.GENEL","EVDS_HOUSING_SERIES":"","EVDS_DEPOSIT_SERIES":""}
 }
