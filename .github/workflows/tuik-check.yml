@@ -1,0 +1,45 @@
+name: TÜİK bağlantısını doğrula
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/tuik-check.yml
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: TÜİK erişim belirteci al
+        id: token
+        env:
+          TUIK_API_KEY: ${{ secrets.TUIK_API_KEY }}
+        shell: bash
+        run: |
+          test -n "$TUIK_API_KEY"
+          http_code=$(curl --silent --show-error --max-time 45 --output token.json --write-out "%{http_code}" \
+            --request POST "https://giris.tuik.gov.tr/realms/web/protocol/openid-connect/token" \
+            --header "Content-Type: application/x-www-form-urlencoded" \
+            --data-urlencode "grant_type=password" \
+            --data-urlencode "client_id=nsi-ws-consumer" \
+            --data-urlencode "api_key=$TUIK_API_KEY")
+          echo "Token HTTP: $http_code"
+          test "$http_code" = "200"
+          token=$(jq -r '.access_token // empty' token.json)
+          test -n "$token"
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+      - name: Konut satış veri akışını doğrula
+        env:
+          ACCESS_TOKEN: ${{ steps.token.outputs.token }}
+        shell: bash
+        run: |
+          http_code=$(curl --silent --show-error --max-time 60 --output data.out --dump-header headers.out --write-out "%{http_code}" \
+            "https://nsiws.tuik.gov.tr/rest/data/TR,DF_SATIS_SEKLI_DURUMU_ILILCE_V3,1.0/?startPeriod=2026-08&endPeriod=2026-08" \
+            --header "Authorization: Bearer $ACCESS_TOKEN" \
+            --header "Accept: text/csv")
+          echo "Data HTTP: $http_code"
+          grep -i "^content-type:" headers.out || true
+          test "$http_code" = "200"
+          file data.out
+          head -n 4 data.out | cut -c1-1000
