@@ -3,18 +3,6 @@ import {isRelevantNews,refreshNews} from './news.mjs';
 
 const json=(data,status=200,cache='public, max-age=300')=>Response.json(data,{status,headers:{'Cache-Control':cache,'X-Content-Type-Options':'nosniff'}});
 async function fetchText(url,headers={}){const r=await fetch(url,{headers,signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('Upstream unavailable');return r.text()}
-async function inspectTuik(env){
- if(!env.TUIK_API_KEY)return {configured:false};
- try{
-  const response=await fetch('https://giris.tuik.gov.tr/realms/web/protocol/openid-connect/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json'},body:new URLSearchParams({grant_type:'password',client_id:'nsi-ws-consumer',api_key:String(env.TUIK_API_KEY).trim()}),signal:AbortSignal.timeout(20000)});
-  if(!response.ok)return {configured:true,stage:'token',status:response.status};
-  const token=String((await response.json())?.access_token||'');
-  if(!token)return {configured:true,stage:'token',status:502};
-  const target='https://nsiws.tuik.gov.tr/rest/data/TR,DF_SATIS_SEKLI_DURUMU_ILILCE_V3,1.0/?startPeriod=2026-08&endPeriod=2026-08';
-  const data=await fetch(target,{headers:{Authorization:`Bearer ${token}`,Accept:'text/csv'},signal:AbortSignal.timeout(30000)}),body=await data.text();
-  return data.ok?{configured:true,stage:'data',status:data.status,contentType:data.headers.get('content-type'),lines:body.split(/\r?\n/).slice(0,12)}:{configured:true,stage:'data',status:data.status};
- }catch(error){return {configured:true,stage:'network',status:502,kind:error instanceof Error?error.name:'unknown'}}
-}
 async function save(env,rows){if(!rows.length)throw Error('No valid observations');const now=new Date().toISOString();await env.DB.batch(rows.map(r=>env.DB.prepare('INSERT INTO observations(series,period,value,retrieved_at) VALUES(?,?,?,?) ON CONFLICT(series,period) DO UPDATE SET value=excluded.value,retrieved_at=excluded.retrieved_at').bind(r.series,r.period,r.value,now)))}
 async function status(env,series,state){await env.DB.prepare('INSERT INTO source_status(series,state,attempted_at) VALUES(?,?,?) ON CONFLICT(series) DO UPDATE SET state=excluded.state,attempted_at=excluded.attempted_at').bind(series,state,new Date().toISOString()).run()}
 const fmt=d=>`${String(d.getUTCDate()).padStart(2,'0')}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${d.getUTCFullYear()}`;
@@ -85,7 +73,6 @@ export default {
    if(path==='/api/push/subscribe'&&request.method==='POST')return subscribe(request,env);
    if(path==='/api/push/subscribe'&&request.method==='DELETE'){let body;try{body=await request.json()}catch{return json({error:'Geçersiz istek'},400,'no-store')}await env.DB.prepare('DELETE FROM push_subscriptions WHERE endpoint=?').bind(String(body?.endpoint||'')).run();return json({ok:true},200,'no-store')}
    if(path==='/api/health'){await env.DB.prepare('SELECT 1 FROM observations LIMIT 1').first();return json({service:'KonutSeyir',status:'ok',configured:{fx:true,evds:!!env.EVDS_API_KEY,tuik:!!env.TUIK_API_KEY,news:true,push:!!(env.VAPID_PUBLIC_KEY&&env.VAPID_PRIVATE_KEY)},note:'Service health does not guarantee source freshness'})}
-   if(path==='/api/tuik-check')return json(await inspectTuik(env),200,'no-store');
    if(path==='/api/push/config')return json({publicKey:env.VAPID_PUBLIC_KEY||null,configured:!!(env.VAPID_PUBLIC_KEY&&env.VAPID_PRIVATE_KEY)},200,'no-store');
    if(path==='/api/news')return json(await listNews(env,url));
    if(path.startsWith('/api/news/')){const slug=decodeURIComponent(path.slice('/api/news/'.length));const item=await env.DB.prepare('SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,image_url imageUrl FROM news WHERE slug=?').bind(slug).first();return item?json(item):json({error:'Haber bulunamadı'},404)}
