@@ -8,7 +8,8 @@ export async function refresh(env){
  for(const series of ['cpi','housing','deposit']){const code=env[`EVDS_${series.toUpperCase()}_SERIES`];if(!env.EVDS_API_KEY||!code){await status(env,series,'not_configured');continue}
  try{if(!/^[A-Za-z0-9.]+$/.test(code))throw Error('Invalid series');const end=new Date(),start=new Date(Date.UTC(end.getUTCFullYear()-2,end.getUTCMonth(),1)),fmt=d=>`${String(d.getUTCDate()).padStart(2,'0')}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${d.getUTCFullYear()}`;
  // EVDS3 requires the user-specific API key in the HTTP request header.
- const url=`https://evds3.tcmb.gov.tr/igmevdsms-dis/series=${code}&startDate=${fmt(start)}&endDate=${fmt(end)}&type=json&frequency=5`;
+ const frequency=series==='deposit'?3:5;
+ const url=`https://evds3.tcmb.gov.tr/igmevdsms-dis/series=${code}&startDate=${fmt(start)}&endDate=${fmt(end)}&type=json&frequency=${frequency}`;
  await save(env,parseEVDS(JSON.parse(await fetchText(url,{key:env.EVDS_API_KEY})),code,series));await status(env,series,'available')
  }catch{await status(env,series,'error')}}
 }
