@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {parseTuikSales,salesSql} from '../worker/tuik.mjs';
+const head='DATAFLOW,FREQ,SATIS_TURU,REF_AREA,ENDEKS_DEGISIM,KONUT_ISYERI_SAHP,KONUT_ISYERI_GSTERGE,ULKE,OLCU_BIRIMI,SATIS_ADET_PAY,INDICATOR,DUZELTME,TIME_PERIOD,OBS_VALUE';
+const line=(type,value,indicator='MII_KSS',area='TR100',group='2')=>`x,M,${type},${area},_Z,_Z,${group},_Z,_Z,_Z,${indicator},_Z,2026-08,${value}`;
+test('TÜİK satış CSV toplam, ipotekli, ilk ve ikinci eli ayırır',()=>{const rows=parseTuikSales([head,line('_T',20426),line('1',4510),line('2',5813),line('3',14613),line('_T',999,'MII_ISS')].join('\n'),'2026-09-19T00:00:00Z');assert.deepEqual(rows,[{citySlug:'istanbul',period:'2026-08',total:20426,mortgaged:4510,firstSale:5813,secondHand:14613,retrievedAt:'2026-09-19T00:00:00Z'}]);assert.match(salesSql(rows),/ON CONFLICT\(city_slug,period\)/)});
+test('TÜİK tutarsız toplamı reddeder',()=>assert.throws(()=>parseTuikSales([head,line('_T',10),line('1',2),line('2',4),line('3',5)].join('\n')),/toplam kontrolü/));

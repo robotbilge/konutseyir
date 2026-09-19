@@ -38,6 +38,14 @@ async function cityMarket(env,slug){
  return {slug,region:item.region,value:last?.value??null,period:last?.period??null,retrievedAt:last?.retrieved_at??null,annualChange:yearChange(results),status:last?(sourceStatus?.state==='error'?'cached':'available'):(sourceStatus?.state||'unavailable'),source:'TCMB EVDS',sourceUrl:'https://evds3.tcmb.gov.tr/'};
 }
 
+async function citySales(env,slug){
+ if(!Object.hasOwn(cityHousingSeries,slug))return null;
+ const {results=[]}=await env.DB.prepare('SELECT period,total,mortgaged,first_sale firstSale,second_hand secondHand,retrieved_at retrievedAt FROM city_sales WHERE city_slug=? ORDER BY period DESC LIMIT 25').bind(slug).all();
+ const latest=results[0];if(!latest)return {slug,status:'unavailable',source:'TÜİK',sourceUrl:'https://veriportali.tuik.gov.tr/tr/databrowser/tuik/categories/9/9_4/TR,DF_SATIS_SEKLI_DURUMU_ILILCE_V3,1.0'};
+ const priorMonth=results[1],priorYear=results.find(row=>row.period===`${Number(latest.period.slice(0,4))-1}${latest.period.slice(4)}`),change=base=>base?.total>0?(latest.total/base.total-1)*100:null;
+ return {...latest,slug,status:'available',monthlyChange:change(priorMonth),annualChange:change(priorYear),source:'TÜİK',sourceUrl:'https://veriportali.tuik.gov.tr/tr/databrowser/tuik/categories/9/9_4/TR,DF_SATIS_SEKLI_DURUMU_ILILCE_V3,1.0'};
+}
+
 async function listNews(env,url){
  const count=(await env.DB.prepare('SELECT COUNT(*) count FROM news').first())?.count||0;
  if(!count){try{await refreshNews(env,{notify:false})}catch{}}
@@ -77,6 +85,7 @@ export default {
    if(path==='/api/news')return json(await listNews(env,url));
    if(path.startsWith('/api/news/')){const slug=decodeURIComponent(path.slice('/api/news/'.length));const item=await env.DB.prepare('SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,image_url imageUrl FROM news WHERE slug=?').bind(slug).first();return item?json(item):json({error:'Haber bulunamadı'},404)}
    if(path==='/api/city-market'){const item=await cityMarket(env,url.searchParams.get('slug')||'');return item?json(item):json({error:'Bilinmeyen şehir'},404)}
+   if(path==='/api/city-sales'){const item=await citySales(env,url.searchParams.get('slug')||'');return item?json(item):json({error:'Bilinmeyen şehir'},404)}
    if(path==='/api/history'){const series=url.searchParams.get('series');if(!Object.hasOwn(definitions,series))return json({error:'Unknown series'},400);const {results}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 60').bind(series).all();return json({series,source:definitions[series],observations:results.reverse()})}
    if(path==='/api/market-data'){const data=[];for(const series of Object.keys(definitions)){const {results}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 400').bind(series).all();const s=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind(series).first();data.push(observation(series,results,s))}return json({generatedAt:new Date().toISOString(),data})}
    return json({error:'Not found'},404);

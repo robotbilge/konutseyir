@@ -1,0 +1,35 @@
+name: TÜİK konut satışlarını güncelle
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '15 8 18 * *'
+permissions:
+  contents: read
+concurrency:
+  group: konutseyir-tuik-sync
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      TUIK_API_KEY: ${{ secrets.TUIK_API_KEY }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ea5e08f7044d873900c9c8b6b4cfdb8f
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Yapılandırmayı doğrula
+        run: |
+          test -n "$TUIK_API_KEY"
+          test -n "$CLOUDFLARE_API_TOKEN"
+      - name: D1 şemasını uygula
+        run: pnpm exec wrangler d1 migrations apply konutseyir-data --remote --config worker/wrangler.jsonc
+      - name: TÜİK verisini doğrula ve SQL hazırla
+        run: node scripts/sync-tuik.mjs
+      - name: Doğrulanmış satışları D1'e yaz
+        run: pnpm exec wrangler d1 execute konutseyir-data --remote --config worker/wrangler.jsonc --file tuik-city-sales.sql

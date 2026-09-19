@@ -26,3 +26,13 @@ export function CityMarket({slug,region}:{slug:string,region:string}){
  if(data.value==null)return <span className="waiting">Bölgesel seride güncel kayıt bulunamadı.</span>;
  return <div className="city-live"><span>Endeks değeri</span><strong>{Number(data.value).toLocaleString('tr-TR',{maximumFractionDigits:2})}</strong><small>{region} · {data.period}</small>{data.annualChange!=null&&<b>Yıllık değişim %{Number(data.annualChange).toLocaleString('tr-TR',{maximumFractionDigits:2})}</b>}</div>
 }
+
+export function CitySales({slug}:{slug:string}){
+ const[data,setData]=useState<any>(null),[error,setError]=useState('');
+ useEffect(()=>{const controller=new AbortController();fetch(`/api/city-sales?slug=${encodeURIComponent(slug)}`,{signal:controller.signal}).then(async r=>{if(!r.ok)throw Error();return r.json()}).then(setData).catch(()=>setError('Satış verisi şu anda alınamadı.'));return()=>controller.abort()},[slug]);
+ if(error)return <span className="waiting">{error}</span>;
+ if(!data)return <span className="data-loading">TÜİK satış verisi yükleniyor…</span>;
+ if(data.status!=='available')return <span className="waiting">Doğrulanmış il satış kaydı henüz bulunamadı.</span>;
+ const n=(value:number)=>Number(value).toLocaleString('tr-TR'),rate=(value:number|null)=>value==null?'—':`${value>=0?'+':''}%${Number(value).toLocaleString('tr-TR',{maximumFractionDigits:1})}`;
+ return <div className="city-sales-live"><div className="sales-total"><span>Aylık toplam satış</span><strong>{n(data.total)}</strong><small>{data.period}</small></div><dl><div><dt>İpotekli</dt><dd>{n(data.mortgaged)}</dd></div><div><dt>İlk el</dt><dd>{n(data.firstSale)}</dd></div><div><dt>İkinci el</dt><dd>{n(data.secondHand)}</dd></div><div><dt>Aylık değişim</dt><dd className={data.monthlyChange<0?'negative':''}>{rate(data.monthlyChange)}</dd></div><div><dt>Yıllık değişim</dt><dd className={data.annualChange<0?'negative':''}>{rate(data.annualChange)}</dd></div></dl><small>Son çekim: {new Date(data.retrievedAt).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'})} (TSİ)</small></div>;
+}
