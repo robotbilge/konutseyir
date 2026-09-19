@@ -5,6 +5,7 @@ const json=(data,status=200,cache='public, max-age=300')=>Response.json(data,{st
 async function fetchText(url,headers={}){const r=await fetch(url,{headers,signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('Upstream unavailable');return r.text()}
 async function tuikDiagnostic(env){
  if(!env.TUIK_API_KEY)return {configured:false,error:'TÜİK API anahtarı tanımlı değil'};
+ try{
  const tokenResponse=await fetch('https://giris.tuik.gov.tr/realms/web/protocol/openid-connect/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'password',client_id:'nsi-ws-consumer',api_key:env.TUIK_API_KEY}),signal:AbortSignal.timeout(15000)});
  if(!tokenResponse.ok)return {configured:true,tokenStatus:tokenResponse.status,error:'TÜİK kimlik doğrulaması başarısız'};
  const token=String((await tokenResponse.json())?.access_token||'');
@@ -19,6 +20,7 @@ async function tuikDiagnostic(env){
   if(response.ok)return {configured:true,dataStatus:response.status,contentType:response.headers.get('content-type'),urlPattern:url.includes('/TR,')?'compact':'path',sample:body.split(/\r?\n/).slice(0,8)};
  }
  return {configured:true,error:'TÜİK veri servisi yanıt vermedi'};
+ }catch(error){return {configured:true,error:'TÜİK bağlantısı kurulamadı',detail:error instanceof Error?error.name:'unknown'}}
 }
 async function save(env,rows){if(!rows.length)throw Error('No valid observations');const now=new Date().toISOString();await env.DB.batch(rows.map(r=>env.DB.prepare('INSERT INTO observations(series,period,value,retrieved_at) VALUES(?,?,?,?) ON CONFLICT(series,period) DO UPDATE SET value=excluded.value,retrieved_at=excluded.retrieved_at').bind(r.series,r.period,r.value,now)))}
 async function status(env,series,state){await env.DB.prepare('INSERT INTO source_status(series,state,attempted_at) VALUES(?,?,?) ON CONFLICT(series) DO UPDATE SET state=excluded.state,attempted_at=excluded.attempted_at').bind(series,state,new Date().toISOString()).run()}
