@@ -1,6 +1,12 @@
 name: TÜİK konut satışlarını güncelle
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/tuik-sync.yml
+      - scripts/sync-tuik.mjs
+      - worker/tuik.mjs
+      - migrations/0003_city_sales.sql
   schedule:
     - cron: '15 8 18 * *'
 permissions:
