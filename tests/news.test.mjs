@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {parseNewsRSS} from '../worker/news.mjs';
+import {isRelevantNews,parseNewsRSS} from '../worker/news.mjs';
 
 test('news feed keeps only relevant metadata from the approved source',async()=>{
  const xml=`<rss><channel>
@@ -15,4 +15,9 @@ test('news feed keeps only relevant metadata from the approved source',async()=>
  assert.equal(rows[0].sourceName,'Emlak Haberleri');
  assert.equal(rows[0].sourceUrl,'https://www.emlakhaberi.com/konut-kredisi');
  assert.match(rows[0].slug,/^konut-kredilerinde-yeni-donem-/);
+});
+
+test('Turkish word boundaries do not classify aşarsa as arsa',()=>{
+ assert.equal(isRelevantNews({title:'Motorin 100 TL’yi aşarsa zam gelebilir',summary:'Akaryakıt gündemi',category:'Ekonomi'}),false);
+ assert.equal(isRelevantNews({title:'Arsa satışlarında yeni dönem',summary:'Tapu işlemleri',category:'Emlak'}),true);
 });

@@ -1,5 +1,5 @@
 import {definitions,cityHousingSeries,parseFX,parseEVDS,observation,yearChange} from './data.mjs';
-import {refreshNews} from './news.mjs';
+import {isRelevantNews,refreshNews} from './news.mjs';
 
 const json=(data,status=200,cache='public, max-age=300')=>Response.json(data,{status,headers:{'Cache-Control':cache,'X-Content-Type-Options':'nosniff'}});
 async function fetchText(url,headers={}){const r=await fetch(url,{headers,signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('Upstream unavailable');return r.text()}
@@ -45,7 +45,7 @@ async function listNews(env,url){
  const validDate=date&&/^\d{4}-\d{2}-\d{2}$/.test(date)?date:null;
  const query=validDate?'SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,image_url imageUrl FROM news WHERE substr(published_at,1,10)=? ORDER BY published_at DESC LIMIT 100':'SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,image_url imageUrl FROM news ORDER BY published_at DESC LIMIT 100';
  const {results=[]}=validDate?await env.DB.prepare(query).bind(validDate).all():await env.DB.prepare(query).all();
- return {date:validDate,items:results};
+ return {date:validDate,items:results.filter(isRelevantNews)};
 }
 
 async function subscribe(request,env){

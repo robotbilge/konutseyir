@@ -1,7 +1,7 @@
 import webpush from 'web-push';
 
 const feed={name:'Emlak Haberleri',url:'https://www.emlakhaberi.com/rss',host:'www.emlakhaberi.com'};
-const keywords=/\b(konut|emlak|gayrimenkul|kira|kiracı|tapu|arsa|arazi|imar|toki|bina|daire|kentsel dönüşüm|konut kredisi)\b/i;
+const keywords=/(?<![\p{L}\p{N}])(konut|emlak|gayrimenkul|kira|kiracı|tapu|arsa|arazi|imar|toki|bina|daire|kentsel dönüşüm|konut kredisi)(?![\p{L}\p{N}])/iu;
 const cdata=value=>String(value||'').replace(/^<!\[CDATA\[/,'').replace(/\]\]>$/,'').trim();
 const entities=value=>cdata(value).replace(/<[^>]*>/g,' ').replace(/&nbsp;/gi,' ').replace(/&amp;/gi,'&').replace(/&quot;/gi,'"').replace(/&#39;|&apos;/gi,"'").replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/\s+/g,' ').trim();
 const field=(block,name)=>entities(block.match(new RegExp(`<${name}[^>]*>([\\s\\S]*?)<\\/${name}>`,'i'))?.[1]);
@@ -22,6 +22,8 @@ export async function parseNewsRSS(xml){
  }
  return rows.slice(0,40);
 }
+
+export const isRelevantNews=item=>keywords.test(`${item?.title||''} ${item?.summary||''} ${item?.category||''}`);
 
 export async function refreshNews(env,{notify=true}={}){
  const response=await fetch(feed.url,{headers:{'User-Agent':'KonutSeyir/1.0 (+https://konutseyir.com/haberler)'},signal:AbortSignal.timeout(15000)});
