@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {Building2, Menu, X, ArrowUpRight} from "lucide-react";
 
-const navItems = [["Ev Analizi", "/#analiz"], ["Karşılaştır", "/karsilastir"], ["Şehirler", "/sehirler"], ["Kontrol Listesi", "/kontrol-listesi"], ["Rehber", "/rehber"], ["Veri", "/veri"]];
+const navItems = [["Ev Analizi", "/#analiz"], ["Karşılaştır", "/karsilastir"], ["Şehirler", "/sehirler"], ["Haberler", "/haberler"], ["Kontrol Listesi", "/kontrol-listesi"], ["Rehber", "/rehber"], ["Veri", "/veri"]];
 
 export function Header(){
   const [open,setOpen]=useState(false);

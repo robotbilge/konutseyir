@@ -1,0 +1,14 @@
+import {useEffect,useState} from 'react';
+import {Bell,BellOff} from 'lucide-react';
+const decodeKey=(value:string)=>{const padding='='.repeat((4-value.length%4)%4),base64=(value+padding).replace(/-/g,'+').replace(/_/g,'/'),raw=atob(base64);return Uint8Array.from([...raw].map(x=>x.charCodeAt(0)))};
+export function PushSignup(){
+ const[state,setState]=useState<'loading'|'ready'|'active'|'unsupported'|'unconfigured'|'denied'|'error'>('loading');
+ const[publicKey,setKey]=useState('');
+ useEffect(()=>{if(!('serviceWorker'in navigator)||!('PushManager'in window)||!('Notification'in window)){setState('unsupported');return}fetch('/api/push/config').then(r=>r.json()).then(async config=>{if(!config.configured||!config.publicKey){setState('unconfigured');return}setKey(config.publicKey);const registration=await navigator.serviceWorker.register('/sw.js');const subscription=await registration.pushManager.getSubscription();setState(subscription?'active':Notification.permission==='denied'?'denied':'ready')}).catch(()=>setState('error'))},[]);
+ async function enable(){try{const permission=await Notification.requestPermission();if(permission!=='granted'){setState('denied');return}const registration=await navigator.serviceWorker.ready;const subscription=await registration.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:decodeKey(publicKey)});const response=await fetch('/api/push/subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(subscription)});if(!response.ok)throw Error();setState('active')}catch{setState('error')}}
+ async function disable(){try{const registration=await navigator.serviceWorker.ready,subscription=await registration.pushManager.getSubscription();if(subscription){await fetch('/api/push/subscribe',{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({endpoint:subscription.endpoint})});await subscription.unsubscribe()}setState('ready')}catch{setState('error')}}
+ if(state==='loading')return <div className="push-box"><Bell/><p>Bildirim durumu kontrol ediliyor…</p></div>;
+ if(state==='unsupported')return <div className="push-box"><BellOff/><p>Bu tarayıcı Web Push bildirimini desteklemiyor.</p></div>;
+ if(state==='unconfigured')return <div className="push-box"><BellOff/><p>Bildirim servisi kuruluyor; haber sayfası kullanılabilir.</p></div>;
+ return <div className="push-box"><Bell/><div><b>Emlak haberleri cihazınıza gelsin</b><p>Yalnız yeni emlak haberleri gönderilir. İstediğiniz zaman kapatabilirsiniz.</p>{state==='denied'&&<small>Tarayıcı bildirim iznini engelledi. Site ayarlarından izin vermeniz gerekir.</small>}{state==='error'&&<small>Bildirim işlemi tamamlanamadı. Daha sonra yeniden deneyin.</small>}</div>{state==='active'?<button onClick={disable}>Bildirimleri kapat</button>:<button onClick={enable} disabled={state==='denied'}>Bildirimleri aç</button>}</div>
+}

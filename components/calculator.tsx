@@ -1,5 +1,6 @@
-import {useState} from 'react';
+import {useEffect,useState} from 'react';
 import {analyze,loan,termDeposit} from '../lib/finance.mjs';
+import {useMarketData} from './live-data';
 
 const initial={price:5000000,area:100,rent:30000,costs:200000,expenses:30000,tax:0,saleCosts:0,vacancy:1,inflation:30,growth:25,deposit:35,withholding:15,gold:30};
 export const money=(n:number)=>new Intl.NumberFormat('tr-TR',{style:'currency',currency:'TRY',maximumFractionDigits:0}).format(n);
@@ -54,6 +55,8 @@ function Comparison({r}:{r:any}){
 
 export function Calculator(){
   const[p,set]=useState(initial);
+  const market=useMarketData(),liveDeposit=market.find(x=>x.series==='deposit');
+  useEffect(()=>{if(liveDeposit?.value!=null)set(x=>({...x,deposit:Number(liveDeposit.value)}))},[liveDeposit?.value]);
   const field=(k:keyof typeof initial,label:string,hint?:string)=><Input key={k} label={label} hint={hint} value={p[k]} onChange={v=>set(x=>({...x,[k]:v}))}/>;
   return <section id="analiz" className="calc-section main-calculator">
     <div className="calc-heading"><div><p className="eyebrow">İLANINIZI HESAPLAYIN</p><h2>Bu ev mantıklı mı?</h2></div><p>İlandaki bilgileri kullanın. Başlangıç değerleri örnek senaryodur; sonuç girdiğiniz rakamlarla anında güncellenir.</p></div>
@@ -64,7 +67,7 @@ export function Calculator(){
         <h3 id="net-kira"><span>02</span>Net kira hesabı</h3>
         <div className="fields">{field('rent','Aylık kira (TL)')}{field('vacancy','Yılda boş kalan ay','0–12 ay.')}{field('expenses','Yıllık işletme gideri (TL)','Malik aidatı, bakım, sigorta; gelir vergisi hariç.')}{field('tax','Yıllık kira gelir vergisi (TL)','Kendi durumunuza göre hesaplanan tutar; 0 muafiyet anlamına gelmez.')}</div>
         <h3><span>03</span>Bir yıllık senaryo</h3>
-        <div className="fields">{field('growth','Konut fiyat değişimi (%)')}{field('inflation','Yıllık enflasyon (%)','Gelecek beklentiniz; geçmiş TÜFE tahmin değildir.')}{field('deposit','Yıllık brüt mevduat faizi (%)')}{field('withholding','Mevduat stopajı (%)','Hesap türü, açılış tarihi ve vade için bankanızdan doğrulayın.')}{field('gold','Altın fiyat değişimi (%)','Alış/satış farkı dahil net beklentiniz.')}{field('saleCosts','Dönem sonu satış gideri (TL)','Satış varsayımında komisyon ve varsa vergiler.')}</div>
+        <div className="fields">{field('growth','Konut fiyat değişimi (%)')}{field('inflation','Yıllık enflasyon (%)','Gelecek beklentiniz; geçmiş TÜFE tahmin değildir.')}{field('deposit','Yıllık brüt mevduat faizi (%)',liveDeposit?.value!=null?`TCMB haftalık ağırlıklı ortalama: %${Number(liveDeposit.value).toLocaleString('tr-TR',{maximumFractionDigits:2})} · ${liveDeposit.period}`:'Canlı TCMB verisi bekleniyor.')}{field('withholding','Mevduat stopajı (%)','Hesap türü, açılış tarihi ve vade için bankanızdan doğrulayın.')}{field('gold','Altın fiyat değişimi (%)','Alış/satış farkı dahil net beklentiniz.')}{field('saleCosts','Dönem sonu satış gideri (TL)','Satış varsayımında komisyon ve varsa vergiler.')}</div>
         <button className="secondary" onClick={()=>set(initial)}>Örneğe sıfırla</button>
       </div>
       <div className="calc-results" aria-live="polite">
@@ -94,5 +97,7 @@ export function Credit(){
 
 export function Deposit(){
   const[p,s]=useState({capital:1000000,rate:35,days:32,tax:17.5});
-  return <section id="mevduat" className="calc-section"><h2>Vade sonunda net mevduat</h2><div className="fields">{([['capital','Anapara (TL)'],['rate','Yıllık brüt faiz (%)'],['days','Vade (gün)'],['tax','Stopaj (%)']]as const).map(([k,label])=><Input key={k} label={label} value={p[k]} onChange={v=>s({...p,[k]:v})}/>)}</div><Safe fn={()=>termDeposit(p.capital,p.rate,p.days,p.tax)}>{r=><div className="metric-row"><p>Brüt faiz <b>{money(r.gross)}</b></p><p>Stopaj kesintisi <b>{money(r.withheld)}</b></p><p>Net faiz <b>{money(r.net)}</b></p><p>Vade sonu <b>{money(r.total)}</b></p></div>}</Safe><p>365 gün esası. Stopaj yalnızca faizden kesilir. Örnek oran güncel yasal oran teyidi değildir; hesap açılış/yenileme tarihi ve vade için bankanızdan doğrulayın.</p></section>
+  const market=useMarketData(),liveDeposit=market.find(x=>x.series==='deposit');
+  useEffect(()=>{if(liveDeposit?.value!=null)s(x=>({...x,rate:Number(liveDeposit.value)}))},[liveDeposit?.value]);
+  return <section id="mevduat" className="calc-section"><h2>Vade sonunda net mevduat</h2>{liveDeposit?.value!=null&&<p className="live-rate">TCMB 3 aya kadar vadeli TL mevduat ortalaması: <b>%{Number(liveDeposit.value).toLocaleString('tr-TR',{maximumFractionDigits:2})}</b> · {liveDeposit.period}</p>}<div className="fields">{([['capital','Anapara (TL)'],['rate','Yıllık brüt faiz (%)'],['days','Vade (gün)'],['tax','Stopaj (%)']]as const).map(([k,label])=><Input key={k} label={label} value={p[k]} onChange={v=>s({...p,[k]:v})}/>)}</div><Safe fn={()=>termDeposit(p.capital,p.rate,p.days,p.tax)}>{r=><div className="metric-row"><p>Brüt faiz <b>{money(r.gross)}</b></p><p>Stopaj kesintisi <b>{money(r.withheld)}</b></p><p>Net faiz <b>{money(r.net)}</b></p><p>Vade sonu <b>{money(r.total)}</b></p></div>}</Safe><p>365 gün esası. Stopaj yalnızca faizden kesilir. Örnek oran güncel yasal oran teyidi değildir; hesap açılış/yenileme tarihi ve vade için bankanızdan doğrulayın.</p></section>
 }
