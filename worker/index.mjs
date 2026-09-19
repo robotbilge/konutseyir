@@ -1,4 +1,3 @@
-$ tsc --noEmit
 import {definitions,cityHousingSeries,parseFX,parseEVDS,observation,yearChange} from './data.mjs';
 import {isRelevantNews,refreshNews} from './news.mjs';
 
