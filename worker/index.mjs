@@ -1,105 +1,1 @@
-import {definitions,cityHousingSeries,parseFX,parseEVDS,observation,yearChange} from './data.mjs';
-import {isRelevantNews,refreshNews} from './news.mjs';
-
-const json=(data,status=200,cache='public, max-age=300')=>Response.json(data,{status,headers:{'Cache-Control':cache,'X-Content-Type-Options':'nosniff'}});
-async function fetchText(url,headers={}){const r=await fetch(url,{headers,signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('Upstream unavailable');return r.text()}
-async function tuikDiagnostic(env){
- if(!env.TUIK_API_KEY)return {configured:false,error:'TÃœÄ°K API anahtarÄ± tanÄ±mlÄ± deÄŸil'};
- try{
- const tokenResponse=await fetch('https://giris.tuik.gov.tr/realms/web/protocol/openid-connect/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'password',client_id:'nsi-ws-consumer',api_key:env.TUIK_API_KEY}),signal:AbortSignal.timeout(15000)});
- if(!tokenResponse.ok)return {configured:true,tokenStatus:tokenResponse.status,error:'TÃœÄ°K kimlik doÄŸrulamasÄ± baÅŸarÄ±sÄ±z'};
- const token=String((await tokenResponse.json())?.access_token||'');
- if(!token)return {configured:true,error:'TÃœÄ°K eriÅŸim belirteci dÃ¶nmedi'};
- const urls=[
-  'https://nsiws.tuik.gov.tr/rest/data/TR,DF_SATIS_SEKLI_DURUMU_ILILCE_V3,1.0/?startPeriod=2026-07&endPeriod=2026-08',
-  'https://nsiws.tuik.gov.tr/rest/data/TR/DF_SATIS_SEKLI_DURUMU_ILILCE_V3/1.0/?startPeriod=2026-07&endPeriod=2026-08'
- ];
- for(const url of urls){
-  const response=await fetch(url,{headers:{Authorization:`Bearer ${token}`,Accept:'csvfile'},signal:AbortSignal.timeout(30000)});
-  const body=await response.text();
-  if(response.ok)return {configured:true,dataStatus:response.status,contentType:response.headers.get('content-type'),urlPattern:url.includes('/TR,')?'compact':'path',sample:body.split(/\r?\n/).slice(0,8)};
- }
- return {configured:true,error:'TÃœÄ°K veri servisi yanÄ±t vermedi'};
- }catch(error){return {configured:true,error:'TÃœÄ°K baÄŸlantÄ±sÄ± kurulamadÄ±',detail:error instanceof Error?error.name:'unknown'}}
-}
-async function save(env,rows){if(!rows.length)throw Error('No valid observations');const now=new Date().toISOString();await env.DB.batch(rows.map(r=>env.DB.prepare('INSERT INTO observations(series,period,value,retrieved_at) VALUES(?,?,?,?) ON CONFLICT(series,period) DO UPDATE SET value=excluded.value,retrieved_at=excluded.retrieved_at').bind(r.series,r.period,r.value,now)))}
-async function status(env,series,state){await env.DB.prepare('INSERT INTO source_status(series,state,attempted_at) VALUES(?,?,?) ON CONFLICT(series) DO UPDATE SET state=excluded.state,attempted_at=excluded.attempted_at').bind(series,state,new Date().toISOString()).run()}
-const fmt=d=>`${String(d.getUTCDate()).padStart(2,'0')}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${d.getUTCFullYear()}`;
-
-async function fetchEVDS(env,code,series,frequency=5){
- if(!env.EVDS_API_KEY||!code)throw Error('EVDS not configured');
- if(!/^[A-Za-z0-9.]+$/.test(code))throw Error('Invalid series');
- const end=new Date(),start=new Date(Date.UTC(end.getUTCFullYear()-2,end.getUTCMonth(),1));
- const url=`https://evds3.tcmb.gov.tr/igmevdsms-dis/series=${code}&startDate=${fmt(start)}&endDate=${fmt(end)}&type=json&frequency=${frequency}`;
- return parseEVDS(JSON.parse(await fetchText(url,{key:env.EVDS_API_KEY})),code,series);
-}
-
-async function refreshSeries(env,series,code,frequency=5){
- try{await save(env,await fetchEVDS(env,code,series,frequency));await status(env,series,'available');return true}
- catch{await status(env,series,env.EVDS_API_KEY&&code?'error':'not_configured');return false}
-}
-
-export async function refresh(env){
- try{await save(env,parseFX(await fetchText(definitions.usd.url)));await status(env,'usd','available');await status(env,'eur','available')}catch{await status(env,'usd','error');await status(env,'eur','error')}
- await refreshSeries(env,'cpi',env.EVDS_CPI_SERIES);
- await refreshSeries(env,'housing',env.EVDS_HOUSING_SERIES);
- await refreshSeries(env,'deposit',env.EVDS_DEPOSIT_SERIES,3);
- for(const [slug,item] of Object.entries(cityHousingSeries))await refreshSeries(env,`housing:${slug}`,item.code);
-}
-
-async function cityMarket(env,slug){
- const item=cityHousingSeries[slug];if(!item)return null;
- const series=`housing:${slug}`;
- let {results=[]}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 400').bind(series).all();
- if(!results.length&&env.EVDS_API_KEY){await refreshSeries(env,series,item.code);({results=[]}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 400').bind(series).all())}
- const sourceStatus=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind(series).first();
- const last=results[0];
- return {slug,region:item.region,value:last?.value??null,period:last?.period??null,retrievedAt:last?.retrieved_at??null,annualChange:yearChange(results),status:last?(sourceStatus?.state==='error'?'cached':'available'):(sourceStatus?.state||'unavailable'),source:'TCMB EVDS',sourceUrl:'https://evds3.tcmb.gov.tr/'};
-}
-
-async function listNews(env,url){
- const count=(await env.DB.prepare('SELECT COUNT(*) count FROM news').first())?.count||0;
- if(!count){try{await refreshNews(env,{notify:false})}catch{}}
- const date=url.searchParams.get('date');
- const validDate=date&&/^\d{4}-\d{2}-\d{2}$/.test(date)?date:null;
- const query=validDate?'SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,image_url imageUrl FROM news WHERE substr(published_at,1,10)=? ORDER BY published_at DESC LIMIT 100':'SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,image_url imageUrl FROM news ORDER BY published_at DESC LIMIT 100';
- const {results=[]}=validDate?await env.DB.prepare(query).bind(validDate).all():await env.DB.prepare(query).all();
- return {date:validDate,items:results.filter(isRelevantNews)};
-}
-
-async function subscribe(request,env){
- let body;try{body=await request.json()}catch{return json({error:'GeÃ§ersiz istek'},400,'no-store')}
- const endpoint=String(body?.endpoint||''),p256dh=String(body?.keys?.p256dh||''),auth=String(body?.keys?.auth||'');
- if(!endpoint.startsWith('https://')||endpoint.length>2048||!p256dh||p256dh.length>512||!auth||auth.length>512)return json({error:'GeÃ§ersiz bildirim aboneliÄŸi'},400,'no-store');
- const now=new Date().toISOString();
- await env.DB.prepare('INSERT INTO push_subscriptions(endpoint,p256dh,auth,created_at,updated_at) VALUES(?,?,?,?,?) ON CONFLICT(endpoint) DO UPDATE SET p256dh=excluded.p256dh,auth=excluded.auth,updated_at=excluded.updated_at').bind(endpoint,p256dh,auth,now,now).run();
- return json({ok:true},200,'no-store');
-}
-
-export default {
- async scheduled(event,env,ctx){
-  const tasks=[];
-  if(event.cron==='30 13 * * 1-5')tasks.push(refresh(env));
-  if(event.cron==='0 5-20 * * *')tasks.push(refreshNews(env,{notify:true}));
-  ctx.waitUntil(Promise.allSettled(tasks));
- },
- async fetch(request,env){
-  const url=new URL(request.url),path=url.pathname;
-  const pushMutation=path==='/api/push/subscribe'&&(request.method==='POST'||request.method==='DELETE');
-  if(request.method!=='GET'&&!pushMutation)return json({error:'Method not allowed'},405,'no-store');
-  if(!env.DB)return json({status:'not_configured',error:'D1 binding missing'},503);
-  try{
-   if(path==='/api/push/subscribe'&&request.method==='POST')return subscribe(request,env);
-   if(path==='/api/push/subscribe'&&request.method==='DELETE'){let body;try{body=await request.json()}catch{return json({error:'GeÃ§ersiz istek'},400,'no-store')}await env.DB.prepare('DELETE FROM push_subscriptions WHERE endpoint=?').bind(String(body?.endpoint||'')).run();return json({ok:true},200,'no-store')}
-   if(path==='/api/health'){await env.DB.prepare('SELECT 1 FROM observations LIMIT 1').first();return json({service:'KonutSeyir',status:'ok',configured:{fx:true,evds:!!env.EVDS_API_KEY,news:true,push:!!(env.VAPID_PUBLIC_KEY&&env.VAPID_PRIVATE_KEY)},note:'Service health does not guarantee source freshness'})}
-   if(path==='/api/tuik-diagnostic')return json(await tuikDiagnostic(env),200,'no-store');
-   if(path==='/api/push/config')return json({publicKey:env.VAPID_PUBLIC_KEY||null,configured:!!(env.VAPID_PUBLIC_KEY&&env.VAPID_PRIVATE_KEY)},200,'no-store');
-   if(path==='/api/news')return json(await listNews(env,url));
-   if(path.startsWith('/api/news/')){const slug=decodeURIComponent(path.slice('/api/news/'.length));const item=await env.DB.prepare('SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,image_url imageUrl FROM news WHERE slug=?').bind(slug).first();return item?json(item):json({error:'Haber bulunamadÄ±'},404)}
-   if(path==='/api/city-market'){const item=await cityMarket(env,url.searchParams.get('slug')||'');return item?json(item):json({error:'Bilinmeyen ÅŸehir'},404)}
-   if(path==='/api/history'){const series=url.searchParams.get('series');if(!Object.hasOwn(definitions,series))return json({error:'Unknown series'},400);const {results}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 60').bind(series).all();return json({series,source:definitions[series],observations:results.reverse()})}
-   if(path==='/api/market-data'){const data=[];for(const series of Object.keys(definitions)){const {results}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 400').bind(series).all();const s=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind(series).first();data.push(observation(series,results,s))}return json({generatedAt:new Date().toISOString(),data})}
-   return json({error:'Not found'},404);
-  }catch{return json({status:'unavailable',error:'Data store unavailable'},503,'no-store')}
- }
-};
+¶Ç' I¢µ¥µÁ½ÉĞí‘•™¥¹¥Ñ¥½¹Ì±¥Ñå!½ÕÍ¥¹M•É¥•Ì±Á…ÉÍ•`±Á…ÉÍ•YL±½‰Í•ÉÙ…Ñ¥½¸±å•…É¡…¹•ô™É½´€œ¸½‘…Ñ„¹µ©Ìœì)¥µÁ½ÉĞí¥ÍI•±•Ù…¹Ñ9•İÌ±É•™É•Í¡9•İÍô™É½´€œ¸½¹•İÌ¹µ©Ìœì()½¹ÍĞ©Í½¸ô¡‘…Ñ„±ÍÑ…ÑÕÌôÈÀÀ±…¡”ôÁÕ‰±¥Œ°µ…àµ…”ôÌÀÀœ¤ôùI•ÍÁ½¹Í”¹©Í½¸¡‘…Ñ„±íÍÑ…ÑÕÌ±¡•…‘•ÉÌéì…¡”µ½¹ÑÉ½°œé…¡”°`µ½¹Ñ•¹ĞµQåÁ”µ=ÁÑ¥½¹Ìœè¹½Í¹¥™˜õô¤ì)…Íå¹Œ™Õ¹Ñ¥½¸™•Ñ¡Q•áĞ¡ÕÉ°±¡•…‘•ÉÌõíô¥í½¹ÍĞÈõ…İ…¥Ğ™•Ñ ¡ÕÉ°±í¡•…‘•ÉÌ±Í¥¹…°é‰½ÉÑM¥¹…°¹Ñ¥µ•½ÕĞ ÄÔÀÀÀ¥ô¤í¥˜ …È¹½¬¥Ñ¡É½ÜÉÉ½È UÁÍÑÉ•…´Õ¹…Ù…¥±…‰±”œ¤íÉ•ÑÕÉ¸È¹Ñ•áĞ ¥ô)…Íå¹Œ™Õ¹Ñ¥½¸Í…Ù”¡•¹Ø±É½İÌ¥í¥˜ …É½İÌ¹±•¹Ñ ¥Ñ¡É½ÜÉÉ½È 9¼Ù…±¥½‰Í•ÉÙ…Ñ¥½¹Ìœ¤í½¹ÍĞ¹½Üõ¹•Ü…Ñ” ¤¹Ñ½%M=MÑÉ¥¹œ ¤í…İ…¥Ğ•¹Ø¹¹‰…Ñ ¡É½İÌ¹µ…À¡Èôù•¹Ø¹¹ÁÉ•Á…É” %9MIP%9Q<½‰Í•ÉÙ…Ñ¥½¹Ì¡Í•É¥•Ì±Á•É¥½±Ù…±Õ”±É•ÑÉ¥•Ù•‘}…Ğ¤Y1UL ü°ü°ü°ü¤=8=91%P¡Í•É¥•Ì±Á•É¥½¤<UAQMPÙ…±Õ”õ•á±Õ‘•¹Ù…±Õ”±É•ÑÉ¥•Ù•‘}…Ğõ•á±Õ‘•¹É•ÑÉ¥•Ù•‘}…Ğœ¤¹‰¥¹¡È¹Í•É¥•Ì±È¹Á•É¥½±È¹Ù…±Õ”±¹½Ü¤¤¥ô)…Íå¹Œ™Õ¹Ñ¥½¸ÍÑ…ÑÕÌ¡•¹Ø±Í•É¥•Ì±ÍÑ…Ñ”¥í…İ…¥Ğ•¹Ø¹¹ÁÉ•Á…É” %9MIP%9Q<Í½ÕÉ•}ÍÑ…ÑÕÌ¡Í•É¥•Ì±ÍÑ…Ñ”±…ÑÑ•µÁÑ•‘}…Ğ¤Y1UL ü°ü°ü¤=8=91%P¡Í•É¥•Ì¤<UAQMPÍÑ…Ñ”õ•á±Õ‘•¹ÍÑ…Ñ”±…ÑÑ•µÁÑ•‘}…Ğõ•á±Õ‘•¹…ÑÑ•µÁÑ•‘}…Ğœ¤¹‰¥¹¡Í•É¥•Ì±ÍÑ…Ñ”±¹•Ü…Ñ” ¤¹Ñ½%M=MÑÉ¥¹œ ¤¤¹ÉÕ¸ ¥ô)½¹ÍĞ™µĞõôù€‘íMÑÉ¥¹œ¡¹•ÑUQ…Ñ” ¤¤¹Á…‘MÑ…ÉĞ È°œÀœ¥ô´‘íMÑÉ¥¹œ¡¹•ÑUQ5½¹Ñ  ¤¬Ä¤¹Á…‘MÑ…ÉĞ È°œÀœ¥ô´‘í¹•ÑUQÕ±±e•…È ¥õ€ì()…Íå¹Œ™Õ¹Ñ¥½¸™•Ñ¡YL¡•¹Ø±½‘”±Í•É¥•Ì±™É•ÅÕ•¹äôÔ¥ì(¥˜ …•¹Ø¹YM}A%}-eñğ…½‘”¥Ñ¡É½ÜÉÉ½È YL¹½Ğ½¹™¥ÕÉ•œ¤ì(¥˜ „½ymµi„µèÀ´ä¹t¬¼¹Ñ•ÍĞ¡½‘”¤¥Ñ¡É½ÜÉÉ½È %¹Ù…±¥Í•É¥•Ìœ¤ì(½¹ÍĞ•¹õ¹•Ü…Ñ” ¤±ÍÑ…ÉĞõ¹•Ü…Ñ”¡…Ñ”¹UQ¡•¹¹•ÑUQÕ±±e•…È ¤´È±•¹¹•ÑUQ5½¹Ñ  ¤°Ä¤¤ì(½¹ÍĞÕÉ°õ¡ÑÑÁÌè¼½•Ù‘ÌÌ¹Ñµˆ¹½Ø¹ÑÈ½¥µ•Ù‘ÍµÌµ‘¥Ì½Í•É¥•Ìô‘í½‘•ô™ÍÑ…ÉÑ…Ñ”ô‘í™µĞ¡ÍÑ…ÉĞ¥ô™•¹‘…Ñ”ô‘í™µĞ¡•¹¥ô™ÑåÁ”õ©Í½¸™™É•ÅÕ•¹äô‘í™É•ÅÕ•¹åõ€ì(É•ÑÕÉ¸Á…ÉÍ•YL¡)M=8¹Á…ÉÍ”¡…İ…¥Ğ™•Ñ¡Q•áĞ¡ÕÉ°±í­•äé•¹Ø¹YM}A%}-eô¤¤±½‘”±Í•É¥•Ì¤ì)ô()…Íå¹Œ™Õ¹Ñ¥½¸É•™É•Í¡M•É¥•Ì¡•¹Ø±Í•É¥•Ì±½‘”±™É•ÅÕ•¹äôÔ¥ì(ÑÉåí…İ…¥ĞÍ…Ù”¡•¹Ø±…İ…¥Ğ™•Ñ¡YL¡•¹Ø±½‘”±Í•É¥•Ì±™É•ÅÕ•¹ä¤¤í…İ…¥ĞÍÑ…ÑÕÌ¡•¹Ø±Í•É¥•Ì°…Ù…¥±…‰±”œ¤íÉ•ÑÕÉ¸ÑÉÕ•ô(…Ñ¡í…İ…¥ĞÍÑ…ÑÕÌ¡•¹Ø±Í•É¥•Ì±•¹Ø¹YM}A%}-d˜™½‘”ü•ÉÉ½Èœè¹½Ñ}½¹™¥ÕÉ•œ¤íÉ•ÑÕÉ¸™…±Í•ô)ô()•áÁ½ÉĞ…Íå¹Œ™Õ¹Ñ¥½¸É•™É•Í ¡•¹Ø¥ì(ÑÉåí…İ…¥ĞÍ…Ù”¡•¹Ø±Á…ÉÍ•`¡…İ…¥Ğ™•Ñ¡Q•áĞ¡‘•™¥¹¥Ñ¥½¹Ì¹ÕÍ¹ÕÉ°¤¤¤í…İ…¥ĞÍÑ…ÑÕÌ¡•¹Ø°ÕÍœ°…Ù…¥±…‰±”œ¤í…İ…¥ĞÍÑ…ÑÕÌ¡•¹Ø°•ÕÈœ°…Ù…¥±…‰±”œ¥õ…Ñ¡í…İ…¥ĞÍÑ…ÑÕÌ¡•¹Ø°ÕÍœ°•ÉÉ½Èœ¤í…İ…¥ĞÍÑ…ÑÕÌ¡•¹Ø°•ÕÈœ°•ÉÉ½Èœ¥ô(…İ…¥ĞÉ•™É•Í¡M•É¥•Ì¡•¹Ø°Á¤œ±•¹Ø¹YM}A%}MI%L¤ì(…İ…¥ĞÉ•™É•Í¡M•É¥•Ì¡•¹Ø°¡½ÕÍ¥¹œœ±•¹Ø¹YM}!=UM%9}MI%L¤ì(…İ…¥ĞÉ•™É•Í¡M•É¥•Ì¡•¹Ø°‘•Á½Í¥Ğœ±•¹Ø¹YM}A=M%Q}MI%L°Ì¤ì(™½È¡½¹ÍĞmÍ±Õœ±¥Ñ•µt½˜=‰©•Ğ¹•¹ÑÉ¥•Ì¡¥Ñå!½ÕÍ¥¹M•É¥•Ì¤¥…İ…¥ĞÉ•™É•Í¡M•É¥•Ì¡•¹Ø±¡½ÕÍ¥¹œè‘íÍ±Õõ€±¥Ñ•´¹½‘”¤ì)ô()…Íå¹Œ™Õ¹Ñ¥½¸¥Ñå5…É­•Ğ¡•¹Ø±Í±Õœ¥ì(½¹ÍĞ¥Ñ•´õ¥Ñå!½ÕÍ¥¹M•É¥•ÍmÍ±Õtí¥˜ …¥Ñ•´¥É•ÑÕÉ¸¹Õ±°ì(½¹ÍĞÍ•É¥•Ìõ¡½ÕÍ¥¹œè‘íÍ±Õõ€ì(±•ĞíÉ•ÍÕ±ÑÌõmuôõ…İ…¥Ğ•¹Ø¹¹ÁÉ•Á…É” M1PÁ•É¥½±Ù…±Õ”±É•ÑÉ¥•Ù•‘}…ĞI=4½‰Í•ÉÙ…Ñ¥½¹Ì]!IÍ•É¥•Ìôü=IH	dÁ•É¥½M1%5%P€ĞÀÀœ¤¹‰¥¹¡Í•É¥•Ì¤¹…±° ¤ì(¥˜ …É•ÍÕ±ÑÌ¹±•¹Ñ ˜™•¹Ø¹YM}A%}-d¥í…İ…¥ĞÉ•™É•Í¡M•É¥•Ì¡•¹Ø±Í•É¥•Ì±¥Ñ•´¹½‘”¤ì¡íÉ•ÍÕ±ÑÌõmuôõ…İ…¥Ğ•¹Ø¹¹ÁÉ•Á…É” M1PÁ•É¥½±Ù…±Õ”±É•ÑÉ¥•Ù•‘}…ĞI=4½‰Í•ÉÙ…Ñ¥½¹Ì]!IÍ•É¥•Ìôü=IH	dÁ•É¥½M1%5%P€ĞÀÀœ¤¹‰¥¹¡Í•É¥•Ì¤¹…±° ¤¥ô(½¹ÍĞÍ½ÕÉ•MÑ…ÑÕÌõ…İ…¥Ğ•¹Ø¹¹ÁÉ•Á…É” M1PÍÑ…Ñ”±…ÑÑ•µÁÑ•‘}…ĞI=4Í½ÕÉ•}ÍÑ…ÑÕÌ]!IÍ•É¥•Ìôüœ¤¹‰¥¹¡Í•É¥•Ì¤¹™¥ÉÍĞ ¤ì(½¹ÍĞ±…ÍĞõÉ•ÍÕ±ÑÍlÁtì(É•ÑÕÉ¸íÍ±Õœ±É•¥½¸é¥Ñ•´¹É•¥½¸±Ù…±Õ”é±…ÍĞü¹Ù…±Õ”üı¹Õ±°±Á•É¥½é±…ÍĞü¹Á•É¥½üı¹Õ±°±É•ÑÉ¥•Ù•‘Ğé±…ÍĞü¹É•ÑÉ¥•Ù•‘}…Ğüı¹Õ±°±…¹¹Õ…±¡…¹”éå•…É¡…¹”¡É•ÍÕ±ÑÌ¤±ÍÑ…ÑÕÌé±…ÍĞü¡Í½ÕÉ•MÑ…ÑÕÌü¹ÍÑ…Ñ”ôôô•ÉÉ½Èœü…¡•œè…Ù…¥±…‰±”œ¤è¡Í½ÕÉ•MÑ…ÑÕÌü¹ÍÑ…Ñ•ñğÕ¹…Ù…¥±…‰±”œ¤±Í½ÕÉ”èQ5YLœ±Í½ÕÉ•UÉ°è¡ÑÑÁÌè¼½•Ù‘ÌÌ¹Ñµˆ¹½Ø¹ÑÈ¼ôì)ô()…Íå¹Œ™Õ¹Ñ¥½¸±¥ÍÑ9•İÌ¡•¹Ø±ÕÉ°¥ì(½¹ÍĞ½Õ¹Ğô¡…İ…¥Ğ•¹Ø¹¹ÁÉ•Á…É” M1P=U9P ¨¤½Õ¹ĞI=4¹•İÌœ¤¹™¥ÉÍĞ ¤¤ü¹½Õ¹ÑñğÀì(¥˜ …½Õ¹Ğ¥íÑÉåí…İ…¥ĞÉ•™É•Í¡9•İÌ¡•¹Ø±í¹½Ñ¥™äé™…±Í•ô¥õ…Ñ¡íõô(½¹ÍĞ‘…Ñ”õÕÉ°¹Í•…É¡A…É…µÌ¹•Ğ ‘…Ñ”œ¤ì(½¹ÍĞÙ…±¥‘…Ñ”õ‘…Ñ”˜˜½yq‘ìÑôµq‘ìÉôµq‘ìÉô¼¹Ñ•ÍĞ¡‘…Ñ”¤ı‘…Ñ”é¹Õ±°ì(½¹ÍĞÅÕ•ÉäõÙ…±¥‘…Ñ”üM1PÍ±Õœ±Ñ¥Ñ±”±ÍÕµµ…Éä±Í½ÕÉ•}¹…µ”Í½ÕÉ•9…µ”±Í½ÕÉ•}ÕÉ°Í½ÕÉ•UÉ°±ÁÕ‰±¥Í¡•‘}…ĞÁÕ‰±¥Í¡•‘Ğ±…Ñ•½Éä±¥µ…•}ÕÉ°¥µ…•UÉ°I=4¹•İÌ]!IÍÕ‰ÍÑÈ¡ÁÕ‰±¥Í¡•‘}…Ğ°Ä°ÄÀ¤ôü=IH	dÁÕ‰±¥Í¡•‘}…ĞM1%5%P€ÄÀÀœèM1PÍ±Õœ±Ñ¥Ñ±”±ÍÕµµ…Éä±Í½ÕÉ•}¹…µ”Í½ÕÉ•9…µ”±Í½ÕÉ•}ÕÉ°Í½ÕÉ•UÉ°±ÁÕ‰±¥Í¡•‘}…ĞÁÕ‰±¥Í¡•‘Ğ±…Ñ•½Éä±¥µ…•}ÕÉ°¥µ…•UÉ°I=4¹•İÌ=IH	dÁÕ‰±¥Í¡•‘}…ĞM1%5%P€ÄÀÀœì(½¹ÍĞíÉ•ÍÕ±ÑÌõmuôõÙ…±¥‘…Ñ”ı…İ…¥Ğ•¹Ø¹¹ÁÉ•Á…É”¡ÅÕ•Éä¤¹‰¥¹¡Ù…±¥‘…Ñ”¤¹…±° ¤é…İ…¥Ğ•¹Ø¹¹ÁÉ•Á…É”¡ÅÕ•Éä¤¹…±° ¤ì(É•ÑÕÉ¸í‘…Ñ”éÙ…±¥‘…Ñ”±¥Ñ•µÌéÉ•ÍÕ±ÑÌ¹™¥±Ñ•È¡¥ÍI•±•Ù…¹Ñ9•İÌ¥ôì)ô()…Íå¹Œ™Õ¹Ñ¥½¸ÍÕ‰ÍÉ¥‰”¡É•ÅÕ•ÍĞ±•¹Ø¥ì(±•Ğ‰½‘äíÑÉåí‰½‘äõ…İ…¥ĞÉ•ÅÕ•ÍĞ¹©Í½¸ ¥õ…Ñ¡íÉ•ÑÕÉ¸©Í½¸¡í•ÉÉ½Èè—•ÉÍ¥è¥ÍÑ•¬ô°ĞÀÀ°¹¼µÍÑ½É”œ¥ô(½¹ÍĞ•¹‘Á½¥¹ĞõMÑÉ¥¹œ¡‰½‘äü¹•¹‘Á½¥¹Ññğœœ¤±ÀÈÔÙ‘ õMÑÉ¥¹œ¡‰½‘äü¹­•åÌü¹ÀÈÔÙ‘¡ñğœœ¤±…ÕÑ õMÑÉ¥¹œ¡‰½‘äü¹­•åÌü¹…ÕÑ¡ñğœœ¤ì(¥˜ …•¹‘Á½¥¹Ğ¹ÍÑ…ÉÑÍ]¥Ñ  ¡ÑÑÁÌè¼¼œ¥ññ•¹‘Á½¥¹Ğ¹±•¹Ñ øÈÀĞáñğ…ÀÈÔÙ‘¡ññÀÈÔÙ‘ ¹±•¹Ñ øÔÄÉñğ……ÕÑ¡ññ…ÕÑ ¹±•¹Ñ øÔÄÈ¥É•ÑÕÉ¸©Í½¸¡í•ÉÉ½Èè—•ÉÍ¥è‰¥±‘¥É¥´…‰½¹•±§}¤ô°ĞÀÀ°¹¼µÍÑ½É”œ¤ì(½¹ÍĞ¹½Üõ¹•Ü…Ñ” ¤¹Ñ½%M=MÑÉ¥¹œ ¤ì(…İ…¥Ğ•¹Ø¹¹ÁÉ•Á…É” %9MIP%9Q<ÁÕÍ¡}ÍÕ‰ÍÉ¥ÁÑ¥½¹Ì¡•¹‘Á½¥¹Ğ±ÀÈÔÙ‘ ±…ÕÑ ±É•…Ñ•‘}…Ğ±ÕÁ‘…Ñ•‘}…Ğ¤Y1UL ü°ü°ü°ü°ü¤=8=91%P¡•¹‘Á½¥¹Ğ¤<UAQMPÀÈÔÙ‘ õ•á±Õ‘•¹ÀÈÔÙ‘ ±…ÕÑ õ•á±Õ‘•¹…ÕÑ ±ÕÁ‘…Ñ•‘}…Ğõ•á±Õ‘•¹ÕÁ‘…Ñ•‘}…Ğœ¤¹‰¥¹¡•¹‘Á½¥¹Ğ±ÀÈÔÙ‘ ±…ÕÑ ±¹½Ü±¹½Ü¤¹ÉÕ¸ ¤ì(É•ÑÕÉ¸©Í½¸¡í½¬éÑÉÕ•ô°ÈÀÀ°¹¼µÍÑ½É”œ¤ì)ô()•áÁ½ÉĞ‘•™…Õ±Ğì(…Íå¹ŒÍ¡•‘Õ±•¡•Ù•¹Ğ±•¹Ø±Ñà¥ì(€½¹ÍĞÑ…Í­Ìõmtì(€¥˜¡•Ù•¹Ğ¹É½¸ôôôœÌÀ€ÄÌ€¨€¨€Ä´Ôœ¥Ñ…Í­Ì¹ÁÕÍ ¡É•™É•Í ¡•¹Ø¤¤ì(€¥˜¡•Ù•¹Ğ¹É½¸ôôôœÀ€Ô´ÈÀ€¨€¨€¨œ¥Ñ…Í­Ì¹ÁÕÍ ¡É•™É•Í¡9•İÌ¡•¹Ø±í¹½Ñ¥™äéÑÉÕ•ô¤¤ì(€Ñà¹İ…¥ÑU¹Ñ¥°¡AÉ½µ¥Í”¹…±±M•ÑÑ±•¡Ñ…Í­Ì¤¤ì(ô°(…Íå¹Œ™•Ñ ¡É•ÅÕ•ÍĞ±•¹Ø¥ì(€½¹ÍĞÕÉ°õ¹•ÜUI0¡É•ÅÕ•ÍĞ¹ÕÉ°¤±Á…Ñ õÕÉ°¹Á…Ñ¡¹…µ”ì(€½¹ÍĞÁÕÍ¡5ÕÑ…Ñ¥½¸õÁ…Ñ ôôôœ½…Á¤½ÁÕÍ ½ÍÕ‰ÍÉ¥‰”œ˜˜¡É•ÅÕ•ÍĞ¹µ•Ñ¡½ôôôA=MPññÉ•ÅÕ•ÍĞ¹µ•Ñ¡½ôôô1Qœ¤ì(€¥˜¡É•ÅÕ•ÍĞ¹µ•Ñ¡½„ôôPœ˜˜…ÁÕÍ¡5ÕÑ…Ñ¥½¸¥É•ÑÕÉ¸©Í½¸¡í•ÉÉ½Èè5•Ñ¡½¹½Ğ…±±½İ•ô°ĞÀÔ°¹¼µÍÑ½É”œ¤ì(€¥˜ …•¹Ø¹¥É•ÑÕÉ¸©Í½¸¡íÍÑ…ÑÕÌè¹½Ñ}½¹™¥ÕÉ•œ±•ÉÉ½ÈèÄ‰¥¹‘¥¹œµ¥ÍÍ¥¹œô°ÔÀÌ¤ì(€ÑÉåì(€€¥˜¡Á…Ñ ôôôœ½…Á¤½ÁÕÍ ½ÍÕ‰ÍÉ¥‰”œ˜™É•ÅÕ•ÍĞ¹µ•Ñ¡½ôôôA=MPœ¥É•ÑÕÉ¸ÍÕ‰ÍÉ¥‰”¡É•ÅÕ•ÍĞ±•¹Ø¤ì(€€¥˜¡Á…Ñ ôôôœ½…Á¤½ÁÕÍ ½ÍÕ‰ÍÉ¥‰”œ˜™É•ÅÕ•ÍĞ¹µ•Ñ¡½ôôô1Qœ¥í±•Ğ‰½‘äíÑÉåí‰½‘äõ…İ…¥ĞÉ•ÅÕ•ÍĞ¹©Í½¸ ¥õ…Ñ¡íÉ•ÑÕÉ¸©Í½¸¡í•ÉÉ½Èè—•ÉÍ¥è¥ÍÑ•¬ô°ĞÀÀ°¹¼µÍÑ½É”œ¥õ…İ…¥Ğ•¹Ø¹¹ÁÉ•Á…É” 1QI=4ÁÕÍ¡}ÍÕ‰ÍÉ¥ÁÑ¥½¹Ì]!I•¹‘Á½¥¹Ğôüœ¤¹‰¥¹¡MÑÉ¥¹œ¡‰½‘äü¹•¹‘Á½¥¹Ññğœœ¤¤¹ÉÕ¸ ¤íÉ•ÑÕÉ¸©Í½¸¡í½¬éÑÉÕ•ô°ÈÀÀ°¹¼µÍÑ½É”œ¥ô(€€¥˜¡Á…Ñ ôôôœ½…Á¤½¡•…±Ñ œ¥í…İ…¥Ğ•¹Ø¹¹ÁÉ•Á…É” M1P€ÄI=4½‰Í•ÉÙ…Ñ¥½¹Ì1%5%P€Äœ¤¹™¥ÉÍĞ ¤íÉ•ÑÕÉ¸©Í½¸¡íÍ•ÉÙ¥”è-½¹ÕÑM•å¥Èœ±ÍÑ…ÑÕÌè½¬œ±½¹™¥ÕÉ•éí™àéÑÉÕ”±•Ù‘Ìè„…•¹Ø¹YM}A%}-d±ÑÕ¥¬è„…•¹Ø¹QU%-}A%}-d±¹•İÌéÑÉÕ”±ÁÕÍ è„„¡•¹Ø¹YA%}AU	1%}-d˜™•¹Ø¹YA%}AI%YQ}-d¥ô±¹½Ñ”èM•ÉÙ¥”¡•…±Ñ ‘½•Ì¹½ĞÕ…É…¹Ñ•”Í½ÕÉ”™É•Í¡¹•ÍÌô¥ô(€€¥˜¡Á…Ñ ôôôœ½…Á¤½ÁÕÍ ½½¹™¥œœ¥É•ÑÕÉ¸©Í½¸¡íÁÕ‰±¥-•äé•¹Ø¹YA%}AU	1%}-eññ¹Õ±°±½¹™¥ÕÉ•è„„¡•¹Ø¹YA%}AU	1%}-d˜™•¹Ø¹YA%}AI%YQ}-d¥ô°ÈÀÀ°¹¼µÍÑ½É”œ¤ì(€€¥˜¡Á…Ñ ôôôœ½…Á¤½¹•İÌœ¥É•ÑÕÉ¸©Í½¸¡…İ…¥Ğ±¥ÍÑ9•İÌ¡•¹Ø±ÕÉ°¤¤ì(€€¥˜¡Á…Ñ ¹ÍÑ…ÉÑÍ]¥Ñ  œ½…Á¤½¹•İÌ¼œ¤¥í½¹ÍĞÍ±Õœõ‘•½‘•UI%½µÁ½¹•¹Ğ¡Á…Ñ ¹Í±¥” œ½…Á¤½¹•İÌ¼œ¹±•¹Ñ ¤¤í½¹ÍĞ¥Ñ•´õ…İ…¥Ğ•¹Ø¹¹ÁÉ•Á…É” M1PÍ±Õœ±Ñ¥Ñ±”±ÍÕµµ…Éä±Í½ÕÉ•}¹…µ”Í½ÕÉ•9…µ”±Í½ÕÉ•}ÕÉ°Í½ÕÉ•UÉ°±ÁÕ‰±¥Í¡•‘}…ĞÁÕ‰±¥Í¡•‘Ğ±…Ñ•½Éä±¥µ…•}ÕÉ°¥µ…•UÉ°I=4¹•İÌ]!IÍ±Õœôüœ¤¹‰¥¹¡Í±Õœ¤¹™¥ÉÍĞ ¤íÉ•ÑÕÉ¸¥Ñ•´ı©Í½¸¡¥Ñ•´¤é©Í½¸¡í•ÉÉ½Èè!…‰•È‰Õ±Õ¹…µ…“Äô°ĞÀĞ¥ô(€€¥˜¡Á…Ñ ôôôœ½…Á¤½¥Ñäµµ…É­•Ğœ¥í½¹ÍĞ¥Ñ•´õ…İ…¥Ğ¥Ñå5…É­•Ğ¡•¹Ø±ÕÉ°¹Í•…É¡A…É…µÌ¹•Ğ Í±Õœœ¥ñğœœ¤íÉ•ÑÕÉ¸¥Ñ•´ı©Í½¸¡¥Ñ•´¤é©Í½¸¡í•ÉÉ½Èè	¥±¥¹µ•å•¸ƒ}•¡¥Èô°ĞÀĞ¥ô(€€¥˜¡Á…Ñ ôôôœ½…Á¤½¡¥ÍÑ½Éäœ¥í½¹ÍĞÍ•É¥•ÌõÕÉ°¹Í•…É¡A…É…µÌ¹•Ğ Í•É¥•Ìœ¤í¥˜ …=‰©•Ğ¹¡…Í=İ¸¡‘•™¥¹¥Ñ¥½¹Ì±Í•É¥•Ì¤¥É•ÑÕÉ¸©Í½¸¡í•ÉÉ½ÈèU¹­¹½İ¸Í•É¥•Ìô°ĞÀÀ¤í½¹ÍĞíÉ•ÍÕ±ÑÍôõ…İ…¥Ğ•¹Ø¹¹ÁÉ•Á…É” M1PÁ•É¥½±Ù…±Õ”±É•ÑÉ¥•Ù•‘}…ĞI=4½‰Í•ÉÙ…Ñ¥½¹Ì]!IÍ•É¥•Ìôü=IH	dÁ•É¥½M1%5%P€ØÀœ¤¹‰¥¹¡Í•É¥•Ì¤¹…±° ¤íÉ•ÑÕÉ¸©Í½¸¡íÍ•É¥•Ì±Í½ÕÉ”é‘•™¥¹¥Ñ¥½¹ÍmÍ•É¥•Ít±½‰Í•ÉÙ…Ñ¥½¹ÌéÉ•ÍÕ±ÑÌ¹É•Ù•ÉÍ” ¥ô¥ô(€€¥˜¡Á…Ñ ôôôœ½…Á¤½µ…É­•Ğµ‘…Ñ„œ¥í½¹ÍĞ‘…Ñ„õmtí™½È¡½¹ÍĞÍ•É¥•Ì½˜=‰©•Ğ¹­•åÌ¡‘•™¥¹¥Ñ¥½¹Ì¤¥í½¹ÍĞíÉ•ÍÕ±ÑÍôõ…İ…¥Ğ•¹Ø¹¹ÁÉ•Á…É” M1PÁ•É¥½±Ù…±Õ”±É•ÑÉ¥•Ù•‘}…ĞI=4½‰Í•ÉÙ…Ñ¥½¹Ì]!IÍ•É¥•Ìôü=IH	dÁ•É¥½M1%5%P€ĞÀÀœ¤¹‰¥¹¡Í•É¥•Ì¤¹…±° ¤í½¹ÍĞÌõ…İ…¥Ğ•¹Ø¹¹ÁÉ•Á…É” M1PÍÑ…Ñ”±…ÑÑ•µÁÑ•‘}…ĞI=4Í½ÕÉ•}ÍÑ…ÑÕÌ]!IÍ•É¥•Ìôüœ¤¹‰¥¹¡Í•É¥•Ì¤¹™¥ÉÍĞ ¤í‘…Ñ„¹ÁÕÍ ¡½‰Í•ÉÙ…Ñ¥½¸¡Í•É¥•Ì±É•ÍÕ±ÑÌ±Ì¤¥õÉ•ÑÕÉ¸©Í½¸¡í•¹•É…Ñ•‘Ğé¹•Ü…Ñ” ¤¹Ñ½%M=MÑÉ¥¹œ ¤±‘…Ñ…ô¥ô(€€É•ÑÕÉ¸©Í½¸¡í•ÉÉ½Èè9½Ğ™½Õ¹ô°ĞÀĞ¤ì(€õ…Ñ¡íÉ•ÑÕÉ¸©Í½¸¡íÍÑ…ÑÕÌèÕ¹…Ù…¥±…‰±”œ±•ÉÉ½Èè…Ñ„ÍÑ½É”Õ¹…Ù…¥±…‰±”ô°ÔÀÌ°¹¼µÍÑ½É”œ¥ô(ô)ôì(
