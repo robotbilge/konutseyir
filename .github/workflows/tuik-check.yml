@@ -14,9 +14,7 @@ jobs:
         id: token
         env:
           TUIK_API_KEY: ${{ secrets.TUIK_API_KEY }}
-        shell: bash
         run: |
-          test -n "$TUIK_API_KEY"
           http_code=$(curl --silent --show-error --max-time 45 --output token.json --write-out "%{http_code}" \
             --request POST "https://giris.tuik.gov.tr/realms/web/protocol/openid-connect/token" \
             --header "Content-Type: application/x-www-form-urlencoded" \
@@ -29,17 +27,24 @@ jobs:
           test -n "$token"
           echo "::add-mask::$token"
           echo "token=$token" >> "$GITHUB_OUTPUT"
-      - name: Konut satış veri akışını doğrula
+      - name: TÜİK boyut kodlarını doğrula
         env:
           ACCESS_TOKEN: ${{ steps.token.outputs.token }}
-        shell: bash
         run: |
-          http_code=$(curl --silent --show-error --max-time 60 --output data.out --dump-header headers.out --write-out "%{http_code}" \
+          http_code=$(curl --silent --show-error --max-time 60 --output data.csv --write-out "%{http_code}" \
             "https://nsiws.tuik.gov.tr/rest/data/TR,DF_SATIS_SEKLI_DURUMU_ILILCE_V3,1.0/?startPeriod=2026-08&endPeriod=2026-08" \
             --header "Authorization: Bearer $ACCESS_TOKEN" \
             --header "Accept: text/csv")
           echo "Data HTTP: $http_code"
-          grep -i "^content-type:" headers.out || true
           test "$http_code" = "200"
-          file data.out
-          head -n 4 data.out | cut -c1-1000
+          python - <<'PY'
+          import csv
+          with open("data.csv", encoding="utf-8-sig", newline="") as f:
+              rows=list(csv.DictReader(f))
+          print("COLUMNS", ",".join(rows[0].keys()))
+          for key in ("SATIS_TURU","ENDEKS_DEGISIM","KONUT_ISYERI_SAHP","KONUT_ISYERI_GSTERGE","ULKE","OLCU_BIRIMI","SATIS_ADET_PAY","INDICATOR","DUZELTME"):
+              print("CODES",key,",".join(sorted({r[key] for r in rows})))
+          for r in rows:
+              if r["REF_AREA"]=="TR100":
+                  print("ISTANBUL", "|".join(r[k] for k in ("SATIS_TURU","ENDEKS_DEGISIM","KONUT_ISYERI_SAHP","KONUT_ISYERI_GSTERGE","ULKE","OLCU_BIRIMI","SATIS_ADET_PAY","INDICATOR","DUZELTME","TIME_PERIOD","OBS_VALUE")))
+          PY
