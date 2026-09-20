@@ -11,8 +11,9 @@ export const newsFeeds=[
 ];
 
 const normalizeText=value=>String(value||'').toLocaleLowerCase('tr-TR').normalize('NFKC');
-const keywords=/(?<![\p{L}\p{N}])(?:(?:konut|emlak|gayrimenkul|kiracı|tapu|arsa|arazi|imar|toki|bina|daire|dask|mortgage|gyo)[\p{L}]*|kira|ev sahibi|kentsel dönüşüm|konut kredisi|yapı ruhsatı|konut satışı)(?![\p{L}\p{N}])/u;
-const hasKeyword=value=>keywords.test(normalizeText(value));
+const keywords=/(?<![\p{L}\p{N}])(?:(?:konut|emlak|gayrimenkul|kiracı|tapu|arsa|arazi|imar|toki)[\p{L}]*|dask|mortgage|gyo|kira|ev sahibi|kentsel dönüşüm|konut kredisi|yapı ruhsatı|konut satışı)(?![\p{L}\p{N}])/u;
+const titleKeywords=/(?<![\p{L}\p{N}])(?:bina|binalar|binada|binanın|daire|daireler|dairede|dairenin)(?![\p{L}\p{N}])/u;
+const hasKeyword=(value,title='')=>keywords.test(normalizeText(value))||titleKeywords.test(normalizeText(title));
 const cdata=value=>String(value||'').replace(/^<!\[CDATA\[/,'').replace(/\]\]>$/,'').trim();
 const entities=value=>cdata(value).replace(/<[^>]*>/g,' ').replace(/&nbsp;|&#160;/gi,' ').replace(/&amp;/gi,'&').replace(/&quot;|&#34;/gi,'"').replace(/&#39;|&apos;/gi,"'").replace(/&lt;/gi,'<').replace(/&gt;/gi,'>').replace(/&#(\d+);/g,(_,n)=>String.fromCodePoint(Number(n))).replace(/\s+/g,' ').trim();
 const field=(block,name)=>entities(block.match(new RegExp(`<${name}[^>]*>([\\s\\S]*?)<\\/${name}>`,'i'))?.[1]);
@@ -28,7 +29,7 @@ export async function parseNewsRSS(xml,source=newsFeeds[0]){
  const rows=[];
  for(const block of blocks){
   const title=field(block,'title'),summary=field(block,'description').slice(0,320),rawUrl=rawField(block,'link')||field(block,'guid'),feedCategory=field(block,'category'),category=feedCategory||source.defaultCategory;
-  if(!title||!rawUrl||(source.filter&&!hasKeyword(`${title} ${summary} ${feedCategory}`)))continue;
+  if(!title||!rawUrl||(source.filter&&!hasKeyword(`${title} ${summary} ${feedCategory}`,title)))continue;
   let sourceUrl;try{sourceUrl=canonicalUrl(new URL(entities(rawUrl),source.url).toString())}catch{continue}
   if(!source.hosts.includes(new URL(sourceUrl).hostname))continue;
   const published=new Date(field(block,'pubDate')||field(block,'dc:date')||field(block,'date'));if(Number.isNaN(published.getTime()))continue;
@@ -37,7 +38,7 @@ export async function parseNewsRSS(xml,source=newsFeeds[0]){
  return rows.slice(0,40);
 }
 
-export const isRelevantNews=item=>hasKeyword(`${item?.title||''} ${item?.summary||''} ${item?.category||''}`);
+export const isRelevantNews=item=>hasKeyword(`${item?.title||''} ${item?.summary||''} ${item?.category||''}`,item?.title||'');
 
 async function fetchFeed(source){
  const response=await fetch(source.url,{headers:{'User-Agent':'KonutSeyir/1.0 (+https://konutseyir.com/haberler)','Accept':'application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.5'},signal:AbortSignal.timeout(15000)});
@@ -48,12 +49,15 @@ async function fetchFeed(source){
 export async function refreshNews(env,{notify=true}={}){
  const settled=await Promise.allSettled(newsFeeds.map(async source=>{try{const rows=await fetchFeed(source);await sourceStatus(env,source.id,'available');return {source,rows}}catch(error){await sourceStatus(env,source.id,'error');throw error}}));
  const successful=settled.filter(x=>x.status==='fulfilled').map(x=>x.value);if(!successful.length)throw Error('All news feeds unavailable');
+ const filteredNames=successful.filter(x=>x.source.filter).map(x=>x.source.name),stale=[];
+ if(filteredNames.length){const placeholders=filteredNames.map(()=>'?').join(','),stored=(await env.DB.prepare(`SELECT slug,title,summary,category FROM news WHERE source_name IN (${placeholders}) ORDER BY published_at DESC LIMIT 1000`).bind(...filteredNames).all()).results||[];stale.push(...stored.filter(item=>!isRelevantNews(item)).map(item=>item.slug))}
+ if(stale.length)await env.DB.batch(stale.map(slug=>env.DB.prepare('DELETE FROM news WHERE slug=?').bind(slug)));
  const candidates=successful.flatMap(x=>x.rows).sort((a,b)=>Date.parse(b.publishedAt)-Date.parse(a.publishedAt));
  const recent=(await env.DB.prepare('SELECT source_url,title FROM news ORDER BY published_at DESC LIMIT 1000').all()).results||[],knownUrls=new Set(recent.map(x=>x.source_url)),knownTitles=new Set(recent.map(x=>titleKey(x.title))),fresh=[];
  for(const item of candidates){const key=titleKey(item.title);if(knownUrls.has(item.sourceUrl)||knownTitles.has(key))continue;knownUrls.add(item.sourceUrl);knownTitles.add(key);fresh.push(item)}
  const now=new Date().toISOString();if(fresh.length)await env.DB.batch(fresh.map(x=>env.DB.prepare('INSERT OR IGNORE INTO news(slug,title,summary,source_name,source_url,published_at,category,image_url,created_at) VALUES(?,?,?,?,?,?,?,?,?)').bind(x.slug,x.title,x.summary,x.sourceName,x.sourceUrl,x.publishedAt,x.category,x.imageUrl,now)));
  const cutoff=Date.now()-8*60*60*1000,notifiable=fresh.filter(x=>Date.parse(x.publishedAt)>=cutoff).slice(0,3),push=notify&&notifiable.length?await sendNewsPush(env,notifiable):{sent:0,subscribers:0,failed:0,configured:!!(env.VAPID_PUBLIC_KEY&&env.VAPID_PRIVATE_KEY)};
- return {saved:fresh.length,newCount:fresh.length,push,sources:newsFeeds.map((source,index)=>({id:source.id,name:source.name,status:settled[index].status==='fulfilled'?'available':'error',items:settled[index].status==='fulfilled'?settled[index].value.rows.length:0}))};
+ return {saved:fresh.length,newCount:fresh.length,removed:stale.length,push,sources:newsFeeds.map((source,index)=>({id:source.id,name:source.name,status:settled[index].status==='fulfilled'?'available':'error',items:settled[index].status==='fulfilled'?settled[index].value.rows.length:0}))};
 }
 
 export async function sendNewsPush(env,items){

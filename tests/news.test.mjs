@@ -22,6 +22,17 @@ test('Turkish word boundaries do not classify aşarsa as arsa',()=>{
  assert.equal(isRelevantNews({title:'Arsa satışlarında yeni dönem',summary:'Tapu işlemleri',category:'Emlak'}),true);
 });
 
+test('ordinary uses of daire and bina do not become housing news',async()=>{
+ const source=newsFeeds.find(item=>item.id==='cnbce');
+ const xml=`<rss><channel>
+ <item><title>Nafaka kararı açıklandı</title><link>https://www.cnbce.com/haberler/nafaka</link><description>Yargıtay hukuk dairesi kararı bozdu.</description><pubDate>Sun, 20 Sep 2026 12:00:00 GMT</pubDate></item>
+ <item><title>Rafineriye saldırı</title><link>https://www.cnbce.com/haberler/rafineri</link><description>Bir araç binaya çarptı.</description><pubDate>Sun, 20 Sep 2026 11:00:00 GMT</pubDate></item>
+ <item><title>Yeni daireler satışta</title><link>https://www.cnbce.com/haberler/yeni-daireler</link><description>Projede satış başladı.</description><pubDate>Sun, 20 Sep 2026 10:00:00 GMT</pubDate></item>
+ </channel></rss>`;
+ const rows=await parseNewsRSS(xml,source);
+ assert.deepEqual(rows.map(item=>item.title),['Yeni daireler satışta']);
+});
+
 test('Bloomberg HT feed accepts only housing-related articles from its own host',async()=>{
  const source=newsFeeds.find(x=>x.id==='bloomberght');
  const xml=`<rss><channel>
