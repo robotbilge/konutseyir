@@ -6,8 +6,8 @@ async function fetchText(url,headers={}){const r=await fetch(url,{headers,signal
 async function save(env,rows){if(!rows.length)throw Error('No valid observations');const now=new Date().toISOString();await env.DB.batch(rows.map(r=>env.DB.prepare('INSERT INTO observations(series,period,value,retrieved_at) VALUES(?,?,?,?) ON CONFLICT(series,period) DO UPDATE SET value=excluded.value,retrieved_at=excluded.retrieved_at').bind(r.series,r.period,r.value,now)))}
 async function status(env,series,state){await env.DB.prepare('INSERT INTO source_status(series,state,attempted_at) VALUES(?,?,?) ON CONFLICT(series) DO UPDATE SET state=excluded.state,attempted_at=excluded.attempted_at').bind(series,state,new Date().toISOString()).run()}
 async function refreshNewsTracked(env,notify=true){
- try{const result=await refreshNews(env,{notify});await status(env,'news','available');return result}
- catch(error){await status(env,'news','error');throw error}
+ try{const result=await refreshNews(env,{notify});await status(env,'news:emlakhaberi','available');return result}
+ catch(error){await status(env,'news:emlakhaberi','error');throw error}
 }
 const fmt=d=>`${String(d.getUTCDate()).padStart(2,'0')}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${d.getUTCFullYear()}`;
 
@@ -52,14 +52,15 @@ async function citySales(env,slug){
 
 async function listNews(env,url){
  const count=(await env.DB.prepare('SELECT COUNT(*) count FROM news').first())?.count||0;
- let sync=await env.DB.prepare("SELECT state,attempted_at attemptedAt FROM source_status WHERE series='news'").first();
+ let sync=await env.DB.prepare("SELECT state,attempted_at attemptedAt FROM source_status WHERE series='news:emlakhaberi'").first();
  const attempted=sync?.attemptedAt?new Date(sync.attemptedAt).getTime():0,stale=!attempted||Date.now()-attempted>55*60*1000;
- if(!count||stale){try{await refreshNewsTracked(env,true)}catch{}sync=await env.DB.prepare("SELECT state,attempted_at attemptedAt FROM source_status WHERE series='news'").first()}
+ let refreshResult=null;
+ if(!count||stale){try{refreshResult=await refreshNewsTracked(env,true)}catch{}sync=await env.DB.prepare("SELECT state,attempted_at attemptedAt FROM source_status WHERE series='news:emlakhaberi'").first()}
  const date=url.searchParams.get('date');
  const validDate=date&&/^\d{4}-\d{2}-\d{2}$/.test(date)?date:null;
  const query=validDate?'SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,image_url imageUrl FROM news WHERE substr(published_at,1,10)=? ORDER BY published_at DESC LIMIT 100':'SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,image_url imageUrl FROM news ORDER BY published_at DESC LIMIT 100';
  const {results=[]}=validDate?await env.DB.prepare(query).bind(validDate).all():await env.DB.prepare(query).all();
- return {date:validDate,items:results.filter(isRelevantNews),sync:sync||{state:'unknown',attemptedAt:null}};
+ return {date:validDate,items:results.filter(isRelevantNews),sync:sync||{state:'unknown',attemptedAt:null},refresh:refreshResult};
 }
 
 async function subscribe(request,env){
@@ -86,7 +87,7 @@ export default {
   try{
    if(path==='/api/push/subscribe'&&request.method==='POST')return subscribe(request,env);
    if(path==='/api/push/subscribe'&&request.method==='DELETE'){let body;try{body=await request.json()}catch{return json({error:'Geçersiz istek'},400,'no-store')}await env.DB.prepare('DELETE FROM push_subscriptions WHERE endpoint=?').bind(String(body?.endpoint||'')).run();return json({ok:true},200,'no-store')}
-   if(path==='/api/health'){await env.DB.prepare('SELECT 1 FROM observations LIMIT 1').first();const newsSync=await env.DB.prepare("SELECT state,attempted_at attemptedAt FROM source_status WHERE series='news'").first(),newsLatest=await env.DB.prepare('SELECT MAX(published_at) latestPublishedAt,MAX(created_at) lastImportedAt FROM news').first();return json({service:'KonutSeyir',status:'ok',configured:{fx:true,evds:!!env.EVDS_API_KEY,tuik:!!env.TUIK_API_KEY,news:true,push:!!(env.VAPID_PUBLIC_KEY&&env.VAPID_PRIVATE_KEY)},news:{...newsSync,...newsLatest},note:'Service health does not guarantee source freshness'})}
+   if(path==='/api/health'){await env.DB.prepare('SELECT 1 FROM observations LIMIT 1').first();const newsSync=await env.DB.prepare("SELECT state,attempted_at attemptedAt FROM source_status WHERE series='news:emlakhaberi'").first(),newsLatest=await env.DB.prepare('SELECT MAX(published_at) latestPublishedAt,MAX(created_at) lastImportedAt FROM news').first();return json({service:'KonutSeyir',status:'ok',configured:{fx:true,evds:!!env.EVDS_API_KEY,tuik:!!env.TUIK_API_KEY,news:true,push:!!(env.VAPID_PUBLIC_KEY&&env.VAPID_PRIVATE_KEY)},news:{...newsSync,...newsLatest},note:'Service health does not guarantee source freshness'})}
    if(path==='/api/push/config')return json({publicKey:env.VAPID_PUBLIC_KEY||null,configured:!!(env.VAPID_PUBLIC_KEY&&env.VAPID_PRIVATE_KEY)},200,'no-store');
    if(path==='/api/news')return json(await listNews(env,url));
    if(path.startsWith('/api/news/')){const slug=decodeURIComponent(path.slice('/api/news/'.length));const item=await env.DB.prepare('SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,image_url imageUrl FROM news WHERE slug=?').bind(slug).first();return item?json(item):json({error:'Haber bulunamadı'},404)}
