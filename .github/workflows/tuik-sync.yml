@@ -61,8 +61,6 @@ jobs:
             fi
           done
           test -n "$(find tuik-data -name '*.csv' -print -quit)"
-          wc -l tuik-data/*.csv
-          for file in tuik-data/*.csv; do echo "DOSYA $file"; head -n 3 "$file" | cut -c1-1000; done
       - name: TÜİK verisini doğrula ve SQL hazırla
         run: node scripts/sync-tuik.mjs
       - name: Doğrulanmış satışları D1'e yaz

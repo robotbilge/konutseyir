@@ -8,10 +8,10 @@ function csvLine(line){
 
 export function parseTuikSales(csv,retrievedAt=new Date().toISOString()){
  const lines=String(csv).replace(/^\uFEFF/,'').split(/\r?\n/).filter(Boolean);if(lines.length<2)throw Error('TÜİK CSV boş');
- const header=csvLine(lines[0]),required=['SATIS_TURU','REF_AREA','KONUT_ISYERI_GSTERGE','INDICATOR','TIME_PERIOD','OBS_VALUE'];
+ const header=csvLine(lines[0]),required=['SATIS_TURU','REF_AREA','KONUT_ISYERI_SAHP','INDICATOR','TIME_PERIOD','OBS_VALUE'];
  if(required.some(key=>!header.includes(key)))throw Error('TÜİK CSV sütunları değişti');
  const grouped=new Map();
- for(const line of lines.slice(1)){const values=csvLine(line),row=Object.fromEntries(header.map((key,index)=>[key,values[index]??''])),slug=cityCodes[row.REF_AREA];if(!slug||row.INDICATOR!=='MII_KSS'||row.KONUT_ISYERI_GSTERGE!=='2'||!/^\d{4}-\d{2}$/.test(row.TIME_PERIOD))continue;const value=Number(row.OBS_VALUE);if(!Number.isInteger(value)||value<0)continue;const key=`${slug}|${row.TIME_PERIOD}`,item=grouped.get(key)||{citySlug:slug,period:row.TIME_PERIOD,total:null,mortgaged:null,firstSale:null,secondHand:null,retrievedAt};if(row.SATIS_TURU==='_T')item.total=value;if(row.SATIS_TURU==='1')item.mortgaged=value;if(row.SATIS_TURU==='2')item.firstSale=value;if(row.SATIS_TURU==='3')item.secondHand=value;grouped.set(key,item)}
+ for(const line of lines.slice(1)){const values=csvLine(line),row=Object.fromEntries(header.map((key,index)=>[key,values[index]??''])),slug=cityCodes[row.REF_AREA];if(!slug||row.INDICATOR!=='MII_KSS'||row.KONUT_ISYERI_SAHP!=='2'||!/^\d{4}-\d{2}$/.test(row.TIME_PERIOD))continue;const value=Number(row.OBS_VALUE);if(!Number.isInteger(value)||value<0)continue;const key=`${slug}|${row.TIME_PERIOD}`,item=grouped.get(key)||{citySlug:slug,period:row.TIME_PERIOD,total:null,mortgaged:null,firstSale:null,secondHand:null,retrievedAt};if(row.SATIS_TURU==='_T')item.total=value;if(row.SATIS_TURU==='1')item.mortgaged=value;if(row.SATIS_TURU==='2')item.firstSale=value;if(row.SATIS_TURU==='3')item.secondHand=value;grouped.set(key,item)}
  const rows=[...grouped.values()].filter(row=>[row.total,row.mortgaged,row.firstSale,row.secondHand].every(Number.isInteger));
  if(!rows.length)throw Error('TÜİK CSV içinde doğrulanmış il satışı yok');
  for(const row of rows)if(row.firstSale+row.secondHand!==row.total)throw Error(`TÜİK toplam kontrolü başarısız: ${row.citySlug} ${row.period}`);
