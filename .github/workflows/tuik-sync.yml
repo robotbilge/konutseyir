@@ -61,6 +61,10 @@ jobs:
             fi
           done
           test -n "$(find tuik-data -name '*.csv' -print -quit)"
+          for file in tuik-data/*.csv; do
+            echo "İstanbul konut satış kodları: $file"
+            awk -F, 'NR == 1 || ($4 == "TR100" && $11 == "MII_KSS")' "$file" | head -n 12
+          done
       - name: TÜİK verisini doğrula ve SQL hazırla
         run: node scripts/sync-tuik.mjs
       - name: Doğrulanmış satışları D1'e yaz
