@@ -20,5 +20,5 @@ export function parseTuikSales(csv,retrievedAt=new Date().toISOString()){
 
 export function salesSql(rows){
  const q=value=>`'${String(value).replaceAll("'","''")}'`;
- return ['BEGIN TRANSACTION;',...rows.map(row=>`INSERT INTO city_sales(city_slug,period,total,mortgaged,first_sale,second_hand,retrieved_at) VALUES(${q(row.citySlug)},${q(row.period)},${row.total},${row.mortgaged},${row.firstSale},${row.secondHand},${q(row.retrievedAt)}) ON CONFLICT(city_slug,period) DO UPDATE SET total=excluded.total,mortgaged=excluded.mortgaged,first_sale=excluded.first_sale,second_hand=excluded.second_hand,retrieved_at=excluded.retrieved_at;`),'COMMIT;'].join('\n');
+ return rows.map(row=>`INSERT INTO city_sales(city_slug,period,total,mortgaged,first_sale,second_hand,retrieved_at) VALUES(${q(row.citySlug)},${q(row.period)},${row.total},${row.mortgaged},${row.firstSale},${row.secondHand},${q(row.retrievedAt)}) ON CONFLICT(city_slug,period) DO UPDATE SET total=excluded.total,mortgaged=excluded.mortgaged,first_sale=excluded.first_sale,second_hand=excluded.second_hand,retrieved_at=excluded.retrieved_at;`).join('\n');
 }
