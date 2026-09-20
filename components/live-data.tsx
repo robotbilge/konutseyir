@@ -1,5 +1,5 @@
 import {useEffect,useState} from 'react';
-import {BarChart3,Landmark,Percent} from 'lucide-react';
+import {ArrowUpRight,BarChart3,Landmark,Newspaper,Percent} from 'lucide-react';
 
 export type MarketItem={series:string,value:number|null,period:string|null,status:string,annualChange:number|null,retrievedAt:string|null};
 export function useMarketData(){
@@ -16,6 +16,13 @@ export function MarketSnapshot(){
   {icon:Landmark,label:'TÜFE yıllık değişim',value:pct(cpi?.annualChange??null),detail:cpi?.period||'Veri bekleniyor'}
  ];
  return <section className="market-snapshot" aria-label="Güncel piyasa göstergeleri"><div><p className="eyebrow">RESMÎ VERİLER</p><h2>Kararı etkileyen üç oran</h2><a href="/veri">Kaynak ve çekim saatleri →</a></div>{cards.map(({icon:Icon,...item})=><article key={item.label}><Icon/><span>{item.label}</span><strong>{item.value}</strong><small>Dönem: {item.detail}</small></article>)}</section>
+}
+
+export function LatestNews(){
+ const[items,setItems]=useState<any[]>([]);
+ useEffect(()=>{const controller=new AbortController();fetch('/api/news?limit=3',{signal:controller.signal}).then(r=>r.ok?r.json():Promise.reject()).then(j=>setItems(j.items||[])).catch(()=>{});return()=>controller.abort()},[]);
+ if(!items.length)return null;
+ return <section className="latest-news"><header><div><p className="eyebrow">KONUT GÜNDEMİ</p><h2>Piyasayı etkileyen son gelişmeler</h2></div><a href="/haberler">Tüm haberler <ArrowUpRight/></a></header><div>{items.map(item=><article key={item.slug}><Newspaper/><span>{item.sourceName}</span><h3><a href={`/haberler/haber?slug=${encodeURIComponent(item.slug)}`}>{item.title}</a></h3><small>{new Intl.DateTimeFormat('tr-TR',{dateStyle:'medium',timeZone:'Europe/Istanbul'}).format(new Date(item.publishedAt))}</small></article>)}</div></section>
 }
 
 export function CityMarket({slug,region}:{slug:string,region:string}){

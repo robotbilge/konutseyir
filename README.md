@@ -12,6 +12,7 @@ Konutseyir.com için GitHub + Cloudflare Pages + Worker + D1 dağıtımı. Bu pa
 - Ayrı sabit taksitli kredi hesabı, gerçek gün sayısıyla mevduat ve faiz üzerinden stopaj.
 - Yazdır/PDF, kontrol listesi, kaynak ve veri durumları, sitemap, canonical ve 404.
 - Worker: TCMB günlük USD/EUR XML aktarımı, anahtarlı EVDS uyumlu adaptör, D1 geçmişi, zamanlanmış güncelleme.
+- Haberler: kaynak ve tarih filtresi, D1 arşivi, Web Push ve ana sayfada son gelişmeler.
 
 ## Yerelde
 
@@ -61,6 +62,21 @@ Servis bağı root wrangler.jsonc içindeki MARKET_API'dir. Worker herkese açı
 GET `/api/health`: servis/D1 durumu; kaynak güncelliğini garanti etmez.
 GET `/api/market-data`: alan başına kaynak, gözlem dönemi, son çekim, durum, yıllık endeks değişimi.
 GET `/api/history?series=cpi`: sınırlı geçmiş; usd, eur, cpi, housing, deposit.
+GET `/api/news?date=YYYY-MM-DD&source=bloomberght&limit=20`: tarih ve kaynak filtresiyle haberler ve kaynak durumları.
+
+## Haber kaynakları
+
+Worker, RSS-to-JSON aracısı kullanmadan RSS/XML akışlarını sunucu tarafında işler. Kaynaklar birbirinden bağımsız çekilir; bir kaynağın hatası diğerlerini durdurmaz. Aynı URL veya aynı başlığa sahip haber yeniden yazılmaz. Yalnız son sekiz saatte yayımlanmış yeni kayıtlar bildirim adayıdır.
+
+- Emlak Haberleri
+- Sözcü Emlak
+- CNBC-e
+- Bloomberg HT
+- TRT Haber Ekonomi
+- Habertürk Ekonomi
+- Ekonomi Gazetesi
+
+Haberlerde başlık, kısa özet, tarih ve özgün kaynak bağlantısı tutulur. Kaynak görselleri kopyalanmaz; tam metin yeniden yayımlanmaz. RSS adresleri yayıncı tarafından değiştirilebileceği için `source_status` kayıtları izlenmelidir. Haber cron'u her gün 05:00–20:00 UTC arasında saat başı çalışır.
 
 D1'da yalnızca kamu gözlemleri saklanır. Kullanıcı hesap girdileri sunucuya gönderilmez. Yazma HTTP uç noktası yoktur. Anahtarlar hata mesajlarında gösterilmez.
 
