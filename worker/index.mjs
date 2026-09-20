@@ -1,5 +1,5 @@
 import {definitions,cityHousingSeries,parseFX,parseEVDS,observation,yearChange} from './data.mjs';
-import {newsFeeds,refreshNews} from './news.mjs';
+import {isRelevantNews,newsFeeds,refreshNews} from './news.mjs';
 
 const json=(data,status=200,cache='public, max-age=300')=>Response.json(data,{status,headers:{'Cache-Control':cache,'X-Content-Type-Options':'nosniff'}});
 async function fetchText(url,headers={}){const r=await fetch(url,{headers,signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('Upstream unavailable');return r.text()}
@@ -61,10 +61,10 @@ async function listNews(env,url){
  if(validDate){clauses.push('substr(published_at,1,10)=?');params.push(validDate)}
  if(validSource){clauses.push('source_name=?');params.push(newsFeeds.find(x=>x.id===validSource).name)}
  const query=`SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,image_url imageUrl FROM news${clauses.length?` WHERE ${clauses.join(' AND ')}`:''} ORDER BY published_at DESC LIMIT ?`;
- params.push(limit);
- const {results=[]}=await env.DB.prepare(query).bind(...params).all();
+ params.push(Math.min(limit*4,400));
+ const {results=[]}=await env.DB.prepare(query).bind(...params).all(),filteredSourceNames=new Set(newsFeeds.filter(feed=>feed.filter).map(feed=>feed.name)),items=results.filter(item=>!filteredSourceNames.has(item.sourceName)||isRelevantNews(item)).slice(0,limit);
  const sources=newsFeeds.map(feed=>({id:feed.id,name:feed.name,...(states.find(x=>x.series===`news:${feed.id}`)||{state:'pending',attemptedAt:null})}));
- return {date:validDate,source:validSource,items:results,sources,refresh:refreshResult};
+ return {date:validDate,source:validSource,items,sources,refresh:refreshResult};
 }
 
 async function subscribe(request,env){
