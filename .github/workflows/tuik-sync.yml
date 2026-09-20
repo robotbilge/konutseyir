@@ -35,6 +35,32 @@ jobs:
           test -n "$CLOUDFLARE_API_TOKEN"
       - name: D1 şemasını uygula
         run: pnpm exec wrangler d1 migrations apply konutseyir-data --remote --config worker/wrangler.jsonc
+      - name: TÜİK son iki ayı indir
+        shell: bash
+        run: |
+          token_http=$(curl --silent --show-error --max-time 45 --output token.json --write-out "%{http_code}" \
+            --request POST "https://giris.tuik.gov.tr/realms/web/protocol/openid-connect/token" \
+            --header "Content-Type: application/x-www-form-urlencoded" \
+            --data-urlencode "grant_type=password" \
+            --data-urlencode "client_id=nsi-ws-consumer" \
+            --data-urlencode "api_key=$TUIK_API_KEY")
+          test "$token_http" = "200"
+          token=$(jq -r '.access_token // empty' token.json)
+          test -n "$token"
+          echo "::add-mask::$token"
+          mkdir -p tuik-data
+          for offset in 2 1; do
+            period=$(date -u -d "$offset months ago" +%Y-%m)
+            data_http=$(curl --silent --show-error --retry 2 --retry-all-errors --max-time 60 \
+              --output "tuik-data/$period.csv" --write-out "%{http_code}" \
+              "https://nsiws.tuik.gov.tr/rest/data/TR,DF_SATIS_SEKLI_DURUMU_ILILCE_V3,1.0/?startPeriod=$period&endPeriod=$period" \
+              --header "Authorization: Bearer $token" --header "Accept: text/csv")
+            if [ "$data_http" != "200" ]; then
+              echo "TÜİK $period alınamadı: HTTP $data_http"
+              rm -f "tuik-data/$period.csv"
+            fi
+          done
+          test -n "$(find tuik-data -name '*.csv' -print -quit)"
       - name: TÜİK verisini doğrula ve SQL hazırla
         run: node scripts/sync-tuik.mjs
       - name: Doğrulanmış satışları D1'e yaz
