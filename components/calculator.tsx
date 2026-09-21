@@ -59,6 +59,7 @@ export function Calculator(){
   useEffect(()=>{if(liveDeposit?.value!=null)set(x=>({...x,deposit:Number(liveDeposit.value)}))},[liveDeposit?.value]);
   const field=(k:keyof typeof initial,label:string,hint?:string)=><Input key={k} label={label} hint={hint} value={p[k]} onChange={v=>set(x=>({...x,[k]:v}))}/>;
   return <section id="analiz" className="calc-section main-calculator">
+    <span id="kira-carpani" className="anchor-target" aria-hidden="true"/><span id="metrekare" className="anchor-target" aria-hidden="true"/>
     <div className="calc-heading"><div><p className="eyebrow">İLANINIZI HESAPLAYIN</p><h2>Bu ev mantıklı mı?</h2></div><p>İlandaki bilgileri kullanın. Başlangıç değerleri örnek senaryodur; sonuç girdiğiniz rakamlarla anında güncellenir.</p></div>
     <div className="calculator-layout">
       <div className="calc-panel">
@@ -66,7 +67,7 @@ export function Calculator(){
         <div className="fields">{field('price','Satış fiyatı (TL)')}{field('area','Net alan (m²)')}{field('costs','Toplam alım masrafı (TL)','Tapu, komisyon, tadilat ve diğer tek seferlik giderler.')}</div>
         <h3 id="net-kira"><span>02</span>Net kira hesabı</h3>
         <div className="fields">{field('rent','Aylık kira (TL)')}{field('vacancy','Yılda boş kalan ay','0–12 ay.')}{field('expenses','Yıllık işletme gideri (TL)','Malik aidatı, bakım, sigorta; gelir vergisi hariç.')}{field('tax','Yıllık kira gelir vergisi (TL)','Kendi durumunuza göre hesaplanan tutar; 0 muafiyet anlamına gelmez.')}</div>
-        <h3><span>03</span>Bir yıllık senaryo</h3>
+        <h3 id="reel-getiri"><span>03</span>Bir yıllık senaryo</h3>
         <div className="fields">{field('growth','Konut fiyat değişimi (%)')}{field('inflation','Yıllık enflasyon (%)','Gelecek beklentiniz; geçmiş TÜFE tahmin değildir.')}{field('deposit','Yıllık brüt mevduat faizi (%)',liveDeposit?.value!=null?`TCMB haftalık ağırlıklı ortalama: %${Number(liveDeposit.value).toLocaleString('tr-TR',{maximumFractionDigits:2})} · ${liveDeposit.period}`:'Canlı TCMB verisi bekleniyor.')}{field('withholding','Mevduat stopajı (%)','Hesap türü, açılış tarihi ve vade için bankanızdan doğrulayın.')}{field('gold','Altın fiyat değişimi (%)','Alış/satış farkı dahil net beklentiniz.')}{field('saleCosts','Dönem sonu satış gideri (TL)','Satış varsayımında komisyon ve varsa vergiler.')}</div>
         <button className="secondary" onClick={()=>set(initial)}>Örneğe sıfırla</button>
       </div>

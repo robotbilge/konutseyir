@@ -1,4 +1,7 @@
 import Home from '../app/page';
+import HomeAnalysis from '../app/ev-analizi/page';
+import LoanCalculator from '../app/kredi-hesaplama/page';
+import OfficialChecks from '../app/resmi-kontroller/page';
 import Compare from '../app/karsilastir/page';
 import Guides from '../app/rehber/page';
 import Guide from '../app/rehber/[slug]/page';
@@ -17,6 +20,9 @@ import {guides,cities} from '../lib/content';
 import {Header,Footer} from '../components/site-chrome';
 const fixed:Record<string,{component:any,title:string,description:string}>={
 '/':{component:Home,title:'KonutSeyir | Net kira, kredi ve reel konut getirisi',description:'Net kira gelirini TL ve yüzde olarak hesaplayın. Stopaj sonrası mevduat, konut ve altını aynı sermayeyle karşılaştırın.'},
+'/ev-analizi':{component:HomeAnalysis,title:'Ev analizi ve kira çarpanı hesaplama',description:'Net kira, kira çarpanı, metrekare fiyatı, alım maliyeti ve reel konut getirisini hesaplayın.'},
+'/kredi-hesaplama':{component:LoanCalculator,title:'Konut kredisi toplam maliyet hesaplama',description:'Aylık taksit, toplam geri ödeme, faiz ve ek kredi giderlerini hesaplayın.'},
+'/resmi-kontroller':{component:OfficialChecks,title:'Ev almadan önce resmî kontroller',description:'Tapu, parsel, deprem tehlikesi ve satın alma kontrol adımlarına ulaşın.'},
 '/karsilastir':{component:Compare,title:'Ev, mevduat ve altın karşılaştırması',description:'Alım giderleri, kira, stopaj ve enflasyon dahil bir yıllık yatırım senaryosu.'},
 '/rehber':{component:Guides,title:'Konut satın alma ve yatırım rehberleri',description:'Kira çarpanı, net getiri, tapu ve maliyet konularında açıklamalar.'},
 '/sehirler':{component:Cities,title:'Şehir konut piyasaları',description:'Bölgesel konut verilerinin kapsamı ve resmî kaynakları.'},
