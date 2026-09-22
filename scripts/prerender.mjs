@@ -4,7 +4,7 @@ const base='https://konutseyir.com',template=await readFile('dist/index.html','u
 const esc=s=>s.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
 const label=part=>decodeURIComponent(part).replaceAll('-',' ').replace(/(^|\s)\S/g,c=>c.toLocaleUpperCase('tr-TR'));
 const jsonLd=(path,m)=>{
- const url=`${base}${path==='/'?'':path}`,parts=path.split('/').filter(Boolean),items=[{'@type':'Organization','@id':`${base}/#organization`,name:'KonutSeyir',url:base,email:'iletisim@konutseyir.com',logo:`${base}/icons/icon-512.png`},{'@type':'WebSite','@id':`${base}/#website`,name:'KonutSeyir',url:base,publisher:{'@id':`${base}/#organization`}}];
+ const url=`${base}${path==='/'?'':path}`,parts=path.split('/').filter(Boolean),items=[{'@type':'Organization','@id':`${base}/#organization`,name:'KonutSeyir',url:base,email:'iletisim@konutseyir.com',logo:`${base}/icon-512.png`},{'@type':'WebSite','@id':`${base}/#website`,name:'KonutSeyir',url:base,publisher:{'@id':`${base}/#organization`}}];
  if(parts.length)items.push({'@type':'BreadcrumbList',itemListElement:[{position:1,name:'Ana sayfa',item:base},...parts.map((part,index)=>({'@type':'ListItem',position:index+2,name:label(part),item:`${base}/${parts.slice(0,index+1).join('/')}`}))]});
  if(path.startsWith('/rehber/'))items.push({'@type':'Article',headline:m.title,description:m.description,mainEntityOfPage:url,dateModified:'2026-09-22',author:{'@id':`${base}/#organization`},publisher:{'@id':`${base}/#organization`}});
  return JSON.stringify({'@context':'https://schema.org','@graph':items}).replaceAll('<','\\u003c');
