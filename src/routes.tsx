@@ -19,6 +19,7 @@ import Contact from '../app/iletisim/page';
 import Privacy from '../app/gizlilik/page';
 import Terms from '../app/kullanim-kosullari/page';
 import CookiePolicy from '../app/cerez-politikasi/page';
+import Editorial from '../app/yayin-ilkeleri/page';
 import News from '../app/haberler/page';
 import NewsDetail from '../app/haberler/haber/page';
 import {guides,cities} from '../lib/content';
@@ -44,6 +45,7 @@ const fixed:Record<string,{component:any,title:string,description:string}>={
 '/iletisim':{component:Contact,title:'İletişim',description:'KonutSeyir iletişim bilgileri.'},
 '/gizlilik':{component:Privacy,title:'Gizlilik',description:'KonutSeyir veri işleme ve gizlilik açıklaması.'},
 '/cerez-politikasi':{component:CookiePolicy,title:'Çerez politikası',description:'KonutSeyir çerezleri, reklam tercihleri ve tarayıcı ayarları.'},
+'/yayin-ilkeleri':{component:Editorial,title:'Yayın ve hesaplama ilkeleri',description:'KonutSeyir kaynak, hesaplama, düzeltme ve editoryal bağımsızlık ilkeleri.'},
 '/kullanim-kosullari':{component:Terms,title:'Kullanım koşulları',description:'Hesaplama varsayımları ve kullanım koşulları.'}};
 export const paths=[...Object.keys(fixed),...guides.map(g=>'/rehber/'+g.slug),...cities.map(c=>'/sehirler/'+c.slug)];
 export function meta(path:string){const f=fixed[path];if(f)return {...f,noindex:path==='/haberler'||path==='/haberler/haber'};const g=guides.find(g=>path==='/rehber/'+g.slug);if(g)return {title:g.title,description:g.summary,noindex:false};const c=cities.find(c=>path==='/sehirler/'+c.slug);return {title:c?c.name+' konut piyasası':'Sayfa bulunamadı',description:c?.note||'Aradığınız sayfa bulunamadı.',noindex:!c}}

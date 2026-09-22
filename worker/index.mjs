@@ -38,7 +38,7 @@ async function cityMarket(env,slug){
  if(!results.length&&env.EVDS_API_KEY){await refreshSeries(env,series,item.code);({results=[]}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 400').bind(series).all())}
  const sourceStatus=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind(series).first();
  const last=results[0];
- return {slug,region:item.region,value:last?.value??null,period:last?.period??null,retrievedAt:last?.retrieved_at??null,annualChange:yearChange(results),status:last?(sourceStatus?.state==='error'?'cached':'available'):(sourceStatus?.state||'unavailable'),source:'TCMB EVDS',sourceUrl:'https://evds3.tcmb.gov.tr/'};
+ return {slug,region:item.region,value:last?.value??null,period:last?.period??null,retrievedAt:last?.retrieved_at??null,annualChange:yearChange(results),history:results.slice(0,24).reverse().map(row=>({period:row.period,value:row.value})),status:last?(sourceStatus?.state==='error'?'cached':'available'):(sourceStatus?.state||'unavailable'),source:'TCMB EVDS',sourceUrl:'https://evds3.tcmb.gov.tr/'};
 }
 
 async function citySales(env,slug){
@@ -46,7 +46,7 @@ async function citySales(env,slug){
  const {results=[]}=await env.DB.prepare('SELECT period,total,mortgaged,first_sale firstSale,second_hand secondHand,retrieved_at retrievedAt FROM city_sales WHERE city_slug=? ORDER BY period DESC LIMIT 25').bind(slug).all();
  const latest=results[0];if(!latest)return {slug,status:'unavailable',source:'TÜİK',sourceUrl:'https://veriportali.tuik.gov.tr/tr/databrowser/tuik/categories/9/9_4/TR,DF_SATIS_SEKLI_DURUMU_ILILCE_V3,1.0'};
  const priorMonth=results[1],priorYear=results.find(row=>row.period===`${Number(latest.period.slice(0,4))-1}${latest.period.slice(4)}`),change=base=>base?.total>0?(latest.total/base.total-1)*100:null;
- return {...latest,slug,status:'available',monthlyChange:change(priorMonth),annualChange:change(priorYear),source:'TÜİK',sourceUrl:'https://veriportali.tuik.gov.tr/tr/databrowser/tuik/categories/9/9_4/TR,DF_SATIS_SEKLI_DURUMU_ILILCE_V3,1.0'};
+ return {...latest,slug,status:'available',monthlyChange:change(priorMonth),annualChange:change(priorYear),history:results.slice(0,13).reverse().map(row=>({period:row.period,total:row.total,mortgaged:row.mortgaged,firstSale:row.firstSale,secondHand:row.secondHand})),source:'TÜİK',sourceUrl:'https://veriportali.tuik.gov.tr/tr/databrowser/tuik/categories/9/9_4/TR,DF_SATIS_SEKLI_DURUMU_ILILCE_V3,1.0'};
 }
 
 async function listNews(env,url){
