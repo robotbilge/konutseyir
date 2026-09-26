@@ -92,6 +92,15 @@ export default {
    if(path==='/api/push/subscribe'&&request.method==='POST')return subscribe(request,env);
    if(path==='/api/push/subscribe'&&request.method==='DELETE'){let body;try{body=await request.json()}catch{return json({error:'Geçersiz istek'},400,'no-store')}await env.DB.prepare('DELETE FROM push_subscriptions WHERE endpoint=?').bind(String(body?.endpoint||'')).run();return json({ok:true},200,'no-store')}
    if(path==='/api/health'){await env.DB.prepare('SELECT 1 FROM observations LIMIT 1').first();const {results:newsSources=[]}=await env.DB.prepare("SELECT series,state,attempted_at attemptedAt FROM source_status WHERE series LIKE 'news:%'").all(),newsLatest=await env.DB.prepare('SELECT MAX(published_at) latestPublishedAt,MAX(created_at) lastImportedAt FROM news').first();return json({service:'KonutSeyir',status:'ok',configured:{fx:true,evds:!!env.EVDS_API_KEY,tuik:!!env.TUIK_API_KEY,news:true,push:!!(env.VAPID_PUBLIC_KEY&&env.VAPID_PRIVATE_KEY)},news:{sources:newsSources,...newsLatest},note:'Service health does not guarantee source freshness'})}
+   if(path==='/api/gold-price'){
+    try{
+     const upstream=await fetch('https://altinseyir.com/api/prices',{headers:{Accept:'application/json','User-Agent':'KonutSeyir/1.0'}});
+     if(!upstream.ok)throw new Error('UPSTREAM_'+upstream.status);
+     const payload=await upstream.json(),gram=Number(payload?.price?.gram);
+     if(!Number.isFinite(gram)||gram<=0)throw new Error('INVALID_GRAM');
+     return json({gram,recordedAt:payload?.price?.recorded_at||null,source:'AltınSeyir',sourceUrl:'https://altinseyir.com/'},200,'public, max-age=60');
+    }catch{return json({status:'unavailable',error:'Altın fiyatı geçici olarak alınamıyor'},503,'no-store')}
+   }
    if(path==='/api/push/config')return json({publicKey:env.VAPID_PUBLIC_KEY||null,configured:!!(env.VAPID_PUBLIC_KEY&&env.VAPID_PRIVATE_KEY)},200,'no-store');
    if(path==='/api/news')return json(await listNews(env,url));
    if(path.startsWith('/api/news/')){const slug=decodeURIComponent(path.slice('/api/news/'.length));const item=await env.DB.prepare('SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,NULL imageUrl FROM news WHERE slug=?').bind(slug).first();return item?json(item):json({error:'Haber bulunamadı'},404)}
