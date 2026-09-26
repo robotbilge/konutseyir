@@ -26,7 +26,7 @@ import {guides,cities} from '../lib/content';
 import {Header,Footer} from '../components/site-chrome';
 const fixed:Record<string,{component:any,title:string,description:string}>={
 '/':{component:Home,title:'KonutSeyir | Net kira, kredi ve reel konut getirisi',description:'Net kira gelirini TL ve yüzde olarak hesaplayın. Stopaj sonrası mevduat, konut ve altını aynı sermayeyle karşılaştırın.'},
-'/ev-analizi':{component:HomeAnalysis,title:'Ev analizi ve kira çarpanı hesaplama',description:'Net kira, kira çarpanı, metrekare fiyatı, alım maliyeti ve reel konut getirisini hesaplayın.'},
+'/ev-analizi':{component:HomeAnalysis,title:'Konut yatırım analizi ve kira çarpanı hesaplama',description:'Konutun net kira getirisini, amortisman süresini, metrekare fiyatını, alım maliyetini ve reel yatırım getirisini hesaplayın.'},
 '/kredi-hesaplama':{component:LoanCalculator,title:'Konut kredisi toplam maliyet hesaplama',description:'Aylık taksit, toplam geri ödeme, faiz ve ek kredi giderlerini hesaplayın.'},
 '/resmi-kontroller':{component:OfficialChecks,title:'Ev almadan önce resmî kontroller',description:'Tapu, parsel, deprem tehlikesi ve satın alma kontrol adımlarına ulaşın.'},
 '/hesaplama/kira-carpani':{component:RentMultiplier,title:'Kira çarpanı hesaplama',description:'Satış fiyatı ve aylık kirayla brüt kira çarpanını ay ve yıl olarak hesaplayın.'},
