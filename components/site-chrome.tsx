@@ -3,7 +3,7 @@ import {Building2,Menu,X,ArrowUpRight,ArrowLeft} from "lucide-react";
 
 const navItems=[
  ["Konut Analizi","/ev-analizi"],
- ["Hesap Araçları","/ev-analizi#hesap-araclari"],
+ ["Hesap Araçları","/ev-analizi"],
  ["Karşılaştır","/karsilastir"],
  ["Şehirler","/sehirler"],
  ["Rehber","/rehber"],
