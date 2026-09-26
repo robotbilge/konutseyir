@@ -141,3 +141,20 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(-
 .site-header.has-back .topbar{position:relative;padding-left:160px}
 .site-header.has-back .header-back{position:absolute;left:28px;top:50%;transform:translateY(-50%)}
 @media(max-width:850px){.site-header.has-back .topbar{padding-left:28px}.site-header.has-back .header-back{position:static;transform:none}.site-header.has-back .brand{margin-left:0}}
+
+
+/* KonutSeyir UI/UX footer + navigation patch */
+body{background:#f7f7f3}
+.site-header{background:rgba(250,250,247,.94);box-shadow:0 1px 0 rgba(16,36,30,.04)}
+.topbar{height:72px}.topbar nav{gap:20px}.topbar nav a{font-size:12.5px}
+.backbar{max-width:1240px;margin:0 auto;padding:10px 28px 0}.backbar .header-back{position:static!important;transform:none!important;width:max-content}
+.site-footer{margin-top:84px;background:#0d241d;color:#d8e3de;border-top:0}
+.footer-main{max-width:1240px;margin:auto;padding:58px 28px 42px;display:grid;grid-template-columns:minmax(230px,.75fr) minmax(0,1.75fr);gap:72px}
+.footer-intro p{max-width:330px;color:#9eb2aa;line-height:1.65;font-size:13px}.footer-brand{color:#fff}.footer-brand b{color:#55c6a4}.footer-email{color:#b9d7cc}
+.footer-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:44px}.footer-nav>div{display:flex;flex-direction:column;gap:11px}.footer-nav strong{color:#fff;font-size:13px;margin-bottom:5px}.footer-nav a{color:#a9beb6;text-decoration:none;font-size:12.5px;line-height:1.4}.footer-nav a:hover{color:#fff}
+.network-strip{border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);padding:24px max(28px,calc((100% - 1184px)/2));display:grid;grid-template-columns:280px 1fr;gap:42px;align-items:center;background:#102a22}
+.network-strip>div{display:flex;gap:22px;align-items:center}.network-strip strong{color:#fff;font-size:13px}.network-strip a{display:inline-flex;align-items:center;gap:4px;color:var(--lime);text-decoration:none;font-size:13px;font-weight:750}.network-strip p{margin:0;color:#93aaa1;font-size:12px;line-height:1.65}
+.footer-bottom{max-width:1240px;margin:auto;padding:22px 28px 28px;border-top:0;display:grid;grid-template-columns:auto 1fr auto;gap:28px;align-items:center;color:#829b91;font-size:11px}.footer-bottom nav{display:flex;justify-content:center;flex-wrap:wrap;gap:18px}.footer-bottom a{color:#9eb2aa;text-decoration:none}.footer-bottom a:hover{color:#fff}
+@media(max-width:900px){.footer-main{grid-template-columns:1fr;gap:38px}.network-strip{grid-template-columns:1fr;gap:12px}.footer-bottom{grid-template-columns:1fr;text-align:center}.footer-bottom nav{order:2}.footer-bottom span{order:3}}
+@media(max-width:650px){.footer-main{padding:42px 20px 30px}.footer-nav{grid-template-columns:1fr 1fr;gap:32px}.network-strip{padding:22px 20px}.backbar{padding:8px 20px 0}}
+@media(max-width:440px){.footer-nav{grid-template-columns:1fr}}
