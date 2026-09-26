@@ -53,13 +53,13 @@ function Comparison({r}:{r:any}){
   </div>
 }
 
-export function Calculator(){
+export function Calculator({mode='analysis'}:{mode?:'analysis'|'compare'}={}){
   const[p,set]=useState(initial);
   const market=useMarketData(),liveDeposit=market.find(x=>x.series==='deposit');
   const field=(k:keyof typeof initial,label:string,hint?:string)=><Input key={k} label={label} hint={hint} value={p[k]} onChange={v=>set(x=>({...x,[k]:v}))}/>;
   return <section id="analiz" className="calc-section main-calculator">
     <span id="kira-carpani" className="anchor-target" aria-hidden="true"/><span id="metrekare" className="anchor-target" aria-hidden="true"/>
-    <div className="calc-heading"><div><p className="eyebrow">İLANINIZI HESAPLAYIN</p><h2>Bu konut yatırım için mantıklı mı?</h2></div><p>İlandaki bilgileri kullanın. Başlangıç değerleri örnek senaryodur; sonuç girdiğiniz rakamlarla anında güncellenir.</p></div>
+    <div className="calc-heading"><div><p className="eyebrow">{mode==='compare'?'AYNI SERMAYEYİ KARŞILAŞTIRIN':'İLANINIZI HESAPLAYIN'}</p><h2>{mode==='compare'?'Konut, mevduat ve altını aynı varsayımla karşılaştırın':'Bu konutun kira ve maliyet tablosu ne söylüyor?'}</h2></div><p>{mode==='compare'?'Önce konutun gerçek başlangıç maliyetini ve net kirasını girin. Ardından bir yıllık konut değer değişimi, mevduat faizi, altın değişimi ve enflasyon varsayımlarını aynı sermaye üzerinden karşılaştırın.':'Satış fiyatı, net alan, alım giderleri ve sürdürülebilir kirayı girin. Sonuç alanı toplam yatırımınızı, net kira getirisini, geri dönüş süresini ve bir yıllık senaryoyu birlikte gösterir.'}</p></div>
     <div className="calculator-layout">
       <div className="calc-panel">
         <h3 id="alim-masrafi"><span>01</span>Konut ve alım maliyeti</h3>
@@ -79,7 +79,7 @@ export function Calculator(){
             {[['Toplam başlangıç yatırımı',money(r.capital)],['Net m² fiyatı',money(r.pricePerM2)],['Yıllık brüt kira',`${money(r.gross)} · ${pct(r.grossYield)}`],['Boş kalma kaybı',money(r.emptyLoss)],['Tahsil edilebilir yıllık kira',money(r.collected)],['İşletme gideri + kira vergisi',money(p.expenses+p.tax)],['Aylık ortalama net kira',money(r.monthlyNet)],['Brüt kira çarpanı',r.multiplierMonths===null?'Hesaplanamaz':`${r.multiplierMonths.toFixed(1)} ay / ${(r.multiplierMonths/12).toFixed(1)} yıl`],['Net kira ile geri dönüş',r.payback===null?'Pozitif net kira yok':`${r.payback.toFixed(1)} yıl`]].map(([k,v])=><div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}
           </dl>
           <small>Sabit kira ile basit geri dönüş. Kira getiri oranları alım masrafları dahil başlangıç yatırımına bölünür.</small>
-          <h3>12 ay sonunda tahmini değer</h3>
+          <h3>{mode==='compare'?'Aynı sermayenin 12 ay sonundaki senaryo karşılaştırması':'Alternatiflerle 12 aylık kontrol'}</h3>
           <Comparison r={r}/>
           <p className="deposit-summary">Mevduat brüt faiz: <b>{money(r.depositGross)}</b> · stopaj: <b>{money(r.withheld)}</b> · net faiz: <b>{money(r.deposit.profit)}</b>.</p>
           <p className="calc-note">365 günlük, kredisiz ve basit getirili senaryodur. Mevduatta girilen oran yıl boyunca varsayılır; vade yenileme garantisi yoktur. Kira yeniden yatırıma yönlendirilmez. Konut sonucu satış gideri sonrası varsayımsal değerdir. Reel TL, başlangıç gününün satın alma gücüdür.</p>
