@@ -6,5 +6,5 @@
  "workers_dev":false,
  "triggers":{"crons":["30 13 * * 1-5","0 5-20 * * *"]},
  "d1_databases":[{"binding":"DB","database_name":"konutseyir-data","database_id":"f64a1ff1-d591-4129-896e-240c833feb49","migrations_dir":"../migrations"}],
- "vars":{"EVDS_CPI_SERIES":"TP.TUKFIY2025.GENEL","EVDS_HOUSING_SERIES":"TP.KFE.TR","EVDS_DEPOSIT_SERIES":"TP.TRY.MT02","EVDS_DEPOSIT_1M_SERIES":"TP.TRY.MT01","VAPID_PUBLIC_KEY":"BKxQ7O9EzsSpCkdDPzMEtEtOCdXV0d-fC1yMMOcmegPJ5k_txtBFzECOU9LwVMEioBK9C1u6H3pNc0zrSonwm6g"}
+ "vars":{"EVDS_CPI_SERIES":"TP.TUKFIY2025.GENEL","EVDS_HOUSING_SERIES":"TP.KFE.TR","EVDS_DEPOSIT_SERIES":"TP.TRY.MT02","EVDS_DEPOSIT_1M_SERIES":"TP.TRY.MT01","EVDS_POLICY_SERIES":"TP.APIFON4","VAPID_PUBLIC_KEY":"BKxQ7O9EzsSpCkdDPzMEtEtOCdXV0d-fC1yMMOcmegPJ5k_txtBFzECOU9LwVMEioBK9C1u6H3pNc0zrSonwm6g"}
 }
