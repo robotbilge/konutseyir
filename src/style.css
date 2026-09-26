@@ -136,3 +136,8 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(-
   .fields,.support-tool-row .metric-row,.preview-grid{grid-template-columns:1fr}.brand{font-size:19px}.trust-label{font-size:10px}.hero h1{font-size:43px}.preview-top{flex-direction:column}.calc-heading h2,.section-heading h2,.official-section h2{font-size:34px}.calc-panel,.calc-results{padding:19px}.results-list>div{gap:8px}.results-list dd{white-space:normal}.footer-nav{grid-template-columns:1fr}
 }
 @media print{.site-header,.site-footer,.hero,.value-strip,.section-heading,.support-tools,.official-section,button{display:none!important}.inner{max-width:none;padding:0}.main-calculator{padding:0}.calculator-layout{display:block;border:0;box-shadow:none}.calc-panel,.calc-results{color:#000;background:#fff;border:1px solid #bbb;margin-bottom:20px}.result-hero strong,.result-hero b{color:#000}.results-list dt,.calc-results small,.calc-note{color:#333}.calc-results th,.calc-results td,.results-list>div{border-color:#bbb}.table-scroll{overflow:visible}body{font-size:12px}a{color:#000}}
+
+/* Back navigation must not shift the centered brand/navigation row. */
+.site-header.has-back .topbar{position:relative;padding-left:160px}
+.site-header.has-back .header-back{position:absolute;left:28px;top:50%;transform:translateY(-50%)}
+@media(max-width:850px){.site-header.has-back .topbar{padding-left:28px}.site-header.has-back .header-back{position:static;transform:none}.site-header.has-back .brand{margin-left:0}}
