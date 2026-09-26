@@ -5,7 +5,7 @@ const navItems = [["Konut Analizi", "/ev-analizi"], ["Karşılaştır", "/karsil
 
 export function Header({back=false}:{back?:boolean}){
   const [open,setOpen]=useState(false);
-  return <header className="site-header"><div className="topbar">
+  return <header className={`site-header${back?" has-back":""}`}><div className="topbar">
     {back&&<button className="header-back" type="button" aria-label="Önceki sayfaya dön" onClick={()=>{if(history.length>1)history.back();else location.assign('/')}}><ArrowLeft size={18}/><span>Geri</span></button>}
     <a className="brand" href="/" aria-label="KonutSeyir ana sayfa"><span><Building2 size={20}/></span><span>Konut<b>Seyir</b></span></a>
     <button className="menu-button" type="button" aria-label={open?"Menüyü kapat":"Menüyü aç"} aria-expanded={open} onClick={()=>setOpen(v=>!v)}>{open?<X/>:<Menu/>}</button>
