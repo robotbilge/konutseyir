@@ -29,6 +29,7 @@ export async function refresh(env){
  await refreshSeries(env,'housing',env.EVDS_HOUSING_SERIES);
  await refreshSeries(env,'deposit',env.EVDS_DEPOSIT_SERIES,3);
  await refreshSeries(env,'deposit1m',env.EVDS_DEPOSIT_1M_SERIES,3);
+ await refreshSeries(env,'policy',env.EVDS_POLICY_SERIES,1);
  for(const [slug,item] of Object.entries(cityHousingSeries))await refreshSeries(env,`housing:${slug}`,item.code);
 }
 
