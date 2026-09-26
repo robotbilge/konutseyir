@@ -53,7 +53,7 @@ async function citySales(env,slug){
 
 async function districtSalesRanking(env,city){
  const allowed=new Set(['istanbul','ankara','izmir','adana','antalya','bursa','kocaeli','konya','gaziantep','trabzon','balikesir','mugla']);if(!allowed.has(city))return null;
- try{const {results=[]}=await env.DB.prepare('SELECT district_name districtName,period,total FROM district_sales WHERE city_slug=? AND period=(SELECT MAX(period) FROM district_sales WHERE city_slug=?) ORDER BY total DESC LIMIT 20').bind(city,city).all();return {city,period:results[0]?.period??null,items:results,status:results.length?'available':'unavailable',source:'TÜİK',sourceUrl:'https://veriportali.tuik.gov.tr/'};}catch{return {city,period:null,items:[],status:'unavailable',source:'TÜİK',sourceUrl:'https://veriportali.tuik.gov.tr/'};}
+ try{const {results=[]}=await env.DB.prepare('SELECT district_name districtName,period,total FROM district_sales WHERE city_slug=? AND period=(SELECT MAX(period) FROM district_sales WHERE city_slug=?) ORDER BY total DESC LIMIT 20').bind(city,city).all();return {city,period:results[0]?.period??null,items:results,status:results.length?'available':'unavailable',source:'TÜİK',sourceUrl:'https://veriportali.tuik.gov.tr/'};}catch(error){console.error('district-sales query failed',error);return {city,period:null,items:[],status:'error',message:'İlçe satış verisi sorgulanamadı.',source:'TÜİK',sourceUrl:'https://veriportali.tuik.gov.tr/'};}
 }
 
 async function listNews(env,url){
