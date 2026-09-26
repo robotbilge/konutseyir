@@ -7,6 +7,12 @@ import NetRent from '../app/hesaplama/net-kira/page';
 import SquareMeter from '../app/hesaplama/metrekare/page';
 import RealReturn from '../app/hesaplama/reel-getiri/page';
 import PurchaseCost from '../app/hesaplama/alim-maliyeti/page';
+import DeedFee from '../app/hesaplama/tapu-harci/page';
+import Commission from '../app/hesaplama/emlak-komisyonu/page';
+import RentIncrease from '../app/hesaplama/kira-artis-orani/page';
+import GoldProperty from '../app/hesaplama/altin-bazli-konut/page';
+import ShareTool from '../app/hesaplama/hisseli-tapu/page';
+
 import Compare from '../app/karsilastir/page';
 import Guides from '../app/rehber/page';
 import Guide from '../app/rehber/[slug]/page';
@@ -34,6 +40,11 @@ const fixed:Record<string,{component:any,title:string,description:string}>={
 '/hesaplama/metrekare':{component:SquareMeter,title:'Metrekare fiyatı hesaplama',description:'Satış fiyatı ve alan üzerinden konutun metrekare fiyatını hesaplayın.'},
 '/hesaplama/reel-getiri':{component:RealReturn,title:'Reel konut getirisi hesaplama',description:'Konut artışı ve net kirayı enflasyondan arındırarak reel getiriyi hesaplayın.'},
 '/hesaplama/alim-maliyeti':{component:PurchaseCost,title:'Konut alım maliyeti hesaplama',description:'Tapu, komisyon, tadilat ve kredi giderleri dahil toplam konut alım maliyetini hesaplayın.'},
+'/hesaplama/tapu-harci':{component:DeedFee,title:'Tapu harcı hesaplama 2026 | Alıcı ve satıcı masrafı',description:'Konut satışında alıcı ve satıcı için %2 tapu harcını ve döner sermaye bedelini hesaplayın.'},
+'/hesaplama/emlak-komisyonu':{component:Commission,title:'Emlakçı komisyonu hesaplama 2026 | KDV dahil',description:'Taşınmaz satışında yasal emlak danışmanı hizmet bedeli tavanını ve KDV dahil komisyonu hesaplayın.'},
+'/hesaplama/kira-artis-orani':{component:RentIncrease,title:'Kira artış oranı hesaplama 2026 | TÜFE kira zammı',description:'TÜFE 12 aylık ortalamaya göre konut kira artış tutarını ve yeni aylık kirayı hesaplayın.'},
+'/hesaplama/altin-bazli-konut':{component:GoldProperty,title:'Ev kaç gram altın ediyor? | Altın bazlı konut değeri',description:'Konut fiyatını güncel gram altın referansıyla karşılaştırın; evin kaç gram ve kaç kilo altın ettiğini görün.'},
+'/hesaplama/hisseli-tapu':{component:ShareTool,title:'Hisseli tapu ve miras payı hesaplama',description:'Tapudaki veya veraset ilamındaki pay/payda oranına göre matematiksel metrekare ve değer karşılığını hesaplayın.'},
 '/karsilastir':{component:Compare,title:'Ev, mevduat ve altın karşılaştırması',description:'Alım giderleri, kira, stopaj ve enflasyon dahil bir yıllık yatırım senaryosu.'},
 '/rehber':{component:Guides,title:'Konut satın alma ve yatırım rehberleri',description:'Kira çarpanı, net getiri, tapu ve maliyet konularında açıklamalar.'},
 '/sehirler':{component:Cities,title:'Şehir konut piyasaları',description:'Bölgesel konut verilerinin kapsamı ve resmî kaynakları.'},
