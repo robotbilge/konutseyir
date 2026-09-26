@@ -8,8 +8,10 @@ export const cityHousingSeries={
  bursa:{code:'TP.KFE.TR41',region:'Bursa, Eskişehir ve Bilecik'},
  kocaeli:{code:'TP.KFE.TR42',region:'Kocaeli, Sakarya, Düzce, Bolu ve Yalova'},
  konya:{code:'TP.KFE.TR52',region:'Konya ve Karaman'},
- gaziantep:{code:'TP.KFE.TRC1',region:'Gaziantep, Adıyaman ve Kilis'},
- trabzon:{code:'TP.KFE.TR90',region:'Trabzon, Ordu, Giresun, Rize, Artvin ve Gümüşhane'}
+ gaziantep:{code:'TP.KFE.TRC',region:'Gaziantep, Adıyaman, Kilis, Diyarbakır, Şanlıurfa, Batman, Mardin, Siirt ve Şırnak'},
+ trabzon:{code:'TP.KFE.TR9',region:'Trabzon, Ordu, Giresun, Rize, Artvin ve Gümüşhane'},
+ balikesir:{code:'TP.KFE.TR22',region:'Balıkesir ve Çanakkale'},
+ mugla:{code:'TP.KFE.TR32',region:'Aydın, Denizli ve Muğla'}
 };
 export function parseFX(xml){const date=xml.match(/Tarih="(\d{2})\.(\d{2})\.(\d{4})"/);if(!date)throw Error('TCMB tarih alanı bulunamadı');const period=`${date[3]}-${date[2]}-${date[1]}`;return ['USD','EUR'].map(code=>{const block=xml.match(new RegExp(`<Currency\\b[^>]*CurrencyCode="${code}"[\\s\\S]*?<\\/Currency>`))?.[0];const value=Number(block?.match(/<ForexSelling>([\d.]+)<\/ForexSelling>/)?.[1]),unit=Number(block?.match(/<Unit>(\d+)<\/Unit>/)?.[1]);if(!(value>0)||!(unit>0))throw Error('TCMB kur formatı tanınmadı');return {series:code.toLowerCase(),period,value:value/unit}})}
 function evdsPeriod(value,monthly=true){const text=String(value||'').trim();let m=text.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/);if(m)return `${m[1]}-${m[2].padStart(2,'0')}-${monthly?'01':(m[3]||'1').padStart(2,'0')}`;m=text.match(/^(\d{1,2})[-.](\d{1,2})[-.](\d{4})$/);return m?`${m[3]}-${m[2].padStart(2,'0')}-${monthly?'01':m[1].padStart(2,'0')}`:null}
