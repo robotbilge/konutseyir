@@ -2,7 +2,7 @@ import {useEffect,useState} from 'react';
 import {analyze,loan,termDeposit} from '../lib/finance.mjs';
 import {useMarketData} from './live-data';
 
-const initial={price:5000000,area:100,rent:30000,costs:200000,expenses:30000,tax:0,saleCosts:0,vacancy:1,inflation:30,growth:25,deposit:35,withholding:15,gold:30};
+const initial={price:5000000,area:100,rent:30000,costs:200000,expenses:30000,tax:0,saleCosts:0,vacancy:1,inflation:30,growth:25,deposit:39,withholding:17.5,gold:30};
 export const money=(n:number)=>new Intl.NumberFormat('tr-TR',{style:'currency',currency:'TRY',maximumFractionDigits:0}).format(n);
 const pct=(n:number)=>`%${n.toLocaleString('tr-TR',{maximumFractionDigits:2})}`;
 const tone=(n:number)=>n<0?'value-negative':n>0?'value-positive':'value-neutral';
@@ -56,11 +56,10 @@ function Comparison({r}:{r:any}){
 export function Calculator(){
   const[p,set]=useState(initial);
   const market=useMarketData(),liveDeposit=market.find(x=>x.series==='deposit');
-  useEffect(()=>{if(liveDeposit?.value!=null)set(x=>({...x,deposit:Number(liveDeposit.value)}))},[liveDeposit?.value]);
   const field=(k:keyof typeof initial,label:string,hint?:string)=><Input key={k} label={label} hint={hint} value={p[k]} onChange={v=>set(x=>({...x,[k]:v}))}/>;
   return <section id="analiz" className="calc-section main-calculator">
     <span id="kira-carpani" className="anchor-target" aria-hidden="true"/><span id="metrekare" className="anchor-target" aria-hidden="true"/>
-    <div className="calc-heading"><div><p className="eyebrow">İLANINIZI HESAPLAYIN</p><h2>Bu ev mantıklı mı?</h2></div><p>İlandaki bilgileri kullanın. Başlangıç değerleri örnek senaryodur; sonuç girdiğiniz rakamlarla anında güncellenir.</p></div>
+    <div className="calc-heading"><div><p className="eyebrow">İLANINIZI HESAPLAYIN</p><h2>Bu konut yatırım için mantıklı mı?</h2></div><p>İlandaki bilgileri kullanın. Başlangıç değerleri örnek senaryodur; sonuç girdiğiniz rakamlarla anında güncellenir.</p></div>
     <div className="calculator-layout">
       <div className="calc-panel">
         <h3 id="alim-masrafi"><span>01</span>Konut ve alım maliyeti</h3>
@@ -68,7 +67,7 @@ export function Calculator(){
         <h3 id="net-kira"><span>02</span>Net kira hesabı</h3>
         <div className="fields">{field('rent','Aylık kira (TL)')}{field('vacancy','Yılda boş kalan ay','0–12 ay.')}{field('expenses','Yıllık işletme gideri (TL)','Malik aidatı, bakım, sigorta; gelir vergisi hariç.')}{field('tax','Yıllık kira gelir vergisi (TL)','Kendi durumunuza göre hesaplanan tutar; 0 muafiyet anlamına gelmez.')}</div>
         <h3 id="reel-getiri"><span>03</span>Bir yıllık senaryo</h3>
-        <div className="fields">{field('growth','Konut fiyat değişimi (%)')}{field('inflation','Yıllık enflasyon (%)','Gelecek beklentiniz; geçmiş TÜFE tahmin değildir.')}{field('deposit','Yıllık brüt mevduat faizi (%)',liveDeposit?.value!=null?`TCMB haftalık ağırlıklı ortalama: %${Number(liveDeposit.value).toLocaleString('tr-TR',{maximumFractionDigits:2})} · ${liveDeposit.period}`:'Canlı TCMB verisi bekleniyor.')}{field('withholding','Mevduat stopajı (%)','Hesap türü, açılış tarihi ve vade için bankanızdan doğrulayın.')}{field('gold','Altın fiyat değişimi (%)','Alış/satış farkı dahil net beklentiniz.')}{field('saleCosts','Dönem sonu satış gideri (TL)','Satış varsayımında komisyon ve varsa vergiler.')}</div>
+        <div className="fields">{field('growth','Konut fiyat değişimi (%)')}{field('inflation','Yıllık enflasyon (%)','Gelecek beklentiniz; geçmiş TÜFE tahmin değildir.')}{field('deposit','Yıllık brüt mevduat faizi (%)',liveDeposit?.value!=null?`TCMB 3 aya kadar vadeli TL mevduat istatistiği: %${Number(liveDeposit.value).toLocaleString('tr-TR',{maximumFractionDigits:2})} · ${liveDeposit.period}. Hesap alanı banka teklifini temsil etmez; kendi oranınızı girin.`:'Canlı TCMB verisi bekleniyor.')}{field('withholding','Mevduat stopajı (%)','Hesap türü, açılış tarihi ve vade için bankanızdan doğrulayın.')}{field('gold','Altın fiyat değişimi (%)','Alış/satış farkı dahil net beklentiniz.')}{field('saleCosts','Dönem sonu satış gideri (TL)','Satış varsayımında komisyon ve varsa vergiler.')}</div>
         <button className="secondary" onClick={()=>set(initial)}>Örneğe sıfırla</button>
       </div>
       <div className="calc-results" aria-live="polite">
