@@ -9,6 +9,8 @@ export const cities=[
  {slug:"konya",name:"Konya",region:"Konya ve Karaman",note:"Geniş şehir yapısı nedeniyle merkez ilçeler ve çevre bölgeler aynı fiyat dinamiğine sahip değildir."},
  {slug:"gaziantep",name:"Gaziantep",region:"Gaziantep, Adıyaman ve Kilis",note:"Nüfus, sanayi ve yeniden yapılaşma göstergeleri satış adediyle birlikte okunmalıdır."},
  {slug:"trabzon",name:"Trabzon",region:"Trabzon, Ordu, Giresun, Rize, Artvin ve Gümüşhane",note:"Topoğrafya, ulaşım ve yabancı talebi mikro konum farklarını büyütebilir."},
+ {slug:"balikesir",name:"Balıkesir",region:"Balıkesir ve Çanakkale",note:"Kıyı ilçeleri ile merkez ve iç kesimlerdeki konut talebi farklı dinamiklerle hareket eder."},
+ {slug:"mugla",name:"Muğla",region:"Aydın, Denizli ve Muğla",note:"Turizm ve ikinci konut talebi nedeniyle kıyı ilçeleri ile merkez ilçeler ayrı değerlendirilmelidir."},
 ] as const;
 
 export const guides=[
@@ -115,6 +117,8 @@ export const guideExpansions:Record<string,GuideSection[]>={
   {heading:"Yıllık değişimi doğru karşılaştırın",paragraphs:["Yıllık değişim son endeks değerinin tam 12 ay önceki aynı seri değerine oranıyla hesaplanmalıdır. Eksik ayı sıfır kabul etmek veya bir önceki mevcut kayıtla karşılaştırmak yanlış sonuç üretir.","Nominal KFE artışı satın alma gücü artışı değildir. Aynı dönem TÜFE ile reel değişim, kira dahil toplam yatırım getirisiyle de nakit akışı ayrı hesaplanmalıdır."],bullets:["Seri kapsamını okuyun.","Aynı ayın 12 ay önceki değerini kullanın.","Yayın dönemi ile çekim saatini ayırın.","Tek konut değeri üretmeyin."]},
   {heading:"İlan kararında nasıl kullanılır?",paragraphs:["Endeks, satıcının istediği fiyatı doğrulamaz. İlanın önceki fiyatı biliniyorsa bölgesel eğilim bağlam sağlar; ancak bina yaşı, mikro konum, tadilat ve hukuki durum farklı sonucu açıklayabilir.","KonutSeyir veri bulunmadığında örnek canlı değer göstermez; eski veya eksik kayıt durumunu açıkça etiketler. Teklif için endeksi yerel emsal, kira çarpanı ve teknik-hukuki kontrollerle birlikte kullanın."]}
  ]
+ balikesir:{title:"Balıkesir için değerlendirme",paragraphs:["Balıkesir’de merkez, körfez ve kıyı ilçelerinin kullanım amacı ve talep yapısı farklıdır. TCMB bölgesel KFE serisi Balıkesir ve Çanakkale’yi birlikte kapsar; tek bir ilçenin fiyatı gibi okunmamalıdır.","Kıyı bölgelerinde sezonluk ve ikinci konut talebi ile yıl boyu yerleşik talebi ayırın. Yerel kira emsali, bina niteliği ve ulaşım koşullarını bölgesel fiyat eğilimiyle birlikte değerlendirin."],checks:["Kıyı ve merkez talebini ayırın","Yıl boyu kiralanabilirliği kontrol edin","Yerel emsalleri bölgesel endeksle birlikte okuyun"]},
+ mugla:{title:"Muğla için değerlendirme",paragraphs:["Muğla’da Bodrum, Fethiye, Marmaris ve merkez gibi alt pazarlar birbirinden belirgin biçimde ayrılır. TCMB bölgesel KFE serisi Aydın, Denizli ve Muğla’yı birlikte kapsadığı için tek bir ilçenin değerini temsil etmez.","Turizm ve ikinci konut talebi fiyat ve kirada mevsimsellik yaratabilir. Yıllık getiri hesabında sezonluk yüksek kira düzeyini on iki aya otomatik yaymayın."],checks:["Sezonluk ve sürekli talebi ayırın","Yıllık doluluk varsayımını test edin","İlçe bazında yerel kira ve satış emsali kullanın"]}
 };
 
 export const cityEvaluations:Record<string,{title:string;paragraphs:string[];checks:string[]}>= {
