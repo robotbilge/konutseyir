@@ -9,9 +9,9 @@ export function useMarketData(){
 }
 const pct=(value:number|null)=>value==null?'—':`%${value.toLocaleString('tr-TR',{maximumFractionDigits:2})}`;
 export function MarketSnapshot(){
- const data=useMarketData(),housing=data.find(x=>x.series==='housing'),cpi=data.find(x=>x.series==='cpi');
+ const data=useMarketData(),policy=data.find(x=>x.series==='policy'),housing=data.find(x=>x.series==='housing'),cpi=data.find(x=>x.series==='cpi');
  const cards=[
-  {icon:Percent,label:'TCMB politika faizi',value:'%37',detail:'10 Eylül 2026'},
+  {icon:Percent,label:'TCMB politika faizi',value:pct(policy?.value??null),detail:policy?.period||'Veri bekleniyor'},
   {icon:BarChart3,label:'Konut fiyatı yıllık değişim',value:pct(housing?.annualChange??null),detail:housing?.period||'Veri bekleniyor'},
   {icon:Landmark,label:'TÜFE yıllık değişim',value:pct(cpi?.annualChange??null),detail:cpi?.period||'Veri bekleniyor'}
  ];
