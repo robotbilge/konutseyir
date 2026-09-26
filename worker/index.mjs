@@ -51,6 +51,11 @@ async function citySales(env,slug){
  return {...latest,slug,status:'available',monthlyChange:change(priorMonth),annualChange:change(priorYear),history:results.slice(0,13).reverse().map(row=>({period:row.period,total:row.total,mortgaged:row.mortgaged,firstSale:row.firstSale,secondHand:row.secondHand})),source:'TÜİK',sourceUrl:'https://veriportali.tuik.gov.tr/tr/databrowser/tuik/categories/9/9_4/TR,DF_SATIS_SEKLI_DURUMU_ILILCE_V3,1.0'};
 }
 
+async function districtSalesRanking(env,city){
+ const allowed=new Set(['istanbul','ankara','izmir','adana','antalya','bursa','kocaeli','konya','gaziantep','trabzon','balikesir','mugla']);if(!allowed.has(city))return null;
+ try{const {results=[]}=await env.DB.prepare('SELECT district_name districtName,period,total FROM district_sales WHERE city_slug=? AND period=(SELECT MAX(period) FROM district_sales WHERE city_slug=?) ORDER BY total DESC LIMIT 20').bind(city,city).all();return {city,period:results[0]?.period??null,items:results,status:results.length?'available':'unavailable',source:'TÜİK',sourceUrl:'https://veriportali.tuik.gov.tr/'};}catch{return {city,period:null,items:[],status:'unavailable',source:'TÜİK',sourceUrl:'https://veriportali.tuik.gov.tr/'};}
+}
+
 async function listNews(env,url){
  const count=(await env.DB.prepare('SELECT COUNT(*) count FROM news').first())?.count||0;
  let {results:states=[]}=await env.DB.prepare("SELECT series,state,attempted_at attemptedAt FROM source_status WHERE series LIKE 'news:%'").all();
@@ -108,6 +113,7 @@ export default {
    if(path.startsWith('/api/news/')){const slug=decodeURIComponent(path.slice('/api/news/'.length));const item=await env.DB.prepare('SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,NULL imageUrl FROM news WHERE slug=?').bind(slug).first();return item?json(item):json({error:'Haber bulunamadı'},404)}
    if(path==='/api/city-market'){const item=await cityMarket(env,url.searchParams.get('slug')||'');return item?json(item):json({error:'Bilinmeyen şehir'},404)}
    if(path==='/api/city-sales'){const item=await citySales(env,url.searchParams.get('slug')||'');return item?json(item):json({error:'Bilinmeyen şehir'},404)}
+   if(path==='/api/district-sales'){const item=await districtSalesRanking(env,url.searchParams.get('city')||'');return item?json(item):json({error:'Bilinmeyen şehir'},404)}
    if(path==='/api/history'){const series=url.searchParams.get('series');if(!Object.hasOwn(definitions,series))return json({error:'Unknown series'},400);const {results}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 60').bind(series).all();return json({series,source:definitions[series],observations:results.reverse()})}
    if(path==='/api/market-data'){const data=[];for(const series of Object.keys(definitions)){let {results}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 400').bind(series).all();if(!results.length&&series==='policy'&&env.EVDS_API_KEY){await refreshSeries(env,'policy',env.EVDS_POLICY_SERIES,1);({results}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 400').bind(series).all())}const s=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind(series).first();data.push(observation(series,results,s))}return json({generatedAt:new Date().toISOString(),data})}
    return json({error:'Not found'},404);
