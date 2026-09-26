@@ -12,6 +12,7 @@ import Commission from '../app/hesaplama/emlak-komisyonu/page';
 import RentIncrease from '../app/hesaplama/kira-artis-orani/page';
 import GoldProperty from '../app/hesaplama/altin-bazli-konut/page';
 import ShareTool from '../app/hesaplama/hisseli-tapu/page';
+import Tools from '../app/hesaplama/page';
 
 import Compare from '../app/karsilastir/page';
 import Guides from '../app/rehber/page';
@@ -32,6 +33,7 @@ import {guides,cities} from '../lib/content';
 import {Header,Footer} from '../components/site-chrome';
 const fixed:Record<string,{component:any,title:string,description:string}>={
 '/':{component:Home,title:'KonutSeyir | Net kira, kredi ve reel konut getirisi',description:'Net kira gelirini TL ve yüzde olarak hesaplayın. Stopaj sonrası mevduat, konut ve altını aynı sermayeyle karşılaştırın.'},
+'/hesaplama':{component:Tools,title:'Konut hesaplama araçları | Kira, tapu, m² ve maliyet',description:'Kira çarpanı, net kira, metrekare fiyatı, alım maliyeti, tapu harcı, emlak komisyonu, kira artışı ve diğer konut hesaplama araçlarını seçin.'},
 '/ev-analizi':{component:HomeAnalysis,title:'Konut yatırım analizi ve kira çarpanı hesaplama',description:'Konutun net kira getirisini, amortisman süresini, metrekare fiyatını, alım maliyetini ve reel yatırım getirisini hesaplayın.'},
 '/kredi-hesaplama':{component:LoanCalculator,title:'Konut kredisi toplam maliyet hesaplama',description:'Aylık taksit, toplam geri ödeme, faiz ve ek kredi giderlerini hesaplayın.'},
 '/resmi-kontroller':{component:OfficialChecks,title:'Ev almadan önce resmî kontroller',description:'Tapu, parsel, deprem tehlikesi ve satın alma kontrol adımlarına ulaşın.'},
