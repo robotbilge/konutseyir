@@ -51,6 +51,6 @@ export function DistrictSalesRanking({city}:{city:string}){
  useEffect(()=>{const controller=new AbortController();fetch(`/api/district-sales?city=${encodeURIComponent(city)}`,{signal:controller.signal}).then(r=>r.ok?r.json():Promise.reject()).then(setData).catch(()=>setData({status:'unavailable',items:[]}));return()=>controller.abort()},[city]);
  if(!data)return <span className="data-loading">İlçe satış sıralaması yükleniyor…</span>;
  if(data.status==='error')return <p className="waiting">İlçe satış verisi şu anda sorgulanamadı.</p>;
- if(data.status!=='available'||!data.items?.length)return <p className="waiting">Bu şehir için doğrulanmış ilçe satış kaydı henüz bulunmuyor.</p>;
+ if(data.status!=='available'||!data.items?.length)return <div className="district-data-note"><b>{city[0].toLocaleUpperCase('tr-TR')+city.slice(1)} il satış verisi mevcut.</b><p>Ancak TÜİK API akışında bu şehir için doğrulanmış ilçe kırılımı bulunmuyor. Yukarıdaki “Satış hareketi” kartı il toplamını göstermeye devam eder; burada tahmini ilçe sıralaması üretilmez.</p></div>;
  return <div className="district-ranking"><ol>{data.items.map((x:any,index:number)=><li key={x.districtName}><span><b>{index+1}. {x.districtName}</b><small>{data.period}</small></span><strong>{Number(x.total).toLocaleString('tr-TR')} satış</strong></li>)}</ol><small>Kaynak: TÜİK Konut ve İş Yeri Satış İstatistikleri. Sıralama son mevcut dönemin ilçe satış adedine göredir.</small></div>;
 }
