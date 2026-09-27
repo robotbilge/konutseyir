@@ -13,6 +13,11 @@ export const cityHousingSeries={
  balikesir:{code:'TP.KFE.TR22',region:'Balıkesir ve Çanakkale'},
  mugla:{code:'TP.KFE.TR32',region:'Aydın, Denizli ve Muğla'}
 };
+export function goldPrice(payload){
+ const gram=Number(payload?.price?.gram??payload?.gram);
+ if(!Number.isFinite(gram)||gram<=0)throw Error('AltınSeyir gram fiyatı geçersiz');
+ return {gram,recordedAt:payload?.price?.recorded_at??payload?.recordedAt??null};
+}
 export function parseFX(xml){const date=xml.match(/Tarih="(\d{2})\.(\d{2})\.(\d{4})"/);if(!date)throw Error('TCMB tarih alanı bulunamadı');const period=`${date[3]}-${date[2]}-${date[1]}`;return ['USD','EUR'].map(code=>{const block=xml.match(new RegExp(`<Currency\\b[^>]*CurrencyCode="${code}"[\\s\\S]*?<\\/Currency>`))?.[0];const value=Number(block?.match(/<ForexSelling>([\d.]+)<\/ForexSelling>/)?.[1]),unit=Number(block?.match(/<Unit>(\d+)<\/Unit>/)?.[1]);if(!(value>0)||!(unit>0))throw Error('TCMB kur formatı tanınmadı');return {series:code.toLowerCase(),period,value:value/unit}})}
 function evdsPeriod(value,monthly=true){const text=String(value||'').trim();let m=text.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?$/);if(m)return `${m[1]}-${m[2].padStart(2,'0')}-${monthly?'01':(m[3]||'1').padStart(2,'0')}`;m=text.match(/^(\d{1,2})[-.](\d{1,2})[-.](\d{4})$/);return m?`${m[3]}-${m[2].padStart(2,'0')}-${monthly?'01':m[1].padStart(2,'0')}`:null}
 export function parseEVDS(payload,code,series){if(!Array.isArray(payload.items))throw Error('EVDS yanıtı tanınmadı');const key=code.replaceAll('.','_');return payload.items.flatMap(row=>{const period=evdsPeriod(row.Tarih,!series.startsWith('deposit'));const raw=row[key];if(!period||raw==null||raw==='')return [];const value=Number(String(raw).replace(',','.'));if(!Number.isFinite(value))return [];return [{series,period,value}]})}

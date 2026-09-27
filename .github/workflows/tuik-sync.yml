@@ -64,4 +64,10 @@ jobs:
       - name: TÜİK verisini doğrula ve SQL hazırla
         run: node scripts/sync-tuik.mjs
       - name: Doğrulanmış satışları D1'e yaz
-        run: pnpm exec wrangler d1 execute konutseyir-data --remote --config worker/wrangler.jsonc --file tuik-city-sales.sql
+        run: |
+          pnpm exec wrangler d1 execute konutseyir-data --remote --config worker/wrangler.jsonc --file tuik-city-sales.sql
+          if [ -s tuik-district-sales.sql ]; then
+            pnpm exec wrangler d1 execute konutseyir-data --remote --config worker/wrangler.jsonc --file tuik-district-sales.sql
+          else
+            echo "TÜİK yanıtında ilçe kaydı bulunmadı; mevcut ilçe verileri korunuyor."
+          fi

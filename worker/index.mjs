@@ -1,4 +1,4 @@
-import {definitions,cityHousingSeries,parseFX,parseEVDS,observation,yearChange} from './data.mjs';
+import {definitions,cityHousingSeries,goldPrice,parseFX,parseEVDS,observation,yearChange} from './data.mjs';
 import {isRelevantNews,newsFeeds,refreshNews} from './news.mjs';
 
 const json=(data,status=200,cache='public, max-age=300')=>Response.json(data,{status,headers:{'Cache-Control':cache,'X-Content-Type-Options':'nosniff'}});
@@ -101,11 +101,10 @@ export default {
    if(path==='/api/health'){await env.DB.prepare('SELECT 1 FROM observations LIMIT 1').first();const {results:newsSources=[]}=await env.DB.prepare("SELECT series,state,attempted_at attemptedAt FROM source_status WHERE series LIKE 'news:%'").all(),newsLatest=await env.DB.prepare('SELECT MAX(published_at) latestPublishedAt,MAX(created_at) lastImportedAt FROM news').first();return json({service:'KonutSeyir',status:'ok',configured:{fx:true,evds:!!env.EVDS_API_KEY,tuik:!!env.TUIK_API_KEY,news:true,push:!!(env.VAPID_PUBLIC_KEY&&env.VAPID_PRIVATE_KEY)},news:{sources:newsSources,...newsLatest},note:'Service health does not guarantee source freshness'})}
    if(path==='/api/gold-price'){
     try{
-     const upstream=await fetch('https://altinseyir.com/api/prices',{headers:{Accept:'application/json','User-Agent':'KonutSeyir/1.0'}});
+     const upstream=await fetch('https://api.altinseyir.com/api/prices',{headers:{Accept:'application/json','User-Agent':'KonutSeyir/1.0'},signal:AbortSignal.timeout(12000)});
      if(!upstream.ok)throw new Error('UPSTREAM_'+upstream.status);
-     const payload=await upstream.json(),gram=Number(payload?.price?.gram);
-     if(!Number.isFinite(gram)||gram<=0)throw new Error('INVALID_GRAM');
-     return json({gram,recordedAt:payload?.price?.recorded_at||null,source:'AltınSeyir',sourceUrl:'https://altinseyir.com/'},200,'public, max-age=60');
+     const price=goldPrice(await upstream.json());
+     return json({...price,source:'AltınSeyir',sourceUrl:'https://altinseyir.com/',apiSource:'https://api.altinseyir.com/api/prices'},200,'public, max-age=60');
     }catch{return json({status:'unavailable',error:'Altın fiyatı geçici olarak alınamıyor'},503,'no-store')}
    }
    if(path==='/api/push/config')return json({publicKey:env.VAPID_PUBLIC_KEY||null,configured:!!(env.VAPID_PUBLIC_KEY&&env.VAPID_PRIVATE_KEY)},200,'no-store');
