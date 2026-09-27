@@ -1,4 +1,4 @@
-export const cityCodes={TR100:'istanbul',TR510:'ankara',TR310:'izmir',TR621:'adana',TR611:'antalya',TR411:'bursa',TR421:'kocaeli',TR521:'konya',TRC11:'gaziantep',TR901:'trabzon'};
+export const cityCodes={TR100:'istanbul',TR510:'ankara',TR310:'izmir',TR621:'adana',TR611:'antalya',TR411:'bursa',TR421:'kocaeli',TR521:'konya',TRC11:'gaziantep',TR901:'trabzon',TR221:'balikesir',TR323:'mugla'};
 
 function csvLine(line){
  const values=[];let value='',quoted=false;
@@ -22,3 +22,11 @@ export function salesSql(rows){
  const q=value=>`'${String(value).replaceAll("'","''")}'`;
  return rows.map(row=>`INSERT INTO city_sales(city_slug,period,total,mortgaged,first_sale,second_hand,retrieved_at) VALUES(${q(row.citySlug)},${q(row.period)},${row.total},${row.mortgaged},${row.firstSale},${row.secondHand},${q(row.retrievedAt)}) ON CONFLICT(city_slug,period) DO UPDATE SET total=excluded.total,mortgaged=excluded.mortgaged,first_sale=excluded.first_sale,second_hand=excluded.second_hand,retrieved_at=excluded.retrieved_at;`).join('\n');
 }
+
+
+export function parseTuikDistrictSales(csv,retrievedAt=new Date().toISOString()){
+ const lines=String(csv).replace(/^\uFEFF/,'').split(/\r?\n/).filter(Boolean);if(lines.length<2)throw Error('TÜİK ilçe CSV boş');
+ const header=csvLine(lines[0]),required=['REF_AREA','INDICATOR','TIME_PERIOD','OBS_VALUE'];if(required.some(key=>!header.includes(key)))throw Error('TÜİK ilçe CSV sütunları değişti');
+ const rows=[];for(const line of lines.slice(1)){const values=csvLine(line),row=Object.fromEntries(header.map((key,index)=>[key,values[index]??'']));if(row.INDICATOR!=='MII_KSS'||!/^\d{4}-\d{2}$/.test(row.TIME_PERIOD))continue;const total=Number(row.OBS_VALUE);if(!Number.isInteger(total)||total<0)continue;const districtName=String(row.REF_AREA_NAME||row.REF_AREA_TR||row.REF_AREA_LABEL||'').trim(),citySlug=String(row.CITY_SLUG||'').trim();if(!districtName||!citySlug)continue;rows.push({citySlug,districtName,period:row.TIME_PERIOD,total,retrievedAt})}return rows;
+}
+export function districtSalesSql(rows){const q=value=>`'${String(value).replaceAll("'","''")}'`;return rows.map(row=>`INSERT INTO district_sales(city_slug,district_name,period,total,retrieved_at) VALUES(${q(row.citySlug)},${q(row.districtName)},${q(row.period)},${row.total},${q(row.retrievedAt)}) ON CONFLICT(city_slug,district_name,period) DO UPDATE SET total=excluded.total,retrieved_at=excluded.retrieved_at;`).join('\n')}
