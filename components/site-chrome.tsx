@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {Building2,Menu,X,ArrowUpRight,ArrowLeft} from "lucide-react";
+import {Building2,Menu,X,ArrowUpRight,ArrowLeft,Coins} from "lucide-react";
 
 const navItems=[
  ["Konut Analizi","/ev-analizi"],
@@ -17,7 +17,7 @@ export function Header({back=false}:{back?:boolean}){
    <a className="brand" href="/" aria-label="KonutSeyir ana sayfa"><span><Building2 size={20}/></span><span>Konut<b>Seyir</b></span></a>
    <button className="menu-button" type="button" aria-label={open?"Menüyü kapat":"Menüyü aç"} aria-expanded={open} onClick={()=>setOpen(v=>!v)}>{open?<X/>:<Menu/>}</button>
    <nav className={open?"open":""} aria-label="Ana menü">{navItems.map(([label,href])=><a key={href} href={href} onClick={()=>setOpen(false)}>{label}</a>)}</nav>
-   <a className="header-cta" href="/ev-analizi">Konutunu analiz et <ArrowUpRight size={16}/></a>
+   <a className="network-link" href="https://altinseyir.com/" target="_blank" rel="noopener noreferrer" title="Altın fiyatları ve altın hesaplamaları"><Coins size={16}/> AltınSeyir <ArrowUpRight size={14}/></a><a className="header-cta" href="/ev-analizi">Konutunu analiz et <ArrowUpRight size={16}/></a>
   </div>
   {back&&<div className="backbar"><button className="header-back" type="button" onClick={()=>{if(history.length>1)history.back();else location.assign('/')}}><ArrowLeft size={18}/> Geri</button></div>}
  </header>
@@ -37,7 +37,7 @@ export function Footer(){return <footer className="site-footer">
   </div>
  </div>
  <div className="network-strip">
-  <div><strong>konutseyir.com</strong><a href="https://altinseyir.com/" target="_blank" rel="noopener noreferrer">altinseyir.com <ArrowUpRight size={14}/></a></div>
+  <div><strong>konutseyir.com</strong><a className="network-gold-link" href="https://altinseyir.com/" target="_blank" rel="noopener noreferrer"><Coins size={16}/> AltınSeyir.com · Altın fiyatları ve araçları <ArrowUpRight size={14}/></a></div>
   <p>KonutSeyir ve AltınSeyir aynı bağımsız yayın ağı tarafından sunulur. KonutSeyir konut maliyeti, kira ve yatırım karşılaştırmalarına; AltınSeyir altın verileri ve hesaplamalarına odaklanır.</p>
  </div>
  <div className="footer-bottom"><small>© 2026 KonutSeyir</small><nav aria-label="Alt bağlantılar"><a href="/yayin-ilkeleri">Hesaplama yöntemi</a><a href="/veri">Veri kaynakları</a><a href="/gizlilik">Gizlilik</a><a href="/cerez-politikasi">Çerezler</a><a href="/kullanim-kosullari">Kullanım koşulları</a></nav><span>Yatırım tavsiyesi değildir.</span></div>
