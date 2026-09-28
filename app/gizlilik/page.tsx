@@ -2,7 +2,7 @@ import {InfoPage} from '../../components/info-page';
 
 export default function Privacy(){
  return <InfoPage eyebrow="GİZLİLİK" title="Gizlilik politikası">
-  <p><b>Son güncelleme: 21 Eylül 2026.</b> Bu politika, KonutSeyir’i kullandığınızda hangi verilerin hangi amaçlarla işlendiğini açıklar.</p>
+  <p><b>Son güncelleme: 28 Eylül 2026.</b> Bu politika, KonutSeyir’i kullandığınızda hangi verilerin hangi amaçlarla işlendiğini açıklar.</p>
   <p>Hesaplayıcıya girilen tutarlar ve kontrol listesi seçimleri tarayıcı belleğinde işlenir; sunucuya gönderilmez. Sayfa yenilendiğinde sıfırlanır. Kullanıcı hesabı veya kişisel ilan kaydı oluşturulmaz.</p>
   <p>Veri sayfası kamu verilerini almak için KonutSeyir API’sine istek gönderir. Sunucu veri tabanında kamuya açık ekonomik gözlemler ve veri çekim zamanları saklanır.</p>
   <p>Emlak haberi bildirimi yalnızca açık izninizle etkinleşir. Bildirim aboneliğinin teknik uç noktası ve şifreleme anahtarları bildirim göndermek için saklanır; bildirimleri kapattığınızda abonelik kaydı silinir. Haberlerde başlık, kısa özet, yayın tarihi ve özgün kaynak bağlantısı tutulur.</p>

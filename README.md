@@ -86,7 +86,11 @@ Konut + net kira, dönem sonu satış gideri sonrası değerle karşılaştırı
 
 ## Yayın sonrası
 
-Önce gerçek EVDS yanıtlarını kaynak ekranındaki dönem/birimlerle karşılaştırın. İletişim e-postasını test edin. Arama konsoluna sitemap ekleyin. Reklam/analiz kodu bu pakette yoktur; AdSense onayı garanti edilmez. Reklam eklemeden önce yayıncı bilgileri, gerekli gizlilik/tercih akışları ve içerik editör kontrolü tamamlanmalıdır.
+Önce gerçek EVDS yanıtlarını kaynak ekranındaki dönem/birimlerle karşılaştırın. İletişim e-postasını test edin. Arama konsoluna sitemap ekleyin. AdSense onayı garanti edilmez.
+
+### AdSense yayına alma
+
+Derleme, aynı yayın ağındaki AltınSeyir’in canlı `ads.txt` kaydında doğrulanan `pub-1047230012085801` kimliğiyle doğrulama meta etiketini, resmî AdSense betiğini ve `ads.txt` kaydını otomatik üretir. Hesap değişirse GitHub Actions/production ortamındaki `ADSENSE_PUBLISHER_ID` değişkenini yeni `pub-` ile başlayan 16 haneli yayıncı kimliğine ayarlayın. AdSense Gizlilik ve mesajlaşma bölümünde AEA, Birleşik Krallık ve İsviçre için Google sertifikalı CMP mesajını yayımlayın ve canlı `/ads.txt` adresini kontrol edin.
 
 ## Kaynaklar
 

@@ -1,7 +1,7 @@
 import {InfoPage} from '../../components/info-page';
 
 export default function CookiePolicy(){return <InfoPage eyebrow="ÇEREZLER" title="Çerez politikası">
- <p><b>Son güncelleme: 21 Eylül 2026.</b> Çerezler ve benzeri teknolojiler, tarayıcıda bilgi saklayan veya daha önce saklanan bilgiyi okuyan küçük teknik kayıtlardır.</p>
+ <p><b>Son güncelleme: 28 Eylül 2026.</b> Çerezler ve benzeri teknolojiler, tarayıcıda bilgi saklayan veya daha önce saklanan bilgiyi okuyan küçük teknik kayıtlardır.</p>
  <h2>Zorunlu teknolojiler</h2>
  <p>Güvenlik, trafik yönlendirme ve hizmetin çalışması için barındırma sağlayıcısı teknik kayıtlar oluşturabilir. Web Push tercihi, servis çalışanı ve ana ekrana ekleme işlevleri cihazınızda teknik veri tutabilir. Bunlar reklam profili oluşturmak amacıyla kullanılmaz.</p>
  <h2>Tercih ve işlevsellik</h2>
