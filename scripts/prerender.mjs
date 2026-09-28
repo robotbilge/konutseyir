@@ -6,7 +6,7 @@ const base='https://konutseyir.com',template=await readFile('dist/index.html','u
 const publisherId=(process.env.ADSENSE_PUBLISHER_ID||'pub-1047230012085801').trim();
 if(publisherId&&!/^pub-\d{16}$/.test(publisherId))throw Error('ADSENSE_PUBLISHER_ID, pub- ile başlayan 16 haneli yayıncı kimliği olmalıdır.');
 const adsenseHead=publisherId?`<meta name="google-adsense-account" content="ca-${publisherId}"/><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-${publisherId}" crossorigin="anonymous"></script>`:'';
-const analyticsHead='<script defer src="/analytics.js" data-measurement-id="G-RC6GFQ86P6"></script>';
+const analyticsHead='<script src="/analytics.js?v=consent-1" data-measurement-id="G-RC6GFQ86P6" data-consent-key="ks_analytics_consent" data-policy-url="/cerez-politikasi"></script>';
 const esc=s=>s.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
 const label=part=>decodeURIComponent(part).replaceAll('-',' ').replace(/(^|\s)\S/g,c=>c.toLocaleUpperCase('tr-TR'));
 const jsonLd=(path,m)=>{
@@ -21,3 +21,4 @@ await writeFile('dist/sitemap.xml',`<?xml version="1.0" encoding="UTF-8"?><urlse
 if(publisherId)await writeFile('dist/ads.txt',`google.com, ${publisherId}, DIRECT, f08c47fec0942fa0\n`);
 else await rm('dist/ads.txt',{force:true});
 console.log(`Prerendered ${paths.length} pages plus 404`);
+

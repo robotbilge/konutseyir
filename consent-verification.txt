@@ -1,0 +1,26 @@
+PASS altin first visit / default denied / no tag
+PASS altin reject / persistence / refresh / navigation
+PASS altin accept / one tag / one config / reopen
+PASS altin withdraw / disable / clean cookies / reload
+PASS altin invalid preference shows banner
+PASS altin localStorage unavailable / cookie fallback
+PASS altin script in head / DOMContentLoaded
+PASS altin cross tab withdrawal
+PASS altin cross tab grant and reset
+PASS altin duplicate script initialization
+PASS konut first visit / default denied / no tag
+PASS konut reject / persistence / refresh / navigation
+PASS konut accept / one tag / one config / reopen
+PASS konut withdraw / disable / clean cookies / reload
+PASS konut invalid preference shows banner
+PASS konut localStorage unavailable / cookie fallback
+PASS konut script in head / DOMContentLoaded
+PASS konut cross tab withdrawal
+PASS konut cross tab grant and reset
+PASS konut duplicate script initialization
+PASS legacy necessary preserved / legacy all not misread as Analytics consent
+PASS both sites use byte-identical consent engine and CSS
+PASS 58 Altin pages have one configured synchronous tag and preference link
+PASS old Altin consent removed / Konut component does not create second popup
+PASS button interaction and color rules explicitly scoped
+25 checks passed. Node VM + static checks; not browser tests.

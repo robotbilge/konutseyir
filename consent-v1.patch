@@ -1,0 +1,208 @@
+--- a/public/analytics.js
++++ b/public/analytics.js
+@@ -1,22 +1,123 @@
++/* Seyir Analytics Consent 1.0 — shared by AltinSeyir and KonutSeyir. */
+ (function () {
+-  var measurementId = document.currentScript && document.currentScript.dataset.measurementId;
+-  var loaded = false;
++  'use strict';
++  if (window.SeyirConsent) return;
++  var tag = document.currentScript;
++  var id = tag && tag.dataset.measurementId;
++  var key = tag && tag.dataset.consentKey;
++  var policy = tag && tag.dataset.policyUrl;
++  if (!id || !key) return; // Fail closed if integration configuration is missing.
++  var loaded = false, choice = null, banner = null, opener = null;
++  var denied = {analytics_storage:'denied',ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied'};
++  window.dataLayer = window.dataLayer || [];
++  window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
++  window['ga-disable-' + id] = true;
++  window.gtag('consent', 'default', denied);
+ 
+-  window.ksEnableAnalytics = function () {
+-    if (loaded || !measurementId) return;
++  function valid(value) { return value === 'granted' || value === 'denied' ? value : null; }
++  function read() {
++    var value = null;
++    try { value = valid(localStorage.getItem(key)); } catch (_) {}
++    if (value) return value;
++    try {
++      var part = document.cookie.split('; ').find(function (c) { return c.indexOf(key + '=') === 0; });
++      if (part) value = valid(decodeURIComponent(part.slice(key.length + 1)));
++    } catch (_) {}
++    // The former AltinSeyir 'all' button described future advertising consent,
++    // not Analytics. Keep that record intact; do not invent Analytics consent.
++    if (!value && key === 'altinseyir_analytics_consent') {
++      try { if (JSON.parse(localStorage.getItem('altinseyir_consent_v2') || 'null')?.choice === 'necessary') value = 'denied'; } catch (_) {}
++    }
++    return value;
++  }
++  function save(value) {
++    try { localStorage.setItem(key, value); } catch (_) {}
++    try { document.cookie = key + '=' + value + '; Path=/; Max-Age=31536000; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : ''); } catch (_) {}
++  }
++  function clearAnalyticsCookies() {
++    var names;
++    try { names = document.cookie.split(';').map(function (c) { return c.trim().split('=')[0]; }).filter(function (n) { return /^(_ga(?:_|$)|_gid$|_gat(?:_|$))/.test(n); }); } catch (_) { return; }
++    var domains = [''], host = location.hostname.split('.');
++    while (host.length > 1) { domains.push(host.join('.'), '.' + host.join('.')); host.shift(); }
++    var paths = ['/'], parts = location.pathname.split('/').filter(Boolean), path = '';
++    parts.forEach(function (part) { path += '/' + part; paths.push(path, path + '/'); });
++    names.forEach(function (name) { domains.forEach(function (domain) { paths.forEach(function (p) {
++      document.cookie = name + '=; Max-Age=0; Path=' + p + (domain ? '; Domain=' + domain : '') + '; SameSite=Lax';
++    }); }); });
++  }
++  function enable() {
++    if (choice !== 'granted' || loaded) return;
++    window['ga-disable-' + id] = false;
++    window.gtag('consent', 'update', {analytics_storage:'granted',ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied'});
+     loaded = true;
+-    window.dataLayer = window.dataLayer || [];
+-    window.gtag = function () { window.dataLayer.push(arguments); };
+     window.gtag('js', new Date());
+-    window.gtag('config', measurementId, { anonymize_ip: true });
++    window.gtag('config', id, {allow_google_signals:false,allow_ad_personalization_signals:false});
+     var script = document.createElement('script');
+-    script.async = true;
+-    script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(measurementId);
++    script.id = 'seyir-ga-tag'; script.async = true;
++    script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(id);
+     document.head.appendChild(script);
+-  };
+-
+-  try {
+-    if (localStorage.getItem('ks_analytics_consent') === 'granted') window.ksEnableAnalytics();
+-  } catch (_) {}
++  }
++  function close() {
++    if (banner) banner.remove();
++    banner = null;
++    if (opener && opener.isConnected) opener.focus();
++    opener = null;
++  }
++  function choose(value) {
++    if (!valid(value)) return;
++    choice = value; save(value);
++    if (value === 'granted') { enable(); close(); }
++    else {
++      window['ga-disable-' + id] = true;
++      window.gtag('consent', 'update', denied);
++      clearAnalyticsCookies(); close();
++      // Removing a script does not unload its listeners. Reload without the tag.
++      if (loaded) location.reload();
++    }
++  }
++  function open(focus) {
++    if (banner) return;
++    banner = document.createElement('aside');
++    banner.className = 'seyir-consent';
++    banner.setAttribute('role', 'dialog');
++    banner.setAttribute('aria-labelledby', 'seyir-consent-title');
++    banner.setAttribute('aria-describedby', 'seyir-consent-description');
++    banner.innerHTML = '<div><strong id="seyir-consent-title">Ziyaret ölçümü tercihi</strong><p id="seyir-consent-description">Siteyi geliştirmek için Google Analytics ile kullanım istatistikleri toplamak istiyoruz. Kabul etmezseniz Analytics yüklenmez. Tercihinizi daha sonra değiştirebilirsiniz.</p><a class="seyir-consent-details">Ayrıntılar</a></div><div class="seyir-consent-actions"><button type="button" data-seyir-choice="denied">Reddet</button><button type="button" data-seyir-choice="granted">Kabul et</button></div>';
++    banner.querySelector('a').href = policy || '/';
++    banner.addEventListener('click', function (event) {
++      var button = event.target.closest('[data-seyir-choice]');
++      if (button) choose(button.dataset.seyirChoice);
++    });
++    banner.addEventListener('keydown', function (event) { if (event.key === 'Escape' && choice) close(); });
++    document.body.appendChild(banner);
++    if (focus) { opener = document.activeElement; banner.querySelector('button').focus(); }
++  }
++  window.SeyirConsent = {open:function () { open(true); },getChoice:function () { return choice; }};
++  document.addEventListener('click', function (event) {
++    var link = event.target.closest('[data-seyir-preferences], #consent-reset');
++    if (link) { event.preventDefault(); open(true); }
++  });
++  window.addEventListener('storage', function (event) {
++    if (event.key !== key) return;
++    var next = valid(event.newValue);
++    if (next === choice) return;
++    choice = next;
++    if (next === 'granted') { enable(); close(); }
++    else {
++      window['ga-disable-' + id] = true;
++      window.gtag('consent', 'update', denied);
++      clearAnalyticsCookies();
++      if (next) save(next);
++      else { try { document.cookie = key + '=; Path=/; Max-Age=0; SameSite=Lax'; } catch (_) {} }
++      if (loaded) location.reload();
++      else if (!next) open(false);
++      else close();
++    }
++  });
++  choice = read();
++  if (choice === 'granted') enable();
++  else clearAnalyticsCookies();
++  function mount() { if (!choice) open(false); }
++  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount, {once:true});
++  else mount();
+ })();
+-
+--- a/app/analytics.css
++++ b/app/analytics.css
+@@ -1,4 +1,9 @@
+-.analytics-consent{position:fixed;z-index:1000;left:50%;bottom:18px;transform:translateX(-50%);width:min(760px,calc(100vw - 28px));display:flex;align-items:center;gap:24px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px 22px;box-shadow:0 18px 60px rgba(16,36,30,.2);color:var(--ink)}
+-.analytics-consent>div:first-child{flex:1}.analytics-consent b{font-size:16px}.analytics-consent p{margin:5px 0;color:var(--muted);font-size:13px;line-height:1.5}.analytics-consent a{font-size:12px;color:var(--green);font-weight:700}.analytics-consent-actions{display:flex;gap:9px}.analytics-consent-actions button{white-space:nowrap}
+-@media(max-width:650px){.analytics-consent{align-items:stretch;flex-direction:column;gap:14px}.analytics-consent-actions{display:grid;grid-template-columns:1fr 1fr}.analytics-consent-actions button{width:100%}}
+-
++/* Scoped styles: never inherit footer/secondary button colors. */
++.seyir-consent{box-sizing:border-box;position:fixed;z-index:10000;left:14px;right:14px;bottom:max(18px,env(safe-area-inset-bottom));max-width:820px;margin:auto;display:flex;align-items:center;gap:24px;background:#fff;color:#173b30;border:1px solid #bad3c9;border-radius:14px;padding:20px 22px;box-shadow:0 18px 60px #10241e33;text-align:left;font:16px/1.5 system-ui,sans-serif;max-height:calc(100dvh - 40px);overflow:auto}
++.seyir-consent>div:first-child{flex:1}.seyir-consent strong{font-size:18px;color:#173b30}.seyir-consent p{margin:6px 0;color:#40584f;font-size:14px}.seyir-consent a{font-size:14px;color:#075b43;text-decoration:underline}
++.seyir-consent .seyir-consent-actions{display:flex;gap:10px;flex-shrink:0}
++.seyir-consent .seyir-consent-actions button{appearance:none;-webkit-appearance:none;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-height:48px;min-width:108px;margin:0;padding:12px 18px;border:2px solid #075b43;border-radius:8px;background:#fff;color:#075b43;font:700 15px/1.2 system-ui,sans-serif;opacity:1;pointer-events:auto;cursor:pointer;touch-action:manipulation;white-space:nowrap;box-shadow:none;filter:none}
++.seyir-consent .seyir-consent-actions button[data-seyir-choice="granted"]{background:#075b43;color:#fff;border-color:#075b43}
++.seyir-consent button:focus-visible,.seyir-consent a:focus-visible,[data-seyir-preferences]:focus-visible{outline:3px solid #cd9300;outline-offset:3px}
++.seyir-consent .seyir-consent-actions button:hover{box-shadow:0 0 0 2px #075b4326}
++@media(max-width:650px){.seyir-consent{align-items:stretch;flex-direction:column;gap:14px;padding:18px;left:10px;right:10px}.seyir-consent .seyir-consent-actions{display:grid;grid-template-columns:1fr 1fr}.seyir-consent .seyir-consent-actions button{width:100%;min-width:0}}
+--- a/components/analytics-consent.tsx
++++ b/components/analytics-consent.tsx
+@@ -1,23 +1,3 @@
+-import {useEffect,useState} from 'react';
+-
+-declare global{
+- interface Window{ksEnableAnalytics?:()=>void}
+-}
+-
+-const key='ks_analytics_consent';
+-
+-export function AnalyticsConsent(){
+- const[visible,setVisible]=useState(false);
+- useEffect(()=>{try{setVisible(!localStorage.getItem(key))}catch{setVisible(true)}},[]);
+- function choose(value:'granted'|'denied'){
+-  try{localStorage.setItem(key,value)}catch{}
+-  if(value==='granted')window.ksEnableAnalytics?.();
+-  setVisible(false);
+- }
+- if(!visible)return null;
+- return <aside className="analytics-consent" role="dialog" aria-label="Ziyaret ölçümü tercihi" aria-live="polite">
+-  <div><b>Ziyaret ölçümü tercihi</b><p>Siteyi geliştirmek için Google Analytics ile anonimleştirilmiş kullanım istatistikleri toplamak istiyoruz. Reddederseniz Analytics yüklenmez.</p><a href="/cerez-politikasi">Ayrıntılar</a></div>
+-  <div className="analytics-consent-actions"><button type="button" className="secondary" onClick={()=>choose('denied')}>Reddet</button><button type="button" onClick={()=>choose('granted')}>Kabul et</button></div>
+- </aside>
+-}
+-
++// The shared /analytics.js owns the consent UI and lifecycle.
++// Retained export avoids changing the existing Footer component structure.
++export function AnalyticsConsent(){return null;}
+--- a/components/site-chrome.tsx
++++ b/components/site-chrome.tsx
+@@ -41,7 +41,7 @@
+   <div><strong>konutseyir.com</strong><a className="network-gold-link" href="https://altinseyir.com/araclar" target="_blank" rel="noopener noreferrer"><Coins size={16}/> AltınSeyir.com · Altın araçları <ArrowUpRight size={14}/></a></div>
+   <p>KonutSeyir ve AltınSeyir aynı bağımsız yayın ağı tarafından sunulur. KonutSeyir konut maliyeti, kira ve yatırım karşılaştırmalarına; AltınSeyir altın verileri ve hesaplamalarına odaklanır.</p>
+  </div>
+- <div className="footer-bottom"><small>© 2026 KonutSeyir</small><nav aria-label="Alt bağlantılar"><a href="/yayin-ilkeleri">Hesaplama yöntemi</a><a href="/veri">Veri kaynakları</a><a href="/gizlilik">Gizlilik</a><a href="/cerez-politikasi">Çerezler</a><a href="/kullanim-kosullari">Kullanım koşulları</a></nav><span>Yatırım tavsiyesi değildir.</span></div>
++ <div className="footer-bottom"><small>© 2026 KonutSeyir</small><nav aria-label="Alt bağlantılar"><a href="/yayin-ilkeleri">Hesaplama yöntemi</a><a href="/veri">Veri kaynakları</a><a href="/gizlilik">Gizlilik</a><a href="/cerez-politikasi">Çerezler</a><a href="/cerez-politikasi" data-seyir-preferences>Çerez tercihleri</a><a href="/kullanim-kosullari">Kullanım koşulları</a></nav><span>Yatırım tavsiyesi değildir.</span></div>
+  <AnalyticsConsent/>
+  </footer>}
+ 
+--- a/scripts/prerender.mjs
++++ b/scripts/prerender.mjs
+@@ -6,7 +6,7 @@
+ const publisherId=(process.env.ADSENSE_PUBLISHER_ID||'pub-1047230012085801').trim();
+ if(publisherId&&!/^pub-\d{16}$/.test(publisherId))throw Error('ADSENSE_PUBLISHER_ID, pub- ile başlayan 16 haneli yayıncı kimliği olmalıdır.');
+ const adsenseHead=publisherId?`<meta name="google-adsense-account" content="ca-${publisherId}"/><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-${publisherId}" crossorigin="anonymous"></script>`:'';
+-const analyticsHead='<script defer src="/analytics.js" data-measurement-id="G-RC6GFQ86P6"></script>';
++const analyticsHead='<script src="/analytics.js?v=consent-1" data-measurement-id="G-RC6GFQ86P6" data-consent-key="ks_analytics_consent" data-policy-url="/cerez-politikasi"></script>';
+ const esc=s=>s.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+ const label=part=>decodeURIComponent(part).replaceAll('-',' ').replace(/(^|\s)\S/g,c=>c.toLocaleUpperCase('tr-TR'));
+ const jsonLd=(path,m)=>{
