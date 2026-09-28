@@ -1,5 +1,6 @@
 import {useState} from "react";
 import {Building2,Menu,X,ArrowUpRight,ArrowLeft,Coins} from "lucide-react";
+import {AnalyticsConsent} from './analytics-consent';
 
 const navItems=[
  ["Konut Analizi","/ev-analizi"],
@@ -41,4 +42,5 @@ export function Footer(){return <footer className="site-footer">
   <p>KonutSeyir ve AltınSeyir aynı bağımsız yayın ağı tarafından sunulur. KonutSeyir konut maliyeti, kira ve yatırım karşılaştırmalarına; AltınSeyir altın verileri ve hesaplamalarına odaklanır.</p>
  </div>
  <div className="footer-bottom"><small>© 2026 KonutSeyir</small><nav aria-label="Alt bağlantılar"><a href="/yayin-ilkeleri">Hesaplama yöntemi</a><a href="/veri">Veri kaynakları</a><a href="/gizlilik">Gizlilik</a><a href="/cerez-politikasi">Çerezler</a><a href="/kullanim-kosullari">Kullanım koşulları</a></nav><span>Yatırım tavsiyesi değildir.</span></div>
+ <AnalyticsConsent/>
  </footer>}

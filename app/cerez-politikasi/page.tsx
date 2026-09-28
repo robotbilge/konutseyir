@@ -5,7 +5,9 @@ export default function CookiePolicy(){return <InfoPage eyebrow="ÇEREZLER" titl
  <h2>Zorunlu teknolojiler</h2>
  <p>Güvenlik, trafik yönlendirme ve hizmetin çalışması için barındırma sağlayıcısı teknik kayıtlar oluşturabilir. Web Push tercihi, servis çalışanı ve ana ekrana ekleme işlevleri cihazınızda teknik veri tutabilir. Bunlar reklam profili oluşturmak amacıyla kullanılmaz.</p>
  <h2>Tercih ve işlevsellik</h2>
- <p>Bildirim izni veya ileride sunulabilecek görünüm tercihleri tarayıcınızda saklanabilir. Tarayıcı ayarlarından site verilerini temizlediğinizde bu tercihler sıfırlanabilir.</p>
+ <p>Bildirim izni, Analytics tercihi veya ileride sunulabilecek görünüm tercihleri tarayıcınızda saklanabilir. Tarayıcı ayarlarından site verilerini temizlediğinizde bu tercihler sıfırlanabilir.</p>
+ <h2>Google Analytics</h2>
+ <p>Analytics yalnız “Kabul et” seçiminizden sonra yüklenir. Sayfa görüntüleme, oturum, cihaz ve trafik kaynağı gibi kullanım bilgileri KonutSeyir’i geliştirmek amacıyla ölçülür. “Reddet” seçildiğinde Analytics isteği gönderilmez.</p>
  <h2>Google AdSense çerezleri</h2>
  <p>Reklamlar etkinleştirildiğinde Google ve reklam iş ortakları; reklam sunumu, ölçüm, kötüye kullanımın önlenmesi ve izin verilmişse kişiselleştirme için çerez veya benzeri tanımlayıcılar kullanabilir. Haber liste ve haber detay sayfaları reklamsızdır.</p>
  <p>Geçerli mevzuatın onay gerektirdiği bölgelerde reklam çerezleri, Google tarafından kabul edilen bir onay yönetim mekanizmasındaki seçiminize göre çalıştırılır. Tercihinizi daha sonra aynı mekanizmadan değiştirebilir; ayrıca <a href="https://adssettings.google.com/">Google Reklam Ayarları</a> sayfasını kullanabilirsiniz.</p>
