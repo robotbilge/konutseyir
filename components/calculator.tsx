@@ -63,6 +63,7 @@ export function Calculator({mode='analysis'}:{mode?:'analysis'|'compare'}={}){
       const value=Number(params.get(key));
       if(Number.isFinite(value)&&value>0){next[key]=value;found=true}
     }
+    if(found&&!params.has('rent'))next.rent=0;
     if(found)set(current=>({...current,...next}));
   },[]);
   const market=useMarketData(),liveDeposit=market.find(x=>x.series==='deposit');

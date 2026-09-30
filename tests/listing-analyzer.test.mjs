@@ -21,9 +21,12 @@ test('listing numbers are normalized and net area is preferred',()=>{
 });
 
 test('valuation boundaries match the published thresholds',()=>{
- assert.equal(valuation(900,1000).label,'Fırsat / Çok ucuz');
- assert.equal(valuation(950,1000).label,'Avantajlı / Ucuz');
+ assert.equal(valuation(899.99,1000).label,'Fırsat / Çok ucuz');
+ assert.equal(valuation(900,1000).label,'Avantajlı / Ucuz');
+ assert.equal(valuation(949.99,1000).label,'Avantajlı / Ucuz');
+ assert.equal(valuation(950,1000).label,'Piyasa değerinde / Normal');
  assert.equal(valuation(1050,1000).label,'Piyasa değerinde / Normal');
+ assert.equal(valuation(1050.01,1000).label,'Pahalı');
  assert.equal(valuation(1150,1000).label,'Pahalı');
  assert.equal(valuation(1150.01,1000).label,'Çok şişirilmiş / Aşırı pahalı');
  assert.equal(valuation(1000,0),null);

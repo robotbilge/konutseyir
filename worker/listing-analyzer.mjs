@@ -38,7 +38,7 @@ export function getProvider(input) {
   const key=providerEntries.find(([, provider]) =>
     provider.hosts.some(host => url.hostname === host || url.hostname.endsWith("." + host))
   )?.[0] || null;
-  if(!key||url.pathname.split("/").filter(Boolean).length<2||!/(ilan|detay|satilik|kiralik|konut|daire|arsa|isyeri)/i.test(url.pathname))return null;
+  if(!key||url.pathname.split("/").filter(Boolean).length<1||!/(ilan|detay|satilik|kiralik|konut|daire|arsa|isyeri)/i.test(url.pathname))return null;
   return key;
 }
 
@@ -79,7 +79,7 @@ export function parseListingData(input = {}) {
 
 export function valuation(currentM2, referenceM2) {
   if (!(currentM2 > 0) || !(referenceM2 > 0)) return null;
-  const differencePercent = (currentM2 / referenceM2 - 1) * 100;
+  const differencePercent = Number(((currentM2 / referenceM2 - 1) * 100).toFixed(10));
   let label, tone;
   if (differencePercent < -10) { label = "Fırsat / Çok ucuz"; tone = "green"; }
   else if (differencePercent < -5) { label = "Avantajlı / Ucuz"; tone = "green"; }
