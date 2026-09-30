@@ -192,3 +192,20 @@ body{background:#f7f7f3}
 .tool-hub-special{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:34px 0}.tool-hub-special>div{padding:28px;border-radius:20px;background:var(--ink);color:#fff}.tool-hub-special h2{font-size:21px;margin:8px 0}.tool-hub-special p:not(.eyebrow){color:#aebbb6;font-size:13px;line-height:1.65}.tool-hub-special a{display:inline-block;margin-top:8px;color:var(--lime);font-size:12px;font-weight:800;text-decoration:none}
 .tools-editorial{max-width:900px;margin:54px 0 0;padding:30px;border:1px solid var(--line);border-radius:20px;background:#fff}.tools-editorial h2{font-size:27px;margin:0 0 14px}.tools-editorial p{color:#40534c;font-size:15px;line-height:1.8}
 @media(max-width:900px){.tool-hub-groups,.tool-hub-special{grid-template-columns:1fr}.tool-hub-groups>section>p{min-height:0}}
+
+
+/* Ana sayfa: örnek kartı yerine tek, doğrudan kullanılabilir analiz akışı. */
+.home-hero{grid-template-columns:1fr;max-width:1240px;padding:34px 28px 18px;gap:0;align-items:start}
+.home-hero .hero-copy{max-width:900px}
+.home-hero .trust-label{margin-bottom:18px}
+.home-hero h1{font-size:clamp(42px,4.4vw,62px);line-height:1.02;margin-bottom:15px}
+.home-hero .lead{max-width:800px;font-size:16px;line-height:1.6}
+.home-hero .hero-actions{margin-top:20px}
+.home-hero .hero-proof{margin-top:18px}
+@media(max-width:760px){
+  .home-hero{padding:32px 18px 14px}
+  .home-hero .hero-proof{margin-top:17px;gap:10px 16px}
+}
+@media(max-width:440px){
+  .home-hero h1{font-size:clamp(38px,10vw,48px)}
+}
