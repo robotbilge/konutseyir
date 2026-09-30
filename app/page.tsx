@@ -2,6 +2,7 @@ import {ArrowDown,ArrowUpRight,BadgeCheck,Calculator as CalculatorIcon,Database,
 import {Header,Footer} from '../components/site-chrome';
 import {Calculator,Credit,Deposit} from '../components/calculator';
 import {LatestNews,MarketSnapshot,DistrictSalesRanking} from '../components/live-data';
+import {IstanbulRadar} from '../components/istanbul-radar';
 
 export default function Home(){return <><Header/><main>
   <section className="hero home-hero">
@@ -13,6 +14,7 @@ export default function Home(){return <><Header/><main>
       <div className="hero-actions"><a className="primary-link" href="#analiz">Hesaplamaya başla <ArrowDown size={17}/></a><a className="text-link" href="/veri">Veri kaynakları <ArrowUpRight size={16}/></a></div>
       <div className="hero-proof"><span><ShieldCheck/> Üyelik gerekmez</span><span><CalculatorIcon/> Sonuç anında güncellenir</span><span><Database/> Varsayımlar size ait</span></div>
     </div>
+    <IstanbulRadar/>
   </section>
   <div className="inner">
     <Calculator/>
