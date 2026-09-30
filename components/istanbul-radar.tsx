@@ -17,7 +17,7 @@ export function IstanbulRadar(){
 
  useEffect(()=>{
   const controller=new AbortController();
-  fetch('/api/district-sales?city=istanbul',{signal:controller.signal})
+  fetch('/api/district-sales?city=istanbul&limit=39',{signal:controller.signal})
    .then(async response=>{if(!response.ok)throw new Error('HTTP');return response.json()})
    .then((result:DistrictResponse)=>{
     if(result.status!=='available'||!Array.isArray(result.items)||!result.items.length){setData(result);return}
