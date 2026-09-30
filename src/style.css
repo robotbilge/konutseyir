@@ -242,3 +242,26 @@ body{background:#f7f7f3}
 @media(max-width:440px){
   .home-hero h1{font-size:clamp(38px,10vw,48px)}
 }
+
+
+/* Listing price checker */
+.listing-analyzer{max-width:1184px;margin:32px auto 54px;padding:30px;display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:32px;align-items:start;border:1px solid var(--line);border-radius:22px;background:#fff}
+.listing-analyzer h2{font-size:clamp(24px,3vw,34px);line-height:1.12;margin:0 0 12px;letter-spacing:-.035em}
+.listing-analyzer-copy>p:not(.eyebrow){font-size:14px;line-height:1.7;color:var(--muted)}
+.listing-analyzer small{display:block;color:#718078;font-size:11px;line-height:1.55}
+.listing-analyzer-form form{display:grid;gap:8px}
+.listing-analyzer-form label{font-size:12px;font-weight:750}
+.listing-url-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.listing-url-row input{min-width:0;width:100%;padding:12px;border:1px solid #cbd8d0;border-radius:10px;font:inherit}
+.listing-url-row button,.listing-cta{display:inline-flex;justify-content:center;align-items:center;padding:12px 16px;border:0;border-radius:10px;background:#176346;color:#fff;font:inherit;font-size:12px;font-weight:800;text-decoration:none;cursor:pointer}
+.listing-url-row button:disabled{opacity:.65;cursor:wait}
+.listing-error{color:#9d3526;font-size:13px}
+.listing-result{margin-top:18px;padding:17px;border-radius:14px;background:#f5f8f5}
+.listing-result>p{font-size:13px;line-height:1.55}
+.listing-result dl{display:flex;flex-wrap:wrap;gap:10px 20px;margin:14px 0}
+.listing-result dl div{display:grid;gap:3px}.listing-result dt{font-size:10px;color:#68786f}.listing-result dd{margin:0;font-size:13px;font-weight:800}
+.listing-badge{display:inline-flex;padding:6px 9px;border-radius:30px;font-size:11px;font-weight:800;background:#e7eeea;color:#344b40}
+.listing-badge.green{background:#e0f2e7;color:#155d3e}.listing-badge.yellow{background:#fff0c7;color:#715600}.listing-badge.red{background:#fbe2de;color:#8a3025}
+.listing-cta{margin:5px 0 12px;text-align:center}
+@media(max-width:820px){.listing-analyzer{margin:24px 18px 40px;padding:22px;grid-template-columns:1fr;gap:14px}}
+@media(max-width:480px){.listing-url-row{grid-template-columns:1fr}.listing-url-row button{width:100%}}

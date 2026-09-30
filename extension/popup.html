@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KonutSeyir İlan Analizi</title>
+  <style>
+    *{box-sizing:border-box}body{width:360px;margin:0;padding:20px;font:14px/1.5 system-ui,-apple-system,sans-serif;color:#18382e;background:#f6f8f4}
+    header{display:flex;align-items:center;gap:10px;margin-bottom:14px}header strong{font-size:16px}header span{font-size:11px;color:#62766e}
+    .card{background:#fff;border:1px solid #dce5de;border-radius:14px;padding:15px}
+    button,a{font:inherit}button{width:100%;border:0;border-radius:10px;padding:12px 14px;background:#1b6a4d;color:white;font-weight:700;cursor:pointer}
+    button:disabled{opacity:.6;cursor:wait}.status{min-height:42px;margin:12px 0;color:#52645c;font-size:13px}
+    .result{display:none;margin:12px 0;padding:12px;border-radius:10px;background:#f4f7f4}.badge{display:inline-block;padding:5px 8px;border-radius:20px;background:#e8efeb;font-size:11px;font-weight:800}
+    .green{background:#e1f2e8;color:#17623e}.yellow{background:#fff2c8;color:#795900}.red{background:#fbe4df;color:#922f21}
+    .metric{margin-top:8px;font-size:13px}.cta{display:block;margin-top:12px;text-align:center;text-decoration:none;border:1px solid #1b6a4d;color:#1b6a4d;padding:10px;border-radius:9px;font-weight:700}
+    small{color:#6e7d75;font-size:10px}
+  </style>
+</head>
+<body>
+  <header><strong>KonutSeyir</strong><span>İlan fiyat kontrolü</span></header>
+  <div class="card">
+    <button id="analyze" type="button">Bu ilanı analiz et</button>
+    <p id="status" class="status" role="status">Desteklenen ilan sayfasını açıp analizi başlatın.</p>
+    <div id="result" class="result" aria-live="polite"></div>
+    <small>Karşılaştırma yalnızca ilan sayfasında bulunan kaynak verileriyle yapılır. Sonuç yatırım tavsiyesi değildir.</small>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

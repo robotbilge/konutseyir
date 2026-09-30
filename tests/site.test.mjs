@@ -13,3 +13,15 @@ test('structured data identifies the publisher, articles and breadcrumbs',()=>{c
 test('focused calculator pages publish explanatory content and FAQ schema',()=>{for(const slug of ['kira-carpani','net-kira','metrekare','reel-getiri','alim-maliyeti']){const html=readFileSync(`dist/hesaplama/${slug}/index.html`,'utf8');assert.match(html,/"@type":"FAQPage"/,slug);assert.match(html,/KonutSeyir Editoryal Ekibi/,slug)}const rent=readFileSync('dist/hesaplama/kira-carpani/index.html','utf8');assert.match(rent,/Yıllık kira artış varsayımı/);assert.match(rent,/Yıllara göre kira projeksiyonu/)});
 
 test('Istanbul homepage radar compares official district sales and saves a local watch list',()=>{const home=readFileSync('dist/index.html','utf8'),component=readFileSync('components/istanbul-radar.tsx','utf8'),worker=readFileSync('worker/index.mjs','utf8');assert.match(home,/İSTANBUL RADARI/);assert.match(home,/İlçeleri satış verisiyle karşılaştırın/);assert.match(component,/api\/district-sales\?city=istanbul&limit=39/);assert.match(component,/STORAGE_KEY/);assert.match(component,/Adet karşılaştırması · fiyat\/endeks değildir/);assert.match(component,/TÜİK/);assert.match(worker,/ORDER BY total DESC LIMIT \?/);assert.match(worker,/url\.searchParams\.get\('limit'\)/)});
+
+
+test('listing analyzer is linked to the homepage and extension stays permission-limited',()=>{
+ const home=readFileSync('dist/index.html','utf8'),manifest=JSON.parse(readFileSync('extension/manifest.json','utf8')),worker=readFileSync('worker/index.mjs','utf8');
+ assert.match(home,/İlan fiyatını bölge verisiyle kontrol edin/);
+ assert.match(readFileSync('components/listing-analyzer.tsx','utf8'),/Bölge endeksi bulunamadı/);
+ assert.ok(worker.includes("path==='/api/selectors'"));
+ assert.ok(worker.includes("path==='/api/analyze'"));
+ assert.deepEqual(manifest.host_permissions,[
+  'https://*.sahibinden.com/*','https://*.hepsiemlak.com/*','https://*.emlakjet.com/*','https://konutseyir.com/*'
+ ]);
+});

@@ -3,6 +3,7 @@ import {Header,Footer} from '../components/site-chrome';
 import {Calculator,Credit,Deposit} from '../components/calculator';
 import {LatestNews,MarketSnapshot,DistrictSalesRanking} from '../components/live-data';
 import {IstanbulRadar} from '../components/istanbul-radar';
+import {ListingAnalyzer} from '../components/listing-analyzer';
 
 export default function Home(){return <><Header/><main>
   <section className="hero home-hero">
@@ -16,6 +17,7 @@ export default function Home(){return <><Header/><main>
     </div>
     <IstanbulRadar/>
   </section>
+  <ListingAnalyzer/>
   <div className="inner">
     <Calculator/>
     <div className="section-heading support-heading"><div><p className="eyebrow">BAĞIMSIZ HESAP ARAÇLARI</p><h2>Nakit getirisi ve kredi maliyeti</h2></div><p>Mevduat vadesini ve kredi masraflarını ayrı hesaplayın. Bu hesaplar, üstteki konut karşılaştırmasının yerine geçmez.</p></div>

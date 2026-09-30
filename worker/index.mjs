@@ -1,4 +1,5 @@
 import {definitions,cityHousingSeries,goldPrice,parseFX,parseEVDS,observation,yearChange} from './data.mjs';
+import {selectorConfig,getProvider,parseListingData,extractHtml,analyzeListing,fetchListing} from './listing-analyzer.mjs';
 import {isRelevantNews,newsFeeds,refreshNews} from './news.mjs';
 
 const json=(data,status=200,cache='public, max-age=300')=>Response.json(data,{status,headers:{'Cache-Control':cache,'X-Content-Type-Options':'nosniff'}});
@@ -84,6 +85,68 @@ async function subscribe(request,env){
  return json({ok:true},200,'no-store');
 }
 
+function corsOrigin(request){
+ const origin=request.headers.get("Origin")||"";
+ if(origin==="https://konutseyir.com"||origin==="https://www.konutseyir.com"||/^chrome-extension:\/\/[a-p]{32}$/.test(origin))return origin;
+ return null;
+}
+function corsify(response,request){
+ const origin=corsOrigin(request);
+ if(!origin)return response;
+ const headers=new Headers(response.headers);
+ headers.set("Access-Control-Allow-Origin",origin);
+ headers.set("Access-Control-Allow-Methods","GET, POST, OPTIONS");
+ headers.set("Access-Control-Allow-Headers","Content-Type");
+ headers.set("Vary","Origin");
+ return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
+}
+function calculatorLink(listing){
+ const params=new URLSearchParams();
+ if(listing.price)params.set("price",String(Math.round(listing.price)));
+ if(listing.area)params.set("area",String(Math.round(listing.area)));
+ if(listing.monthlyRent)params.set("rent",String(Math.round(listing.monthlyRent)));
+ return "https://konutseyir.com/?"+params.toString()+"#analiz";
+}
+async function analyzeRequest(request){
+ if(Number(request.headers.get("Content-Length")||0)>20000)return json({error:"İstek boyutu çok büyük."},413,"no-store");
+ let body;
+ try{body=await request.json()}catch{return json({error:"Geçersiz JSON isteği."},400,"no-store")}
+ const target=typeof body?.url==="string"?body.url:"";
+ const provider=getProvider(target);
+ if(!provider)return json({error:"Yalnızca desteklenen ilan sitelerinin HTTPS bağlantıları analiz edilebilir."},400,"no-store");
+ let listing=parseListingData(body.listingData);
+ let fetchState="not_requested";
+ if(!body?.listingData){
+  try{
+   const html=await fetchListing(target);
+   const serverData=await extractHtml(html,provider);
+   const merged={...serverData};
+   for(const [key,value] of Object.entries(listing))if(value!==null&&value!==undefined)merged[key]=value;
+   listing=parseListingData(merged);
+   fetchState="fetched";
+  }catch(error){
+   fetchState=error?.name==="TimeoutError"?"timeout":error?.message||"unavailable";
+  }
+ }
+ const analysis=analyzeListing(listing);
+ const message=analysis.valuation
+  ? "İlanın m² fiyatı bölge referansının %"+Math.abs(analysis.valuation.differencePercent).toLocaleString("tr-TR",{maximumFractionDigits:2})+" "+(analysis.valuation.differencePercent>=0?"üzerinde":"altında")+"."
+  : analysis.currentM2
+    ? "İlanın m² fiyatı hesaplandı; sayfada karşılaştırılabilir bölge endeksi bulunamadığı için değer etiketi oluşturulmadı."
+    : fetchState==="fetched"
+      ? "İlan sayfası açıldı ancak fiyat veya alan bilgisi otomatik olarak ayıklanamadı. Güncel seçici yapılandırması veya eklenti gerekebilir."
+      : "İlan sitesine sunucu erişimi olmadı. Sayfa açıkken Chrome eklentisini deneyin.";
+ return corsify(json({
+  provider,
+  status:analysis.status,
+  message,
+  analysis,
+  calculatorUrl:calculatorLink(analysis.listing),
+  extraction:{serverFetch:fetchState,source:body?.listingData?"page_and_server":"server_page"},
+  note:"Karşılaştırma yalnızca ilan sayfasında erişilebilen verilerle yapılır; bölge endeksi her ilanda bulunmayabilir."
+ },200,"no-store"),request);
+}
+
 export default {
  async scheduled(event,env,ctx){
   const tasks=[];
@@ -93,6 +156,14 @@ export default {
  },
  async fetch(request,env){
   const url=new URL(request.url),path=url.pathname;
+  if(path==='/api/analyze'||path==='/api/selectors'){
+   if(request.method==='OPTIONS')return corsify(new Response(null,{status:204,headers:{'Access-Control-Max-Age':'86400'}}),request);
+   if(path==='/api/selectors'&&request.method==='GET')return corsify(json(selectorConfig,200,'public, max-age=300'),request);
+   if(path==='/api/analyze'&&request.method==='POST'){
+    try{return corsify(await analyzeRequest(request),request)}
+    catch(error){console.error('Listing analysis failed',error);return corsify(json({error:'İlan analizi sırasında geçici bir hata oluştu.'},500,'no-store'),request)}
+   }
+  }
   const pushMutation=path==='/api/push/subscribe'&&(request.method==='POST'||request.method==='DELETE');
   if(request.method!=='GET'&&!pushMutation)return json({error:'Method not allowed'},405,'no-store');
   if(!env.DB)return json({status:'not_configured',error:'D1 binding missing'},503);

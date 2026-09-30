@@ -55,6 +55,16 @@ function Comparison({r}:{r:any}){
 
 export function Calculator({mode='analysis'}:{mode?:'analysis'|'compare'}={}){
   const[p,set]=useState(initial);
+  useEffect(()=>{
+    const params=new URLSearchParams(window.location.search);
+    const next={...initial};
+    let found=false;
+    for(const key of ['price','area','rent'] as const){
+      const value=Number(params.get(key));
+      if(Number.isFinite(value)&&value>0){next[key]=value;found=true}
+    }
+    if(found)set(current=>({...current,...next}));
+  },[]);
   const market=useMarketData(),liveDeposit=market.find(x=>x.series==='deposit');
   const field=(k:keyof typeof initial,label:string,hint?:string)=><Input key={k} label={label} hint={hint} value={p[k]} onChange={v=>set(x=>({...x,[k]:v}))}/>;
   return <section id="analiz" className="calc-section main-calculator">

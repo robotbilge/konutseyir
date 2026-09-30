@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "KonutSeyir İlan Analizi",
+  "version": "0.1.0",
+  "description": "Desteklenen ilan sayfalarındaki fiyat ve alan bilgilerini karşılaştırın.",
+  "permissions": [
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://*.sahibinden.com/*",
+    "https://*.hepsiemlak.com/*",
+    "https://*.emlakjet.com/*",
+    "https://konutseyir.com/*"
+  ],
+  "action": {
+    "default_title": "KonutSeyir ile analiz et",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.sahibinden.com/*",
+        "https://*.hepsiemlak.com/*",
+        "https://*.emlakjet.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
