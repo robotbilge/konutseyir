@@ -136,8 +136,7 @@ export function parseJsonLd(html) {
       const addressText = textFrom(address);
       out.price ??= cleanNumber(first(offer.price, offer.lowPrice, node.price));
       out.area ??= cleanNumber(first(node.floorSize?.value, node.floorSize, node.size));
-      out.netArea ??= out.area;
-      out.city ??= first(address.addressRegion, address.addressCountry?.name);
+            out.city ??= first(address.addressRegion, address.addressCountry?.name);
       out.district ??= first(address.addressLocality);
       out.address ??= first(addressText, node.name);
     } catch { /* Ignore malformed provider JSON-LD. */ }

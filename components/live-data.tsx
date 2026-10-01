@@ -1,5 +1,5 @@
 import {useEffect,useState} from 'react';
-import {ArrowUpRight,BarChart3,Landmark,Newspaper,Percent} from 'lucide-react';
+import {ArrowUpRight,Landmark,Newspaper,Percent} from 'lucide-react';
 
 export type MarketItem={series:string,value:number|null,period:string|null,status:string,annualChange:number|null,retrievedAt:string|null};
 export function useMarketData(){
@@ -9,13 +9,12 @@ export function useMarketData(){
 }
 const pct=(value:number|null)=>value==null?'—':`%${value.toLocaleString('tr-TR',{maximumFractionDigits:2})}`;
 export function MarketSnapshot(){
- const data=useMarketData(),policy=data.find(x=>x.series==='policy'),housing=data.find(x=>x.series==='housing'),cpi=data.find(x=>x.series==='cpi');
+ const data=useMarketData(),policy=data.find(x=>x.series==='policy'),cpi=data.find(x=>x.series==='cpi');
  const cards=[
   {icon:Percent,label:'TCMB politika faizi',value:pct(policy?.value??null),detail:policy?.period||'Veri bekleniyor'},
-  {icon:BarChart3,label:'Konut fiyatı yıllık değişim',value:pct(housing?.annualChange??null),detail:housing?.period||'Veri bekleniyor'},
   {icon:Landmark,label:'TÜFE yıllık değişim',value:pct(cpi?.annualChange??null),detail:cpi?.period||'Veri bekleniyor'}
  ];
- return <section className="market-snapshot" aria-label="Güncel piyasa göstergeleri"><div><p className="eyebrow">RESMÎ VERİLER</p><h2>Kararı etkileyen üç oran</h2><a href="/veri">Kaynak ve çekim saatleri →</a></div>{cards.map(({icon:Icon,...item})=><article key={item.label}><Icon/><span>{item.label}</span><strong>{item.value}</strong><small>Dönem: {item.detail}</small></article>)}</section>
+ return <section className="market-snapshot" aria-label="Güncel piyasa göstergeleri"><div><p className="eyebrow">RESMÎ VERİLER</p><h2>Faiz ve enflasyon verileri</h2><a href="/veri">Kaynak ve çekim saatleri →</a></div>{cards.map(({icon:Icon,...item})=><article key={item.label}><Icon/><span>{item.label}</span><strong>{item.value}</strong><small>Dönem: {item.detail}</small></article>)}</section>
 }
 
 export function LatestNews(){

@@ -25,3 +25,5 @@ test('listing analyzer is linked to the homepage and extension stays permission-
   'https://*.sahibinden.com/*','https://*.hepsiemlak.com/*','https://*.emlakjet.com/*','https://konutseyir.com/*'
  ]);
 });
+
+test('homepage uses the TCMB listing comparison and removes the old duplicate price check/index chart',()=>{const html=readFileSync('dist/index.html','utf8');assert.match(html,/KONUT İLANI · TCMB GÖSTERGESİ/);assert.doesNotMatch(html,/İLAN FİYAT KONTROLÜ|TCMB KONUT FİYAT ENDEKSİ|İstanbul ve Türkiye’de fiyat değişimi/);assert.match(html,/TCMB il ortanca m² fiyatı/);assert.match(html,/net alan|brüt alan/)});
