@@ -233,10 +233,18 @@ async function tcmbListingRequest(request,env){
   const result=calculateTcmc({...listing,thresholdPercent:Number.isFinite(threshold)&&threshold>0?threshold:20},{housePrice,rent});
   return json({...result,extraction:{serverFetch:fetchState}},200,'no-store');
  }catch(error){
-  const message=error?.message==='tcmb_not_configured'
-   ?'TCMB veri bağlantısı şu anda yapılandırılmamış.'
-   :'TCMB verisi şu anda alınamıyor. Lütfen daha sonra yeniden deneyin.';
-  return json({status:'unavailable',error:message,listing:checked},503,'no-store');
+  const allowedCodes=new Set(['tcmb_not_configured','catalog_unavailable','metadata_mismatch','tcmb_format','tcmb_unavailable','empty_data']);
+  const errorCode=allowedCodes.has(error?.message)?error.message:'tcmb_unavailable';
+  const messages={
+   tcmb_not_configured:'TCMB veri bağlantısı şu anda yapılandırılmamış.',
+   catalog_unavailable:'TCMB seri kataloğu okunamadı.',
+   metadata_mismatch:'TCMB serisinin birim veya dönem bilgisi doğrulanamadı.',
+   tcmb_format:'TCMB yanıtı beklenen veri biçiminde değil.',
+   empty_data:'TCMB serisinde karşılaştırılabilir veri bulunamadı.',
+   tcmb_unavailable:'TCMB verisi şu anda alınamıyor. Lütfen daha sonra yeniden deneyin.'
+  };
+  console.error('TCMB listing comparison failed',errorCode);
+  return json({status:'unavailable',error:messages[errorCode],errorCode,listing:checked},503,'no-store');
  }
 }
 
