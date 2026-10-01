@@ -45,8 +45,8 @@ export function ListingAnalyzer(){
     <div className="listing-url-row tcmb-url-row"><input id="listing-url" type="url" placeholder="https://www.hepsiemlak.com/…" value={url} onChange={event=>{setUrl(event.target.value);setListingFetched(false)}}/></div>
     <div className="tcmb-form-grid">
      <label>İl<input type="text" autoComplete="address-level1" placeholder="İstanbul" value={form.city} onChange={e=>update('city',e.target.value)}/></label>
-     <label>İlan fiyatı<input type="number" min="1" step="any" inputMode="decimal" placeholder="6.500.000" value={form.price} onChange={e=>update('price',e.target.value)}/><small>TL</small></label>
-     <label>Konut alanı<input type="number" min="1" step="any" inputMode="decimal" placeholder="100" value={form.area} onChange={e=>update('area',e.target.value)}/><small>m²</small></label>
+     <label>İlan fiyatı<input type="number" min="1" step="any" inputMode="decimal" placeholder="6.500.000" value={form.price??''} onChange={e=>update('price',e.target.value)}/><small>TL</small></label>
+     <label>Konut alanı<input type="number" min="1" step="any" inputMode="decimal" placeholder="100" value={form.area??''} onChange={e=>update('area',e.target.value)}/><small>m²</small></label>
      <label>Alan türü<select value={form.areaType} onChange={e=>update('areaType',e.target.value)}><option value="">Seçin</option><option value="net">Net alan</option><option value="gross">Brüt alan</option></select></label>
      <label className="tcmb-optional-rent">Bildiğiniz aylık kira <span>(isteğe bağlı)</span><input type="number" min="1" step="any" inputMode="decimal" placeholder="30.000" value={form.monthlyRent||''} onChange={e=>update('monthlyRent',e.target.value)}/><small>TL/ay</small></label>
     </div>
