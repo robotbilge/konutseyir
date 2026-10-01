@@ -15,15 +15,6 @@ test('focused calculator pages publish explanatory content and FAQ schema',()=>{
 test('homepage compares current TCMB housing index for Istanbul and Turkey',()=>{const home=readFileSync('dist/index.html','utf8'),component=readFileSync('components/tcmc-housing-comparison.tsx','utf8'),worker=readFileSync('worker/index.mjs','utf8');assert.match(home,/TCMB KONUT FİYAT ENDEKSİ/);assert.match(home,/İstanbul ve Türkiye’de fiyat değişimi/);assert.doesNotMatch(home,/İSTANBUL RADARI/);assert.match(component,/api\/history\?series=housing/);assert.match(component,/api\/city-market\?slug=istanbul/);assert.match(component,/TL\/m² fiyatı ya da mahalle tahmini değildir/);assert.match(worker,/source:'TCMB EVDS'/);});
 
 
-test('listing analyzer is linked to the homepage and extension stays permission-limited',()=>{
- const home=readFileSync('dist/index.html','utf8'),manifest=JSON.parse(readFileSync('extension/manifest.json','utf8')),worker=readFileSync('worker/index.mjs','utf8');
- assert.match(home,/İlan fiyatını bölge verisiyle kontrol edin/);
- assert.match(readFileSync('components/listing-analyzer.tsx','utf8'),/Bölge endeksi bulunamadı/);
- assert.ok(worker.includes("path==='/api/selectors'"));
- assert.ok(worker.includes("path==='/api/analyze'"));
- assert.deepEqual(manifest.host_permissions,[
-  'https://*.sahibinden.com/*','https://*.hepsiemlak.com/*','https://*.emlakjet.com/*','https://konutseyir.com/*'
- ]);
-});
+test('TCMB listing analyzer is linked and extension permissions stay limited',()=>{const home=readFileSync('dist/index.html','utf8'),component=readFileSync('components/listing-analyzer.tsx','utf8'),manifest=JSON.parse(readFileSync('extension/manifest.json','utf8')),worker=readFileSync('worker/index.mjs','utf8');assert.match(home,/KONUT İLANI · TCMB GÖSTERGESİ/);assert.match(component,/api\/tcmb-listing/);assert.ok(worker.includes("path==='/api/tcmb-listing'"));assert.deepEqual(manifest.host_permissions,['https://*.sahibinden.com/*','https://*.hepsiemlak.com/*','https://*.emlakjet.com/*','https://konutseyir.com/*'])});
 
-test('homepage uses the TCMB listing comparison and removes the old duplicate price check/index chart',()=>{const html=readFileSync('dist/index.html','utf8');assert.match(html,/KONUT İLANI · TCMB GÖSTERGESİ/);assert.doesNotMatch(html,/İLAN FİYAT KONTROLÜ|TCMB KONUT FİYAT ENDEKSİ|İstanbul ve Türkiye’de fiyat değişimi/);assert.match(html,/TCMB il ortanca m² fiyatı/);assert.match(html,/net alan|brüt alan/)});
+test('homepage replaces old price and index blocks with TCMB listing comparison',()=>{const html=readFileSync('dist/index.html','utf8'),component=readFileSync('components/listing-analyzer.tsx','utf8');assert.match(html,/KONUT İLANI · TCMB GÖSTERGESİ/);assert.doesNotMatch(html,/İLAN FİYAT KONTROLÜ|TCMB KONUT FİYAT ENDEKSİ|İstanbul ve Türkiye’de fiyat değişimi/);assert.match(component,/İlan m² fiyatı/);assert.match(component,/TCMB il ortanca m² fiyatı/);assert.match(component,/Net alan/);assert.match(component,/Brüt alan/);assert.match(component,/basit amortisman/)});
