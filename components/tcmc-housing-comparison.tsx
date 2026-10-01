@@ -19,7 +19,7 @@ export function TcmcHousingComparison(){
   fetch('/api/city-market?slug=istanbul',{signal:controller.signal}).then(r=>r.ok?r.json():Promise.reject()).then((result:CityResponse)=>result)
  ]).then(([turkeyRows,istanbulResult])=>{
   const turkeyMap=new Map<string,number>((turkeyRows as Observation[]).map(row=>[row.period,row.value]));
-  const points=(istanbulResult.history||[]).flatMap(row=>{const value=turkeyMap.get(row.period);return Number.isFinite(value)&&value>0&&row.value>0?[{period:row.period,istanbul:row.value,turkey:value}]:[]});
+  const points=(istanbulResult.history||[]).flatMap(row=>{const value=turkeyMap.get(row.period);return typeof value==='number'&&Number.isFinite(value)&&value>0&&row.value>0?[{period:row.period,istanbul:row.value,turkey:value}]:[]});
   if(!points.length)throw new Error('Ortak endeks dönemi bulunamadı');
   setData(points.slice(-24));setPeriod(points.at(-1)?.period||null);
  }).catch(()=>{if(!controller.signal.aborted)setFailed(true)}).finally(()=>{if(!controller.signal.aborted)setLoading(false)});return()=>controller.abort()},[]);
