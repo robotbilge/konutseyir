@@ -165,12 +165,18 @@ export function calculateTcmc(input, series) {
  if(!housePrice?.value) return {status:'no_data',message:'Bu il için karşılaştırılabilir TCMB verisi bulunamadı.',listing:validated,housePrice:null,rent:null};
  const grossM2Price=validated.grossArea?validated.price/validated.grossArea:null;
  const netM2Price=validated.netArea?validated.price/validated.netArea:null;
- const delta=grossM2Price?differencePercent(grossM2Price,housePrice.value):null;
+ // Normalize TCMB's gross-area unit price to this listing's net-area basis only
+ // when both areas are explicitly available; no generic net/gross ratio is assumed.
+ const tcmbNetEquivalentM2=validated.netArea&&validated.grossArea
+  ?housePrice.value*validated.grossArea/validated.netArea:null;
+ const comparisonBasis=netM2Price&&tcmbNetEquivalentM2?'net kullanım alanı':'brüt kullanım alanı';
+ const comparableListingM2=tcmbNetEquivalentM2?netM2Price:grossM2Price;
+ const delta=comparableListingM2?differencePercent(comparableListingM2,tcmbNetEquivalentM2||housePrice.value):null;
  const threshold=Number.isFinite(Number(input.thresholdPercent))&&Number(input.thresholdPercent)>0?Number(input.thresholdPercent):20;
  return {
   status:'available',
   listing:{...validated,grossM2Price,netM2Price,listingM2:grossM2Price},
-  comparison:{provinceUnitPriceM2:housePrice.value,differencePercent:delta,reviewRecommended:delta!=null&&Math.abs(delta)>=threshold,thresholdPercent:threshold,areaBasis:'brüt kullanım alanı'},
+  comparison:{provinceUnitPriceM2:housePrice.value,netEquivalentM2Price:tcmbNetEquivalentM2,differencePercent:delta,reviewRecommended:delta!=null&&Math.abs(delta)>=threshold,thresholdPercent:threshold,areaBasis:comparisonBasis},
   rent:rent?.value&&validated.grossArea?{unitMonthlyRentPerM2:rent.value,...rentMetrics(rent.value,validated.grossArea,validated.price),areaBasis:'brüt kullanım alanı',series:rent}:null,
   userRent:validated.monthlyRent?{monthlyRent:validated.monthlyRent,annualGrossYieldPercent:validated.monthlyRent*12/validated.price*100,paybackYears:validated.price/(validated.monthlyRent*12)}:null,
   sources:{housePrice,rent:rent||null},
