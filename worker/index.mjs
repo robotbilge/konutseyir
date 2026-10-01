@@ -151,8 +151,11 @@ export default {
  async scheduled(event,env,ctx){
   const tasks=[];
   if(event.cron==='30 13 * * 1-5')tasks.push(refresh(env));
-  if(event.cron==='0 5-20 * * *')tasks.push(refreshNewsTracked(env,true));
-  if(event.cron==='0 8 * * *'||event.cron==='0 13 * * *')tasks.push(refreshEmlakKonut(env,{notify:true}));
+  if(event.cron==='0 5-20 * * *'){
+   tasks.push(refreshNewsTracked(env,true));
+   const scheduledHour=new Date(event.scheduledTime).getUTCHours();
+   if(scheduledHour===8||scheduledHour===13)tasks.push(refreshEmlakKonut(env,{notify:true}));
+  }
   ctx.waitUntil(Promise.allSettled(tasks));
  },
  async fetch(request,env){
