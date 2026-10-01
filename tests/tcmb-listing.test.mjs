@@ -53,7 +53,7 @@ test('EVDS API failures are controlled and the API key is sent only in a server-
 
 test('20 percent and larger absolute differences raise a review warning without a price verdict',()=>{
  const result=calculateTcmc({price:12000000,grossArea:100,netArea:80,city:'İstanbul',thresholdPercent:20},{housePrice:{value:100000,period:'2026-Q2'},rent:{value:400,period:'2026-Q2'}});
- assert.equal(result.comparison.differencePercent,20);assert.equal(result.comparison.provinceUnitPriceM2,100000);assert.equal(result.comparison.areaBasis,'brüt kullanım alanı');assert.equal(result.comparison.reviewRecommended,true);
+ assert.equal(result.comparison.differencePercent,20);assert.equal(result.comparison.provinceUnitPriceM2,100000);assert.match(result.comparison.areaBasis,/net kullanım alanı/);assert.equal(result.comparison.netEquivalentM2Price,125000);assert.equal(result.comparison.reviewRecommended,true);
  assert.equal(result.listing.grossM2Price,120000);assert.equal(result.listing.netM2Price,150000);assert.equal(result.rent.monthlyGrossRent,40000);
 });
 test('net-only listing never compares against TCMB gross-area indicator or estimates TCMB rent',()=>{
