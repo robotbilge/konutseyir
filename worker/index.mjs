@@ -1,6 +1,6 @@
 import {definitions,cityHousingSeries,goldPrice,parseFX,parseEVDS,observation,yearChange} from './data.mjs';
 import {selectorConfig,getProvider,parseListingData,extractHtml,analyzeListing,fetchListing} from './listing-analyzer.mjs';
-import {isRelevantNews,newsFeeds,refreshNews} from './news.mjs';
+import {isRelevantNews,newsFeeds,refreshNews,refreshEmlakKonut} from './news.mjs';
 
 const json=(data,status=200,cache='public, max-age=300')=>Response.json(data,{status,headers:{'Cache-Control':cache,'X-Content-Type-Options':'nosniff'}});
 async function fetchText(url,headers={}){const r=await fetch(url,{headers,signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('Upstream unavailable');return r.text()}
@@ -61,7 +61,7 @@ async function districtSalesRanking(env,city,requestedLimit=20){
 async function listNews(env,url){
  const count=(await env.DB.prepare('SELECT COUNT(*) count FROM news').first())?.count||0;
  let {results:states=[]}=await env.DB.prepare("SELECT series,state,attempted_at attemptedAt FROM source_status WHERE series LIKE 'news:%'").all();
- const attempted=Math.max(0,...states.map(x=>new Date(x.attemptedAt).getTime()).filter(Number.isFinite)),stale=states.length<newsFeeds.length||!attempted||Date.now()-attempted>55*60*1000;
+ const attempted=Math.max(0,...states.filter(x=>x.series!=='news:emlak-konut-kap').map(x=>new Date(x.attemptedAt).getTime()).filter(Number.isFinite)),regularNewsCount=newsFeeds.filter(feed=>!feed.scheduledOnly).length,stale=states.filter(x=>x.series!=='news:emlak-konut-kap').length<regularNewsCount||!attempted||Date.now()-attempted>55*60*1000;
  let refreshResult=null;
  if(!count||stale){try{refreshResult=await refreshNewsTracked(env,true)}catch{}({results:states=[]}=await env.DB.prepare("SELECT series,state,attempted_at attemptedAt FROM source_status WHERE series LIKE 'news:%'").all())}
  const date=url.searchParams.get('date');
@@ -152,6 +152,7 @@ export default {
   const tasks=[];
   if(event.cron==='30 13 * * 1-5')tasks.push(refresh(env));
   if(event.cron==='0 5-20 * * *')tasks.push(refreshNewsTracked(env,true));
+  if(event.cron==='0 8 * * *'||event.cron==='0 13 * * *')tasks.push(refreshEmlakKonut(env,{notify:true}));
   ctx.waitUntil(Promise.allSettled(tasks));
  },
  async fetch(request,env){

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {isRelevantNews,newsFeeds,parseNewsRSS} from '../worker/news.mjs';
+import {isRelevantNews,newsFeeds,parseNewsRSS,parseEmlakKonutDisclosures} from '../worker/news.mjs';
 
 test('news feed keeps only relevant metadata from the approved source',async()=>{
  const xml=`<rss><channel>
@@ -52,4 +52,16 @@ test('curated emlak feed can retain relevant category items without keyword repe
  const rows=await parseNewsRSS(xml,source);
  assert.equal(rows.length,1);
  assert.equal(rows[0].category,'Emlak');
+});
+
+
+test('KAP scraper imports only Emlak Konut issuer announcements with official detail links',async()=>{
+ const html=`<table><tr id="notification1"><td><input type="checkbox" id="1669208"></td><td>547</td><td>28.09.2026 21:27</td><td>EKGYO</td><td>EMLAK KONUT GAYRİMENKUL YATIRIM ORTAKLIĞI A.Ş.</td><td>ÖDA</td><td>Özel Durum Açıklaması (Genel)</td><td>Eyüpsultan Kemerburgaz 3. Etap Sözleşme İmzalanması</td><td>-</td></tr>
+ <tr id="notification2"><td><input type="checkbox" id="1669207"></td><td>546</td><td>28.09.2026 21:27</td><td>HLVKS</td><td>HALK VARLIK KİRALAMA A.Ş.</td><td>ÖDA</td><td>Tertip İhraç Belgesi</td><td>Emlak Konut GYO 10.Tertip İhraç Belgesi</td></tr></table>`;
+ const items=await parseEmlakKonutDisclosures(html);
+ assert.equal(items.length,1);
+ assert.equal(items[0].title,'Eyüpsultan Kemerburgaz 3. Etap Sözleşme İmzalanması');
+ assert.equal(items[0].publishedAt,'2026-09-28T18:27:00.000Z');
+ assert.equal(items[0].sourceUrl,'https://www.kap.org.tr/tr/Bildirim/1669208');
+ assert.equal(items[0].sourceName,'Emlak Konut');
 });
