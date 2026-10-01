@@ -1,19 +1,31 @@
-import {ArrowDown,ArrowUpRight,BadgeCheck,Calculator as CalculatorIcon,Database,SearchCheck,ShieldCheck} from 'lucide-react';
+import {ArrowDown,ArrowUpRight,BadgeCheck,Calculator as CalculatorIcon,Database,Info,SearchCheck,ShieldCheck} from 'lucide-react';
 import {Header,Footer} from '../components/site-chrome';
 import {Calculator,Credit,Deposit} from '../components/calculator';
 import {LatestNews,MarketSnapshot,DistrictSalesRanking} from '../components/live-data';
 import {ListingAnalyzer} from '../components/listing-analyzer';
 
 export default function Home(){return <><Header/><main>
-  <section className="hero home-hero home-hero-single">
+  <section className="hero home-hero">
     <div className="hero-copy">
       <div className="trust-label"><BadgeCheck size={16}/> Kamu verileriyle karar desteği</div>
-      <p className="eyebrow">KONUT YATIRIM ANALİZİ</p>
-      <h1>Bir evin fiyatını değil,<br/><em>yatırım mantığını</em> ölçün.</h1>
-      <p className="lead">Kira gelirini, alım masraflarını ve alternatif getirileri aynı hesapta karşılaştırın.</p>
-      <div className="hero-actions"><a className="primary-link" href="#analiz">Hesaplamaya başla <ArrowDown size={17}/></a><a className="text-link" href="/veri">Veri kaynakları <ArrowUpRight size={16}/></a></div>
+      <p className="eyebrow">SATILIK KONUT İLANI ANALİZİ</p>
+      <h1>Satılık konut ilanını m² fiyatı ve <em>kira göstergeleriyle</em> karşılaştırın.</h1>
+      <p className="hero-tagline">Bir evin fiyatını değil, <strong>yatırım mantığını</strong> ölçün.</p>
+      <p className="lead">İlan bilgilerini bağlantıdan aktarın. Brüt m² fiyatını TCMB’nin il göstergesiyle; kira, getiri ve amortismanı ayrı ayrı inceleyin.</p>
+      <div className="hero-actions"><a className="primary-link" href="#ilan-analizi">İlanı analiz et <ArrowDown size={17}/></a><a className="text-link" href="/veri">Veri kaynakları <ArrowUpRight size={16}/></a></div>
       <div className="hero-proof"><span><ShieldCheck/> Üyelik gerekmez</span><span><CalculatorIcon/> Sonuç anında güncellenir</span><span><Database/> Varsayımlar size ait</span></div>
     </div>
+    <aside className="hero-analysis-preview" aria-labelledby="hero-analysis-title">
+      <p className="eyebrow">RAPOR ÖNİZLEMESİ</p>
+      <h2 id="hero-analysis-title">Analizde ne göreceksiniz?</h2>
+      <ol>
+        <li><span>01</span><div><b>İlanın m² fiyatı</b><small>Net ve brüt m² fiyatları ayrı hesaplanır.</small></div></li>
+        <li><span>02</span><div><b>TCMB il göstergesiyle fark</b><small>Yüzde farkı yalnız brüt alan varsa gösterilir.</small></div></li>
+        <li><span>03</span><div><b>Kira ve geri dönüş göstergeleri</b><small>TCMB kira verisi veya girdiğiniz aylık kira kullanılır.</small></div></li>
+      </ol>
+      <p className="hero-analysis-note"><Info size={16}/> TCMB göstergesi mahalle emsali veya ekspertiz değildir. İlan bilgileri alınamazsa manuel girebilirsiniz.</p>
+      <a className="hero-analysis-link" href="#ilan-analizi">Raporu oluştur <ArrowDown size={16}/></a>
+    </aside>
   </section>
   <ListingAnalyzer/>
   <div className="inner">

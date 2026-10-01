@@ -2,10 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {validateListingInput,differencePercent,rentMetrics,parseQuarterlyObservations,resolveProvinceSeries,calculateTcmc,validateQuarterlyMetadata,readEvdsJson} from '../worker/tcmb-listing.mjs';
 
-test('listing input requires positive price, area, province and explicit net/gross type',()=>{
- assert.deepEqual(validateListingInput({price:'0',area:'-2',city:'',areaType:'unknown'}).missing,['city','price','area','areaType']);
- assert.deepEqual(validateListingInput({price:'6.500.000 TL',area:'100 m²',city:'İstanbul',areaType:'net'}).missing,[]);
- assert.deepEqual(validateListingInput({price:'1',area:'1',city:'İstanbul',areaType:'net',monthlyRent:'0'}).missing,['monthlyRent']);
+test('listing input validates price, province and at least one explicitly typed net or gross area',()=>{
+ assert.deepEqual(validateListingInput({price:'0',area:'-2',city:'',areaType:'unknown'}).missing,['city','price','area']);
+ const both=validateListingInput({price:'6.500.000 TL',netArea:'55 m²',grossArea:'70 m²',city:'İstanbul'});
+ assert.deepEqual(both.missing,[]);assert.equal(both.area,70);assert.equal(both.areaType,'gross');
+ const netOnly=validateListingInput({price:'6.500.000 TL',netArea:'55 m²',city:'İstanbul'});
+ assert.deepEqual(netOnly.missing,[]);assert.equal(netOnly.grossArea,null);assert.equal(netOnly.areaType,'net');
+ assert.deepEqual(validateListingInput({price:'1',grossArea:'1',city:'İstanbul',monthlyRent:'0'}).missing,['monthlyRent']);
 });
 test('percent difference is relative to official provincial unit-price indicator',()=>{
  assert.equal(differencePercent(120000,100000),20);
@@ -26,6 +29,7 @@ test('official EVDS series catalogue resolves province series and quarterly meta
  const match=resolveProvinceSeries({items:[{SERIE_CODE:'VERIFIED_BY_EVDS_CATALOG',SERIE_NAME:'İstanbul Konut Birim Fiyatları',FREQUENCY_STR:'Üç Aylık',METADATA_LINK:'https://evds3.tcmb.gov.tr/tumSeriler/2003/bie_birimfiyat'}]},'İstanbul','price');
  assert.equal(match.code,'VERIFIED_BY_EVDS_CATALOG');
  assert.equal(match.unit,'TL/m²');
+ assert.equal(match.areaBasis,'brüt kullanım alanı');
  assert.match(match.unitSourceUrl,/bie_birimfiyat/);
  assert.equal(resolveProvinceSeries({items:[{SERIE_CODE:'VERIFIED_TURKEY_SERIES',SERIE_NAME:'Türkiye Konut Birim Fiyatları',FREQUENCY_STR:'Üç Aylık'}]},'İstanbul','price'),null);
  assert.throws(()=>resolveProvinceSeries({items:[{SERIE_CODE:'WRONG_FREQUENCY',SERIE_NAME:'İstanbul Konut Birim Fiyatları',FREQUENCY_STR:'Aylık'}]},'İstanbul','price'),{message:'metadata_mismatch'});
@@ -33,6 +37,7 @@ test('official EVDS series catalogue resolves province series and quarterly meta
 test('quarterly rent metadata uses verified monthly unit basis from TCMB methodology',()=>{
  const match=resolveProvinceSeries({items:[{SERIE_CODE:'VERIFIED_RENT_SERIES',SERIE_NAME:'Değerlemesi Yapılan Konutların Birim Kiraları İstanbul',FREQUENCY_STR:'Üç Aylık'}]},'İstanbul','rent');
  assert.equal(match.unit,'TL/m²/ay');
+ assert.equal(match.areaBasis,'brüt kullanım alanı');
  assert.ok(match.methodologyUrl.includes('tcmb.gov.tr'));
  assert.equal(validateQuarterlyMetadata({...match,frequency:'Çeyreklik'},'rent'),true);
  assert.throws(()=>validateQuarterlyMetadata({...match,frequency:'Aylık'},'rent'),{message:'metadata_mismatch'});
@@ -47,6 +52,13 @@ test('EVDS API failures are controlled and the API key is sent only in a server-
 });
 
 test('20 percent and larger absolute differences raise a review warning without a price verdict',()=>{
- const result=calculateTcmc({price:12000000,area:100,city:'İstanbul',areaType:'net',thresholdPercent:20},{housePrice:{value:100000,period:'2026-Q2'},rent:null});
- assert.equal(result.comparison.differencePercent,20);assert.equal(result.comparison.provinceUnitPriceM2,100000);assert.equal(result.comparison.reviewRecommended,true);assert.equal(result.rent,null);assert.equal(result.userRent,null);
+ const result=calculateTcmc({price:12000000,grossArea:100,netArea:80,city:'İstanbul',thresholdPercent:20},{housePrice:{value:100000,period:'2026-Q2'},rent:{value:400,period:'2026-Q2'}});
+ assert.equal(result.comparison.differencePercent,20);assert.equal(result.comparison.provinceUnitPriceM2,100000);assert.equal(result.comparison.areaBasis,'brüt kullanım alanı');assert.equal(result.comparison.reviewRecommended,true);
+ assert.equal(result.listing.grossM2Price,120000);assert.equal(result.listing.netM2Price,150000);assert.equal(result.rent.monthlyGrossRent,40000);
+});
+test('net-only listing never compares against TCMB gross-area indicator or estimates TCMB rent',()=>{
+ const result=calculateTcmc({price:6500000,netArea:55,monthlyRent:30000,city:'İstanbul'},{housePrice:{value:100000,period:'2026-Q2'},rent:{value:400,period:'2026-Q2'}});
+ assert.equal(result.listing.netM2Price,6500000/55);assert.equal(result.listing.grossM2Price,null);
+ assert.equal(result.comparison.differencePercent,null);assert.equal(result.comparison.reviewRecommended,false);assert.equal(result.rent,null);
+ assert.equal(result.userRent.annualGrossYieldPercent,30000*12/6500000*100);
 });

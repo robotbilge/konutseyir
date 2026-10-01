@@ -182,7 +182,7 @@ async function tcmbProvinceValue(env,province,kind,groupCode){
  const sourceUrl=kind==='price'?'https://evds3.tcmb.gov.tr/tumSeriler/2003/bie_birimfiyat':'https://evds3.tcmb.gov.tr/charts/portlet/Njk5NDEzNTFjNjAxMWY0MDU2MDdmZjJm/tr';
  let cached=await env.DB.prepare('SELECT period,value,retrieved_at retrievedAt FROM observations WHERE series=? ORDER BY period DESC LIMIT 1').bind(dbKey).first();
  if(cached&&Date.now()-Date.parse(cached.retrievedAt)<7*86400000){
-  return {value:Number(cached.value),period:quarterDate(cached.period),retrievedAt:cached.retrievedAt,seriesCode:meta.code,seriesName:meta.name,unit:meta.unit,frequency:meta.frequency,sourceUrl};
+  return {value:Number(cached.value),period:quarterDate(cached.period),retrievedAt:cached.retrievedAt,seriesCode:meta.code,seriesName:meta.name,unit:meta.unit,frequency:meta.frequency,areaBasis:meta.areaBasis,sourceUrl,methodologyUrl:meta.methodologyUrl};
  }
  const end=new Date(),start=new Date(Date.UTC(end.getUTCFullYear()-4,0,1));
  const format=d=>`${String(d.getUTCDate()).padStart(2,'0')}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${d.getUTCFullYear()}`;
@@ -196,7 +196,7 @@ async function tcmbProvinceValue(env,province,kind,groupCode){
  const observations=rows.filter(row=>row.value!=null);
  await env.DB.batch(observations.map(row=>env.DB.prepare('INSERT INTO observations(series,period,value,retrieved_at) VALUES(?,?,?,?) ON CONFLICT(series,period) DO UPDATE SET value=excluded.value,retrieved_at=excluded.retrieved_at').bind(dbKey,row.period,row.value,now)));
  await status(env,dbKey,'available');
- return {value:latest.value,period:latest.displayPeriod,retrievedAt:now,seriesCode:meta.code,seriesName:meta.name,unit:meta.unit,frequency:meta.frequency,sourceUrl};
+ return {value:latest.value,period:latest.displayPeriod,retrievedAt:now,seriesCode:meta.code,seriesName:meta.name,unit:meta.unit,frequency:meta.frequency,areaBasis:meta.areaBasis,sourceUrl,methodologyUrl:meta.methodologyUrl};
 }
 async function tcmbListingRequest(request,env){
  if(Number(request.headers.get('Content-Length')||0)>20000)return json({error:'İstek boyutu çok büyük.'},413,'no-store');
@@ -209,22 +209,31 @@ async function tcmbListingRequest(request,env){
    try{scraped=await extractHtml(await fetchListing(target),provider,target);fetchState='fetched'}
   catch(error){fetchState=error?.name==='TimeoutError'?'timeout':'unavailable'}
  }
- const areaType=body.areaType|| (scraped.netArea&&scraped.grossArea?'':scraped.netArea?'net':scraped.grossArea?'gross':'');
+ const netArea=body.netArea||scraped.netArea||null;
+ const grossArea=body.grossArea||scraped.grossArea||null;
+ const areaType=grossArea?'gross':netArea?'net':body.areaType||'';
  const listing={
   city:typeof body.city==='string'&&body.city.trim()?body.city.trim():scraped.city||'',
   price:body.price!==undefined&&body.price!==null&&body.price!==''?body.price:scraped.price,
-  area:body.area!==undefined&&body.area!==null&&body.area!==''?body.area:body.areaType==='gross'?body.grossArea||scraped.grossArea:body.areaType==='net'?body.netArea||scraped.netArea:body.netArea||scraped.netArea||body.grossArea||scraped.grossArea||scraped.area,
-  netArea:body.netArea||scraped.netArea||null,
-  grossArea:body.grossArea||scraped.grossArea||null,
+  area:grossArea||netArea||body.area||scraped.area,
+  netArea,
+  grossArea,
   district:body.district||scraped.district||null,
   neighborhood:body.neighborhood||scraped.neighborhood||null,
   areaType,
   monthlyRent:body.monthlyRent||scraped.monthlyRent||''
  };
  const checked=validateListingInput(listing);
- if(body.extractOnly&&fetchState==='fetched')return json({status:'extracted',listing,missing:checked.missing,extraction:{serverFetch:fetchState},message:'Sayfada bulunabilen bilgiler forma aktarıldı. Net/brüt alanı ve eksik bilgileri kontrol edin.'},200,'no-store');
- if(checked.missing.length)return json({status:'needs_input',listing,missing:checked.missing,extraction:{serverFetch:fetchState},message:'İlandan alınabilen bilgiler forma aktarıldı. Eksik alanları ve net/brüt m² bilgisini tamamlayın.'},200,'no-store');
- if(!env.DB)return json({status:'unavailable',error:'Veri hizmeti şu anda kullanılamıyor.'},503,'no-store');
+ const listingParsed=Boolean(scraped.price&&(scraped.grossArea||scraped.netArea));
+ const extraction={serverFetch:fetchState,listingParsed};
+ const extractionMessage=target&&fetchState!=='fetched'
+  ?'İlan bilgileri alınamadı. Lütfen bilgileri manuel doldurun.'
+  :target&&!listingParsed
+   ?'İlan sayfasından fiyat ve alan bilgileri birlikte alınamadı. Alınabilenleri kontrol edin, eksikleri manuel doldurun.'
+   :'Sayfada bulunabilen bilgiler forma aktarıldı. Net ve brüt alanları ayrı ayrı kontrol edin.';
+ if(body.extractOnly&&fetchState==='fetched')return json({status:'extracted',listing,missing:checked.missing,extraction,message:extractionMessage},200,'no-store');
+ if(checked.missing.length)return json({status:'needs_input',listing,missing:checked.missing,extraction,message:extractionMessage},200,'no-store');
+ if(!env.DB)return json({status:'unavailable',error:'Veri hizmeti şu anda kullanılamıyor.',extraction},503,'no-store');
  try{
   const groups=await evdsGroups(env);
   const [housePrice,rent]=await Promise.all([
@@ -232,11 +241,11 @@ async function tcmbListingRequest(request,env){
    tcmbProvinceValue(env,checked.city,'rent',groups.rent).catch(()=>null)
   ]);
   if(!housePrice){
-   return json({status:'no_data',message:'Bu il için karşılaştırılabilir TCMB verisi bulunamadı.',listing:checked,extraction:{serverFetch:fetchState},source:{name:'TCMB EVDS',url:'https://evds3.tcmb.gov.tr/'}},200,'no-store');
+   return json({status:'no_data',message:'Bu il için karşılaştırılabilir TCMB verisi bulunamadı.',listing:checked,extraction,source:{name:'TCMB EVDS',url:'https://evds3.tcmb.gov.tr/'}},200,'no-store');
   }
   const threshold=Number(env.TCMB_COMPARISON_THRESHOLD_PERCENT);
   const result=calculateTcmc({...listing,thresholdPercent:Number.isFinite(threshold)&&threshold>0?threshold:20},{housePrice,rent});
-  return json({...result,extraction:{serverFetch:fetchState}},200,'no-store');
+  return json({...result,extraction},200,'no-store');
  }catch(error){
   const allowedCodes=new Set(['tcmb_not_configured','catalog_unavailable','metadata_mismatch','tcmb_format','tcmb_unavailable','empty_data']);
   const errorCode=allowedCodes.has(error?.message)?error.message:'tcmb_unavailable';
@@ -249,7 +258,7 @@ async function tcmbListingRequest(request,env){
    tcmb_unavailable:'TCMB verisi şu anda alınamıyor. Lütfen daha sonra yeniden deneyin.'
   };
   console.error('TCMB listing comparison failed',errorCode);
-  return json({status:'unavailable',error:messages[errorCode],errorCode,listing:checked},503,'no-store');
+  return json({status:'unavailable',error:messages[errorCode],errorCode,listing:checked,extraction},503,'no-store');
  }
 }
 

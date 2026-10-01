@@ -35,12 +35,15 @@ export function asCatalogRows(payload) {
 const officialUnits = {
  price:{
   unit:'TL/m²',
-  sourceUrl:'https://evds3.tcmb.gov.tr/tumSeriler/2003/bie_birimfiyat'
+  areaBasis:'brüt kullanım alanı',
+  sourceUrl:'https://evds3.tcmb.gov.tr/tumSeriler/2003/bie_birimfiyat',
+  methodologyUrl:'https://www.tcmb.gov.tr/wps/wcm/connect/b4628fa9-11a7-4426-aee6-dae67fc56200/KFE-Metaveri.pdf?CACHEID=ROOTWORKSPACE-b4628fa9-11a7-4426-aee6-dae67fc56200-nwWPcfR&MOD=AJPERES'
  },
  rent:{
   unit:'TL/m²/ay',
-  sourceUrl:'https://evds3.tcmb.gov.tr/charts/portlet/Njk5NDEzNTFjNjAxMWY0MDU2MDdmZjJm/tr',
-  methodologyUrl:'https://www.tcmb.gov.tr/wps/wcm/connect/blog/tr/main%2Bmenu/analizler/kiralar%2Bicin%2Byeni%2Bbir%2Bgosterge%2Byeni%2Bkiraci%2Bkira%2Bendeksi'
+  areaBasis:'brüt kullanım alanı',
+   sourceUrl:'https://evds3.tcmb.gov.tr/charts/portlet/Njk5NDEzNTFjNjAxMWY0MDU2MDdmZjJm/tr',
+  methodologyUrl:'https://www.tcmb.gov.tr/wps/wcm/connect/b4628fa9-11a7-4426-aee6-dae67fc56200/KFE-Metaveri.pdf?CACHEID=ROOTWORKSPACE-b4628fa9-11a7-4426-aee6-dae67fc56200-nwWPcfR&MOD=AJPERES'
  }
 };
 export function validateQuarterlyMetadata(meta, kind) {
@@ -77,7 +80,7 @@ export function resolveProvinceSeries(payload, province, kind) {
  // 100 m² quarterly rent examples (the quarter is the observation period, while the reported rent is monthly).
  const verifiedUnit = officialUnits[kind];
  if (!verifiedUnit) throw new Error('metadata_mismatch');
- const resolved={...match,unit:match.unit||verifiedUnit.unit,unitSourceUrl:verifiedUnit.sourceUrl,methodologyUrl:verifiedUnit.methodologyUrl||null};
+ const resolved={...match,unit:match.unit||verifiedUnit.unit,areaBasis:verifiedUnit.areaBasis,unitSourceUrl:verifiedUnit.sourceUrl,methodologyUrl:verifiedUnit.methodologyUrl||null};
  validateQuarterlyMetadata({...resolved,verifiedUnit:verifiedUnit.unit},kind);
  return resolved;
 }
@@ -131,16 +134,18 @@ export function parsePositive(value) {
  const n=Number(s);return Number.isFinite(n)&&n>0?n:null;
 }
 export function validateListingInput(input={}) {
- const price=parsePositive(input.price), area=parsePositive(input.area), city=typeof input.city==='string'?input.city.trim().slice(0,100):'';
- const areaType=['net','gross'].includes(input.areaType)?input.areaType:null;
+ const price=parsePositive(input.price), city=typeof input.city==='string'?input.city.trim().slice(0,100):'';
+ const grossArea=parsePositive(input.grossArea) ?? (input.areaType==='gross'?parsePositive(input.area):null);
+ const netArea=parsePositive(input.netArea) ?? (input.areaType==='net'?parsePositive(input.area):null);
+ const area=grossArea??netArea;
+ const areaType=grossArea?'gross':netArea?'net':null;
  const monthlyRent=input.monthlyRent==null||input.monthlyRent===''?null:parsePositive(input.monthlyRent);
  const missing=[];
  if(!city)missing.push('city');
  if(!price)missing.push('price');
  if(!area)missing.push('area');
- if(!areaType)missing.push('areaType');
  if(input.monthlyRent!=null&&input.monthlyRent!==''&&!monthlyRent)missing.push('monthlyRent');
- return {city,price,area,areaType,monthlyRent,missing};
+ return {city,price,area,areaType,netArea,grossArea,monthlyRent,missing};
 }
 export function differencePercent(listingM2, provinceUnitPriceM2) {
  if(!(listingM2>0)||!(provinceUnitPriceM2>0))return null;
@@ -158,15 +163,16 @@ export function calculateTcmc(input, series) {
  if(validated.missing.length)throw new Error('invalid_input');
  const housePrice=series?.housePrice, rent=series?.rent;
  if(!housePrice?.value) return {status:'no_data',message:'Bu il için karşılaştırılabilir TCMB verisi bulunamadı.',listing:validated,housePrice:null,rent:null};
- const listingM2=validated.price/validated.area;
- const delta=differencePercent(listingM2,housePrice.value);
+ const grossM2Price=validated.grossArea?validated.price/validated.grossArea:null;
+ const netM2Price=validated.netArea?validated.price/validated.netArea:null;
+ const delta=grossM2Price?differencePercent(grossM2Price,housePrice.value):null;
  const threshold=Number.isFinite(Number(input.thresholdPercent))&&Number(input.thresholdPercent)>0?Number(input.thresholdPercent):20;
  return {
   status:'available',
-  listing:{...validated,listingM2},
-  comparison:{provinceUnitPriceM2:housePrice.value,differencePercent:delta,reviewRecommended:Math.abs(delta)>=threshold,thresholdPercent:threshold},
-  rent:rent?.value?{unitMonthlyRentPerM2:rent.value,...rentMetrics(rent.value,validated.area,validated.price),series:rent}:null,
-  userRent:validated.monthlyRent?{monthlyRent:validated.monthlyRent,...rentMetrics(validated.monthlyRent/validated.area,validated.area,validated.price)}:null,
+  listing:{...validated,grossM2Price,netM2Price,listingM2:grossM2Price},
+  comparison:{provinceUnitPriceM2:housePrice.value,differencePercent:delta,reviewRecommended:delta!=null&&Math.abs(delta)>=threshold,thresholdPercent:threshold,areaBasis:'brüt kullanım alanı'},
+  rent:rent?.value&&validated.grossArea?{unitMonthlyRentPerM2:rent.value,...rentMetrics(rent.value,validated.grossArea,validated.price),areaBasis:'brüt kullanım alanı',series:rent}:null,
+  userRent:validated.monthlyRent?{monthlyRent:validated.monthlyRent,annualGrossYieldPercent:validated.monthlyRent*12/validated.price*100,paybackYears:validated.price/(validated.monthlyRent*12)}:null,
   sources:{housePrice,rent:rent||null},
   disclaimer:'Bu sonuçlar TCMB’nin il bazlı değerleme verilerinden üretilen yaklaşık göstergelerdir; belirli bir konut için ekspertiz, gerçekleşmiş satış fiyatı, kira garantisi veya yatırım tavsiyesi değildir. Brüt kira getirisi ve amortisman hesabı vergi, aidat, bakım, boş kalma süresi ve diğer masrafları içermez. İl göstergesi mahalle veya daire özelliklerine göre emsal karşılaştırmasının yerine geçmez.'
  };
