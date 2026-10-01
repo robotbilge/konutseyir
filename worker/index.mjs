@@ -206,18 +206,23 @@ async function tcmbListingRequest(request,env){
  if(target){
   const provider=getProvider(target);
   if(!provider)return json({error:'Yalnızca Sahibinden, Hepsiemlak veya Emlakjet ilan bağlantıları kullanılabilir.'},400,'no-store');
-  try{scraped=await extractHtml(await fetchListing(target),provider);fetchState='fetched'}
+   try{scraped=await extractHtml(await fetchListing(target),provider,target);fetchState='fetched'}
   catch(error){fetchState=error?.name==='TimeoutError'?'timeout':'unavailable'}
  }
- const areaType=body.areaType|| (scraped.netArea?'net':scraped.grossArea?'gross':'');
+ const areaType=body.areaType|| (scraped.netArea&&scraped.grossArea?'':scraped.netArea?'net':scraped.grossArea?'gross':'');
  const listing={
   city:typeof body.city==='string'&&body.city.trim()?body.city.trim():scraped.city||'',
   price:body.price!==undefined&&body.price!==null&&body.price!==''?body.price:scraped.price,
-  area:body.area!==undefined&&body.area!==null&&body.area!==''?body.area:body.netArea!==undefined&&body.netArea!==null&&body.netArea!==''?body.netArea:body.grossArea!==undefined&&body.grossArea!==null&&body.grossArea!==''?body.grossArea:scraped.netArea??scraped.area??scraped.grossArea,
+  area:body.area!==undefined&&body.area!==null&&body.area!==''?body.area:body.areaType==='gross'?body.grossArea||scraped.grossArea:body.areaType==='net'?body.netArea||scraped.netArea:body.netArea||scraped.netArea||body.grossArea||scraped.grossArea||scraped.area,
+  netArea:body.netArea||scraped.netArea||null,
+  grossArea:body.grossArea||scraped.grossArea||null,
+  district:body.district||scraped.district||null,
+  neighborhood:body.neighborhood||scraped.neighborhood||null,
   areaType,
-  monthlyRent:body.monthlyRent??''
+  monthlyRent:body.monthlyRent||scraped.monthlyRent||''
  };
  const checked=validateListingInput(listing);
+ if(body.extractOnly&&fetchState==='fetched')return json({status:'extracted',listing,missing:checked.missing,extraction:{serverFetch:fetchState},message:'Sayfada bulunabilen bilgiler forma aktarıldı. Net/brüt alanı ve eksik bilgileri kontrol edin.'},200,'no-store');
  if(checked.missing.length)return json({status:'needs_input',listing,missing:checked.missing,extraction:{serverFetch:fetchState},message:'İlandan alınabilen bilgiler forma aktarıldı. Eksik alanları ve net/brüt m² bilgisini tamamlayın.'},200,'no-store');
  if(!env.DB)return json({status:'unavailable',error:'Veri hizmeti şu anda kullanılamıyor.'},503,'no-store');
  try{

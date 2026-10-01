@@ -1,3 +1,5 @@
+import {canonicalProvince} from '../lib/provinces.mjs';
+
 export const selectorConfig = {
   version: 1,
   updatedAt: "2026-09-30",
@@ -36,7 +38,7 @@ export function getProvider(input) {
   try { url = new URL(input); } catch { return null; }
   if (url.protocol !== "https:" || url.username || url.password || url.port) return null;
   const key=providerEntries.find(([, provider]) =>
-    provider.hosts.some(host => url.hostname === host || url.hostname.endsWith("." + host))
+    provider.hosts.some(host => url.hostname === host || url.hostname === `www.${host}`)
   )?.[0] || null;
   if(!key||url.pathname.split("/").filter(Boolean).length<1||!/(ilan|detay|satilik|kiralik|konut|daire|arsa|isyeri)/i.test(url.pathname))return null;
   return key;
@@ -136,7 +138,7 @@ export function parseJsonLd(html) {
       const addressText = textFrom(address);
       out.price ??= cleanNumber(first(offer.price, offer.lowPrice, node.price));
       out.area ??= cleanNumber(first(node.floorSize?.value, node.floorSize, node.size));
-            out.city ??= first(address.addressRegion, address.addressCountry?.name);
+      out.city ??= first(address.addressRegion, address.addressCountry?.name);
       out.district ??= first(address.addressLocality);
       out.address ??= first(addressText, node.name);
     } catch { /* Ignore malformed provider JSON-LD. */ }
@@ -144,10 +146,68 @@ export function parseJsonLd(html) {
   return out;
 }
 
-export async function extractHtml(html, providerKey) {
+function plainText(html) {
+  return String(html).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,' ')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi,' ')
+    .replace(/<[^>]+>/g,' ').replace(/&nbsp;|&#160;/gi,' ')
+    .replace(/&amp;/gi,'&').replace(/&quot;|&#34;/gi,'"').replace(/&#39;|&apos;/gi,"'")
+    .replace(/&uuml;/gi,'ü').replace(/&Uuml;/g,'Ü').replace(/&ouml;/gi,'ö').replace(/&Ouml;/g,'Ö')
+    .replace(/&ccedil;/gi,'ç').replace(/&Ccedil;/g,'Ç').replace(/&gbreve;/gi,'ğ').replace(/&Gbreve;/g,'Ğ')
+    .replace(/&scedil;/gi,'ş').replace(/&Scedil;/g,'Ş').replace(/&#x([\da-f]+);/gi,(_,n)=>String.fromCodePoint(parseInt(n,16)))
+    .replace(/&#(\d+);/g,(_,n)=>String.fromCodePoint(Number(n))).replace(/\s+/g,' ').trim();
+}
+
+function fromUrl(url) {
+  try {
+    const slug=new URL(url).pathname.split('/').filter(Boolean)[0]||'';
+    const parts=slug.toLocaleLowerCase('tr-TR').split('-');
+    const saleIndex=parts.findIndex(part=>['satilik','kiralik'].includes(part));
+    if(saleIndex<2)return {};
+    const cityPart=parts[0];
+    const city=canonicalProvince(cityPart);
+    if(!city)return {};
+    const title=parts.slice(1,saleIndex);
+    const titleCase=value=>value.split(' ').map(word=>word.charAt(0).toLocaleUpperCase('tr-TR')+word.slice(1)).join(' ');
+    const turkishSlug=value=>({kadikoy:'kadıköy',sisli:'şişli',besiktas:'beşiktaş',erenkoy:'erenköy',uskudar:'üsküdar',cankaya:'çankaya',golbasi:'gölbaşı',caglayan:'çağlayan',sariyer:'sarıyer',kucukcekmece:'küçükçekmece',buyukcekmece:'büyükçekmece'}[value]||value);
+    const district=title.shift()||'';
+    return {city,district:titleCase(turkishSlug(district)),neighborhood:title.length?titleCase(title.map(turkishSlug).join(' ')):null};
+  } catch { return {}; }
+}
+
+export function parseListingPage(html, sourceUrl='') {
+  const values=parseJsonLd(html);
+  const text=plainText(html);
+  const getMeta=(property)=>{
+    const escaped=property.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const match=String(html).match(new RegExp(`<meta[^>]+(?:property|name)=["']${escaped}["'][^>]+content=["']([^"']+)`, 'i'))
+      ||String(html).match(new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["']${escaped}["']`, 'i'));
+    return match?.[1]||null;
+  };
+  values.price ??= cleanNumber(first(getMeta('product:price:amount'),getMeta('og:price:amount')));
+  const areaUnit='m(?:²|2)?';
+  const areaPair=text.match(new RegExp(`br[uü]t\\s*\\/\\s*net\\s*${areaUnit}[\\s:|·-]{0,60}(\\d[\\d.,]*)\\s*${areaUnit}\\s*\\/\\s*(\\d[\\d.,]*)\\s*${areaUnit}`,'i'))
+    ||text.match(new RegExp(`br[uü]t\\s*(\\d[\\d.,]*)\\s*${areaUnit}[\\s|,;/]+net\\s*(\\d[\\d.,]*)\\s*${areaUnit}`,'i'));
+  if(areaPair){
+    const firstArea=cleanNumber(areaPair[1]),secondArea=cleanNumber(areaPair[2]);
+    if(/br[uü]t\s*\/\s*net/i.test(areaPair[0])){values.grossArea??=firstArea;values.netArea??=secondArea;}
+    else {values.grossArea??=firstArea;values.netArea??=secondArea;}
+  }
+  values.netArea ??= cleanNumber(text.match(/net\s*m(?:²|2)\s*[:|·-]?\s*(\d[\d.,]*)\s*m(?:²|2)?/i)?.[1]);
+  values.grossArea ??= cleanNumber(text.match(/br[uü]t\s*m(?:²|2)\s*[:|·-]?\s*(\d[\d.,]*)\s*m(?:²|2)?/i)?.[1]);
+  values.area ??= values.netArea || values.grossArea || cleanNumber(text.match(/(?:net|br[uü]t)\s*(?:alan|m2|m²)[\s:|·-]{0,30}(\d[\d.,]*)\s*m(?:²|2)?/i)?.[1]);
+  values.price ??= cleanNumber(text.match(/(?:₺|TL)\s*([\d.\s,]{5,})|([\d.\s,]{5,})\s*(?:₺|TL)\b/i)?.slice(1).find(Boolean));
+  values.monthlyRent ??= cleanNumber(text.match(/(?:kira getirisi|ayl[iı]k kira|kira bedeli)\s*[:|·-]?\s*(?:₺|TL)?\s*([\d.\s,]{3,})\s*(?:₺|TL)?/i)?.[1]);
+  const location=fromUrl(sourceUrl);
+  values.city ??= canonicalProvince(values.city)||location.city;
+  values.district ??= location.district;
+  values.neighborhood ??= location.neighborhood;
+  return parseListingData(values);
+}
+
+export async function extractHtml(html, providerKey, sourceUrl='') {
   const config = selectorConfig.providers[providerKey];
-  const values = parseJsonLd(html);
-  if (!config || typeof HTMLRewriter === "undefined") return parseListingData(values);
+  const values = parseListingPage(html,sourceUrl);
+  if (!config || typeof HTMLRewriter === "undefined") return values;
   const captures = [];
   for (const [field, rules] of Object.entries(config.selectors)) {
     for (const rule of rules) {

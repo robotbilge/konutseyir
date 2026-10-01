@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {getProvider,parseListingData,analyzeListing,valuation,parseJsonLd} from '../worker/listing-analyzer.mjs';
+import {getProvider,parseListingData,analyzeListing,valuation,parseJsonLd,parseListingPage} from '../worker/listing-analyzer.mjs';
 
 test('only HTTPS listing pages on supported hosts are accepted',()=>{
  assert.equal(getProvider('https://www.sahibinden.com/ilan/emlak-konut-satilik-ev-123'), 'sahibinden');
@@ -47,4 +47,16 @@ test('JSON-LD listing metadata yields price, area and location',()=>{
  assert.equal(result.area,100);
  assert.equal(result.city,'İstanbul');
  assert.equal(result.district,'Kadıköy');
+});
+
+test('Hepsiemlak page text extracts price, both area types, rent and URL location',()=>{
+ const html='<html><head><meta property="product:price:amount" content="11950000"></head><body><h1>Satılık Daire</h1><div>11.950.000 TL</div><section>Brüt / Net M2 70 m2 / 55 m2</section><div>Kira Getirisi 60.000 TL</div></body></html>';
+ const result=parseListingPage(html,'https://www.hepsiemlak.com/istanbul-kadikoy-erenkoy-satilik/daire/138068-1245');
+ assert.equal(result.price,11950000);
+ assert.equal(result.netArea,55);
+ assert.equal(result.grossArea,70);
+ assert.equal(result.city,'İstanbul');
+ assert.equal(result.district,'Kadıköy');
+ assert.equal(result.neighborhood,'Erenköy');
+ assert.equal(result.monthlyRent,60000);
 });

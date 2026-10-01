@@ -142,9 +142,9 @@ export function validateListingInput(input={}) {
  if(input.monthlyRent!=null&&input.monthlyRent!==''&&!monthlyRent)missing.push('monthlyRent');
  return {city,price,area,areaType,monthlyRent,missing};
 }
-export function differencePercent(listingM2, provinceMedianM2) {
- if(!(listingM2>0)||!(provinceMedianM2>0))return null;
- return Number(((listingM2/provinceMedianM2-1)*100).toFixed(10));
+export function differencePercent(listingM2, provinceUnitPriceM2) {
+ if(!(listingM2>0)||!(provinceUnitPriceM2>0))return null;
+ return Number(((listingM2/provinceUnitPriceM2-1)*100).toFixed(10));
 }
 export function rentMetrics(monthlyUnitRent, area, salePrice) {
  if(!(monthlyUnitRent>0)||!(area>0)||!(salePrice>0))return null;
@@ -164,11 +164,11 @@ export function calculateTcmc(input, series) {
  return {
   status:'available',
   listing:{...validated,listingM2},
-  comparison:{provinceMedianM2:housePrice.value,differencePercent:delta,reviewRecommended:Math.abs(delta)>=threshold,thresholdPercent:threshold},
+  comparison:{provinceUnitPriceM2:housePrice.value,differencePercent:delta,reviewRecommended:Math.abs(delta)>=threshold,thresholdPercent:threshold},
   rent:rent?.value?{unitMonthlyRentPerM2:rent.value,...rentMetrics(rent.value,validated.area,validated.price),series:rent}:null,
   userRent:validated.monthlyRent?{monthlyRent:validated.monthlyRent,...rentMetrics(validated.monthlyRent/validated.area,validated.area,validated.price)}:null,
   sources:{housePrice,rent:rent||null},
-  disclaimer:'Bu sonuçlar TCMB’nin il bazlı değerleme verilerinden üretilen yaklaşık göstergelerdir; belirli bir konut için ekspertiz, satış fiyatı veya kira garantisi değildir. Brüt kira getirisi ve amortisman hesabı vergi, aidat, bakım, boş kalma süresi ve diğer masrafları içermez. İl ortancası mahalle veya daire özelliklerine göre emsal karşılaştırmasının yerine geçmez.'
+  disclaimer:'Bu sonuçlar TCMB’nin il bazlı değerleme verilerinden üretilen yaklaşık göstergelerdir; belirli bir konut için ekspertiz, gerçekleşmiş satış fiyatı, kira garantisi veya yatırım tavsiyesi değildir. Brüt kira getirisi ve amortisman hesabı vergi, aidat, bakım, boş kalma süresi ve diğer masrafları içermez. İl göstergesi mahalle veya daire özelliklerine göre emsal karşılaştırmasının yerine geçmez.'
  };
 }
 export function normalizeMetadataRows(payload) { return asCatalogRows(payload).map(row=>({code:field(row,keyNames.code),name:field(row,keyNames.name),unit:field(row,keyNames.unit),frequency:field(row,keyNames.frequency),note:field(row,keyNames.note)})); }

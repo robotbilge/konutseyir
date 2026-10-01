@@ -291,8 +291,11 @@ body{background:#f7f7f3}
 .tcmb-listing-analyzer{grid-template-columns:minmax(240px,.72fr) minmax(0,1.28fr);align-items:start}
 .tcmb-tool-points{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
 .tcmb-tool-points span{display:inline-flex;align-items:center;gap:7px;padding:9px 11px;border:1px solid var(--line);border-radius:999px;background:#f7faf8;color:var(--green);font-size:11px;font-weight:750}
-.tcmb-url-row{display:grid;grid-template-columns:1fr;gap:8px}
+.tcmb-url-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
 .tcmb-url-row button{display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+.tcmb-url-row .tcmb-extract{min-height:42px;padding:0 13px;border:1px solid var(--green);border-radius:10px;background:#fff;color:var(--green);font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.tcmb-url-row .tcmb-extract:disabled{opacity:.55;cursor:not-allowed}
+.tcmb-form-hint{margin:0;color:var(--muted);font-size:10px;line-height:1.5}
 .tcmb-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:18px 0}
 .tcmb-form-grid>label{position:relative;display:grid;gap:6px;font-size:12px;font-weight:750}
 .tcmb-form-grid input,.tcmb-form-grid select{width:100%;min-width:0;height:42px;border:1px solid #ced9d3;border-radius:10px;background:#fff;padding:0 12px;color:var(--ink);font:inherit;font-size:14px}
@@ -307,6 +310,7 @@ body{background:#f7f7f3}
 .tcmb-report{margin-top:20px;padding:18px;border:1px solid var(--line);border-radius:16px;background:#f8faf8}
 .tcmb-report-heading{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:13px;color:var(--green);font-size:10px;font-weight:850;letter-spacing:.1em}
 .tcmb-report-heading b{letter-spacing:0;font-size:13px}
+.tcmb-report-intro{margin:0 0 12px;color:var(--muted);font-size:12px;line-height:1.55}
 .tcmb-metric-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
 .tcmb-metric-grid article{min-width:0;padding:13px;border:1px solid #e2e9e5;border-radius:11px;background:#fff}
 .tcmb-metric-grid article span,.tcmb-metric-grid article small{display:block;color:var(--muted);font-size:10px;line-height:1.45}

@@ -7,7 +7,7 @@ test('listing input requires positive price, area, province and explicit net/gro
  assert.deepEqual(validateListingInput({price:'6.500.000 TL',area:'100 m²',city:'İstanbul',areaType:'net'}).missing,[]);
  assert.deepEqual(validateListingInput({price:'1',area:'1',city:'İstanbul',areaType:'net',monthlyRent:'0'}).missing,['monthlyRent']);
 });
-test('percent difference is relative to official provincial median',()=>{
+test('percent difference is relative to official provincial unit-price indicator',()=>{
  assert.equal(differencePercent(120000,100000),20);
  assert.equal(differencePercent(80000,100000),-20);
  assert.equal(differencePercent(1,0),null);
@@ -48,5 +48,5 @@ test('EVDS API failures are controlled and the API key is sent only in a server-
 
 test('20 percent and larger absolute differences raise a review warning without a price verdict',()=>{
  const result=calculateTcmc({price:12000000,area:100,city:'İstanbul',areaType:'net',thresholdPercent:20},{housePrice:{value:100000,period:'2026-Q2'},rent:null});
- assert.equal(result.comparison.differencePercent,20);assert.equal(result.comparison.reviewRecommended,true);assert.equal(result.rent,null);assert.equal(result.userRent,null);
+ assert.equal(result.comparison.differencePercent,20);assert.equal(result.comparison.provinceUnitPriceM2,100000);assert.equal(result.comparison.reviewRecommended,true);assert.equal(result.rent,null);assert.equal(result.userRent,null);
 });
