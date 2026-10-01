@@ -169,12 +169,14 @@ export function calculateTcmc(input, series) {
  // listing's own supplied areas. Never assume a generic conversion ratio.
  const netAreaRatio=validated.netArea&&validated.grossArea?validated.grossArea/validated.netArea:null;
  const netEquivalentM2Price=netAreaRatio?housePrice.value*netAreaRatio:null;
- const delta=netM2Price&&netEquivalentM2Price?differencePercent(netM2Price,netEquivalentM2Price):null;
+ const grossDifferencePercent=grossM2Price?differencePercent(grossM2Price,housePrice.value):null;
+ const netDifferencePercent=netM2Price&&netEquivalentM2Price?differencePercent(netM2Price,netEquivalentM2Price):null;
+ const delta=netDifferencePercent??grossDifferencePercent;
  const threshold=Number.isFinite(Number(input.thresholdPercent))&&Number(input.thresholdPercent)>0?Number(input.thresholdPercent):20;
  return {
   status:'available',
   listing:{...validated,grossM2Price,netM2Price,listingM2:grossM2Price},
-  comparison:{provinceUnitPriceM2:housePrice.value,netEquivalentM2Price,netAreaRatio,differencePercent:delta,reviewRecommended:delta!=null&&Math.abs(delta)>=threshold,thresholdPercent:threshold,areaBasis:'net kullanım alanı (ilanın brüt/net oranıyla türetilmiş)'},
+  comparison:{provinceUnitPriceM2:housePrice.value,netEquivalentM2Price,netAreaRatio,grossDifferencePercent,netDifferencePercent,differencePercent:delta,reviewRecommended:[grossDifferencePercent,netDifferencePercent].some(value=>value!=null&&Math.abs(value)>=threshold),thresholdPercent:threshold,areaBasis:'brüt/brüt ve net/net'},
   rent:rent?.value&&validated.grossArea?{unitMonthlyRentPerM2:rent.value,...rentMetrics(rent.value,validated.grossArea,validated.price),areaBasis:'brüt kullanım alanı',series:rent}:null,
   userRent:validated.monthlyRent?{monthlyRent:validated.monthlyRent,annualGrossYieldPercent:validated.monthlyRent*12/validated.price*100,paybackYears:validated.price/(validated.monthlyRent*12)}:null,
   sources:{housePrice,rent:rent||null},
