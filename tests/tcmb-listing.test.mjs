@@ -22,14 +22,20 @@ test('quarterly EVDS rows parse Turkish numbers and never fill missing province 
  assert.equal(rows.length,2);assert.equal(rows[0].period,'2026-04-01');assert.equal(rows[0].displayPeriod,'2026-Q2');assert.equal(rows[0].value,442.57);assert.equal(rows[1].value,null);
  const decimalRows=parseQuarterlyObservations({items:[{Tarih:'2026-2Ç',TP_BK_ISTANBUL:'442.57'}]},'TP_BK_ISTANBUL','rent:istanbul');assert.equal(decimalRows[0].value,442.57);
 });
-test('catalogue matching requires official province name, quarterly frequency and TL per square metre unit',()=>{
- const match=resolveProvinceSeries({items:[{SERIE_CODE:'VERIFIED_BY_EVDS_CATALOG',SERIE_NAME:'İstanbul Konut Birim Fiyatları',UNIT:'TL/m²',FREQUENCY_STR:'Üç Aylık'}]},'İstanbul','price');
+test('official EVDS series catalogue resolves province series and quarterly metadata without inventing an absent unit field',()=>{
+ const match=resolveProvinceSeries({items:[{SERIE_CODE:'VERIFIED_BY_EVDS_CATALOG',SERIE_NAME:'İstanbul Konut Birim Fiyatları',FREQUENCY_STR:'Üç Aylık',METADATA_LINK:'https://evds3.tcmb.gov.tr/tumSeriler/2003/bie_birimfiyat'}]},'İstanbul','price');
  assert.equal(match.code,'VERIFIED_BY_EVDS_CATALOG');
- assert.equal(resolveProvinceSeries({items:[{SERIE_CODE:'VERIFIED_TURKEY_SERIES',SERIE_NAME:'Türkiye Konut Birim Fiyatları',UNIT:'TL/m²',FREQUENCY_STR:'Üç Aylık'}]},'İstanbul','price'),null);
+ assert.equal(match.unit,'TL/m²');
+ assert.match(match.unitSourceUrl,/bie_birimfiyat/);
+ assert.equal(resolveProvinceSeries({items:[{SERIE_CODE:'VERIFIED_TURKEY_SERIES',SERIE_NAME:'Türkiye Konut Birim Fiyatları',FREQUENCY_STR:'Üç Aylık'}]},'İstanbul','price'),null);
+ assert.throws(()=>resolveProvinceSeries({items:[{SERIE_CODE:'WRONG_FREQUENCY',SERIE_NAME:'İstanbul Konut Birim Fiyatları',FREQUENCY_STR:'Aylık'}]},'İstanbul','price'),{message:'metadata_mismatch'});
 });
-test('rent metadata must explicitly declare monthly TL per square metre units',()=>{
- assert.throws(()=>validateQuarterlyMetadata({code:'X',name:'Değerlemesi Yapılan Konutların Birim Kiraları İstanbul',unit:'TL/m²',frequency:'Çeyreklik'},'rent'));
- assert.equal(validateQuarterlyMetadata({code:'X',name:'Değerlemesi Yapılan Konutların Birim Kiraları İstanbul',unit:'TL/m²/ay',frequency:'Çeyreklik'},'rent'),true);
+test('quarterly rent metadata uses verified monthly unit basis from TCMB methodology',()=>{
+ const match=resolveProvinceSeries({items:[{SERIE_CODE:'VERIFIED_RENT_SERIES',SERIE_NAME:'Değerlemesi Yapılan Konutların Birim Kiraları İstanbul',FREQUENCY_STR:'Üç Aylık'}]},'İstanbul','rent');
+ assert.equal(match.unit,'TL/m²/ay');
+ assert.ok(match.methodologyUrl.includes('tcmb.gov.tr'));
+ assert.equal(validateQuarterlyMetadata({...match,frequency:'Çeyreklik'},'rent'),true);
+ assert.throws(()=>validateQuarterlyMetadata({...match,frequency:'Aylık'},'rent'),{message:'metadata_mismatch'});
 });
 test('missing TCMB data returns the required unavailable message without estimated values',()=>{
  const result=calculateTcmc({price:5000000,area:100,city:'İstanbul',areaType:'gross'},{housePrice:null,rent:{value:300}});

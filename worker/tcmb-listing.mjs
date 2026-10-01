@@ -32,18 +32,26 @@ export function asCatalogRows(payload) {
  if (Array.isArray(payload?.result)) return payload.result;
  return [];
 }
+const officialUnits = {
+ price:{
+  unit:'TL/m²',
+  sourceUrl:'https://evds3.tcmb.gov.tr/tumSeriler/2003/bie_birimfiyat'
+ },
+ rent:{
+  unit:'TL/m²/ay',
+  sourceUrl:'https://evds3.tcmb.gov.tr/charts/portlet/Njk5NDEzNTFjNjAxMWY0MDU2MDdmZjJm/tr',
+  methodologyUrl:'https://www.tcmb.gov.tr/wps/wcm/connect/blog/tr/main%2Bmenu/analizler/kiralar%2Bicin%2Byeni%2Bbir%2Bgosterge%2Byeni%2Bkiraci%2Bkira%2Bendeksi'
+ }
+};
 export function validateQuarterlyMetadata(meta, kind) {
- const unit = norm(meta?.unit);
+ const unit = norm(meta?.unit || meta?.verifiedUnit);
  const frequency = norm(meta?.frequency);
  const hasLira = /tl|turk lirasi|lira/.test(unit);
  const hasSquareMeter = /m2|metrekare/.test(unit);
  const quarterly = /ceyrek|quarter|3 ay|uc aylik|3 month/.test(frequency);
- if (!meta?.code || !hasLira || !hasSquareMeter || !quarterly) {
-   throw new Error('metadata_mismatch');
- }
+ if (!meta?.code || !hasLira || !hasSquareMeter || !quarterly) throw new Error('metadata_mismatch');
  if (kind === 'rent') {
    const note = norm(meta.note);
-   // TCMB's rent series is a quarterly observation of monthly unit rent; the official note must support the rent meaning.
    if (!/kira|rent/.test(norm(meta.name)) && !/kira|rent/.test(note)) throw new Error('metadata_mismatch');
    if (!/ay|month|monthly/.test(unit) && !/aylik|monthly/.test(note)) throw new Error('metadata_mismatch');
  }
@@ -64,8 +72,14 @@ export function resolveProvinceSeries(payload, province, kind) {
  const match = rows.find(row => exactName.has(norm(row.name)) ||
    (kind === 'rent' && norm(row.name).includes('degerlemesi yapilan konutlarin birim kiralari') && norm(row.name).endsWith(expectedProvince)));
  if (!match) return null;
- validateQuarterlyMetadata(match,kind);
- return match;
+ // EVDS serieList metadata exposes the official frequency and source links but does not expose a unit field.
+ // Units are taken from the matching official EVDS dataset page; rent's monthly basis is documented by TCMB's
+ // 100 m² quarterly rent examples (the quarter is the observation period, while the reported rent is monthly).
+ const verifiedUnit = officialUnits[kind];
+ if (!verifiedUnit) throw new Error('metadata_mismatch');
+ const resolved={...match,unit:match.unit||verifiedUnit.unit,unitSourceUrl:verifiedUnit.sourceUrl,methodologyUrl:verifiedUnit.methodologyUrl||null};
+ validateQuarterlyMetadata({...resolved,verifiedUnit:verifiedUnit.unit},kind);
+ return resolved;
 }
 export function discoverGroups(payload) {
  const rows = asCatalogRows(payload);
