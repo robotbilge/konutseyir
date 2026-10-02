@@ -6,8 +6,10 @@ const csv=await readFile(file,'utf8');
 let rows;
 try{rows=parseFinancialReturnsCsv(csv,new Date().toISOString())}
 catch(error){
- const sample=csv.replace(/^\uFEFF/,'').split(/\r?\n/).filter(Boolean).slice(0,4);
- console.error('TÜİK dışa aktarım şeması (başlık ve en çok üç örnek satır):',JSON.stringify(sample));
+ const lines=csv.replace(/^\uFEFF/,'').split(/\r?\n/).filter(Boolean),headers=lines[0]?.split(',')||[];
+ const sample=lines.slice(1,4),dimensions=['INDICATOR','GETIRI','DONEM','DEGISIM','FREQ','OLCU_BIRIMI'];
+ const codes=Object.fromEntries(dimensions.map(key=>{const index=headers.indexOf(key);return [key,index<0?[]:[...new Set(lines.slice(1).map(line=>line.split(',')[index]).filter(Boolean))]}));
+ console.error('TÜİK dışa aktarım şeması (başlık, kod kümeleri ve en çok üç örnek satır):',JSON.stringify({headers,codes,sample}));
  throw error;
 }
 await writeFile('tuik-financial-returns.sql',financialReturnsSql(rows));
