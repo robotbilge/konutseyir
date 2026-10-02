@@ -12,6 +12,11 @@ const horizons=[
  {id:'6m',label:'6 ay',patterns:[/semi.?annual/i,/six.?month/i,/altı aylık/i,/6 aylık/i]},
  {id:'12m',label:'1 yıl',patterns:[/\bannual\b/i,/\byearly\b/i,/yıllık/i]}
 ];
+// Official CSV dimension codes from the TÜİK dataflow export. Unknown codes
+// are rejected instead of being interpreted by position or guessed.
+const instrumentCodes={F_MF:'deposit',F_BIST:'bist100',F_ALTIN:'gold',F_ADOL:'usd',F_EURO:'eur',F_DIBS:'dibs'};
+const horizonCodes={M:'1m',Q:'3m',S:'6m',A:'12m'};
+const returnCodes={1:{kind:'nominal',deflator:'all'},2:{kind:'real',deflator:'ppi'},3:{kind:'real',deflator:'cpi'}};
 function csvRows(text){
  const lines=String(text).replace(/^\uFEFF/,'').split(/\r?\n/).filter(Boolean);
  if(lines.length<2)throw new Error('empty_tuik_csv');
@@ -22,14 +27,15 @@ function csvRows(text){
 function classify(row){
  const values=Object.entries(row).filter(([key])=>key!=='OBS_VALUE'&&key!=='TIME_PERIOD').map(([key,value])=>key+' '+value).join(' ');
  const text=values.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
- const instrument=instruments.find(item=>item.patterns.some(pattern=>pattern.test(values)))||instruments.find(item=>item.patterns.some(pattern=>pattern.test(text)));
+ const instrument=instruments.find(item=>item.id===instrumentCodes[row.INDICATOR])||instruments.find(item=>item.patterns.some(pattern=>pattern.test(values)))||instruments.find(item=>item.patterns.some(pattern=>pattern.test(text)));
  // Yearly average is a distinct TÜİK metric, not the trailing 12-month return.
- if(/yearly average|annual average|ortalama yillik|yillik ortalama/i.test(text))return {instrument,horizon:null,deflator:null,kind:null};
- const horizon=horizons.find(item=>item.patterns.some(pattern=>pattern.test(values)))||horizons.find(item=>item.patterns.some(pattern=>pattern.test(text)));
- const deflator=/CPI|TÜFE|consumer price|tufe/i.test(values)?'cpi':/D.?PPI|Yİ.?ÜFE|domestic producer|yi-ufe/i.test(values)?'ppi':/cpi|tufe/i.test(text)?'cpi':/d.?ppi|yi-ufe/i.test(text)?'ppi':null;
+ if(row.DONEM==='YO'||/yearly average|annual average|ortalama yillik|yillik ortalama/i.test(text))return {instrument,horizon:null,deflator:null,kind:null};
+ const horizon=horizons.find(item=>item.id===horizonCodes[row.DONEM])||horizons.find(item=>item.patterns.some(pattern=>pattern.test(values)))||horizons.find(item=>item.patterns.some(pattern=>pattern.test(text)));
+ const codedReturn=returnCodes[row.GETIRI];
+ const deflator=codedReturn?.deflator&&codedReturn.deflator!=='all'?codedReturn.deflator:/CPI|TÜFE|consumer price|tufe/i.test(values)?'cpi':/D.?PPI|Yİ.?ÜFE|domestic producer|yi-ufe/i.test(values)?'ppi':/cpi|tufe/i.test(text)?'cpi':/d.?ppi|yi-ufe/i.test(text)?'ppi':null;
  const real=/real profit|reel getiri|real return/i.test(values)||/real profit|reel getiri|real return/i.test(text);
  const nominal=/nominal profit|nominal getiri|nominal return/i.test(values)||/nominal profit|nominal getiri|nominal return/i.test(text);
- return {instrument,horizon,deflator,kind:real?'real':nominal?'nominal':null};
+ return {instrument,horizon,deflator,kind:codedReturn?.kind||(real?'real':nominal?'nominal':null)};
 }
 function expectedKeys(){const result=[];for(const instrument of instruments)for(const horizon of horizons){result.push(`${instrument.id}|${horizon.id}|nominal|all`);for(const deflator of ['cpi','ppi'])result.push(`${instrument.id}|${horizon.id}|real|${deflator}`)}return result}
 export function parseFinancialReturnsCsv(csv,retrievedAt=new Date().toISOString()){

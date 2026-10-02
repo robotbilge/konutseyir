@@ -24,6 +24,17 @@ test('TÜİK export maps six instruments, four horizons and nominal/CPI/PPI retu
  assert.ok(rows.every(row=>row.retrievedAt==='2026-10-02T00:00:00.000Z'));
 });
 
+test('official TÜİK dimension codes map to the 1, 3, 6 and 12 month categories',()=>{
+ const header='DATAFLOW,FREQ,REF_AREA,INDICATOR,GETIRI,DONEM,DEGISIM,TIME_PERIOD,OBS_VALUE,OLCU_BIRIMI,UNIT_MULT,DECIMALS,TIME_FORMAT';
+ const instruments=['F_MF','F_BIST','F_ALTIN','F_ADOL','F_EURO','F_DIBS'],horizons=['M','Q','S','A'],rows=[];
+ for(const instrument of instruments)for(const period of horizons)for(const rate of ['1','2','3'])rows.push(`TR:DF_FINANSAL_YATIRIM_ARAC_REEL_GETIRI(1.0),M,TR,${instrument},${rate},${period},_Z,2026-08,2.5,,,`);
+ const parsed=parseFinancialReturnsCsv([header,...rows].join('\n'));
+ assert.equal(parsed.length,72);
+ assert.ok(parsed.some(row=>row.instrument==='usd'&&row.horizon==='12m'&&row.kind==='nominal'));
+ assert.ok(parsed.some(row=>row.instrument==='deposit'&&row.horizon==='3m'&&row.deflator==='ppi'));
+ assert.ok(parsed.some(row=>row.instrument==='gold'&&row.horizon==='6m'&&row.deflator==='cpi'));
+});
+
 test('yearly average is not mislabeled as trailing one-year return',()=>{
  const csv=fixture(),average=csv.split('\n').find(line=>line.includes('"Annual"')).replace('"Annual"','"Yearly average"');
  const rows=parseFinancialReturnsCsv(`${csv}\n${average}`);
