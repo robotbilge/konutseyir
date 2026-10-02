@@ -12,7 +12,7 @@ const displayPeriod=(period:string)=>{const [year,month]=period.split('-').map(N
 export function FinancialReturns(){
  const [payload,setPayload]=useState<Payload|null>(null),[loadError,setLoadError]=useState(''),[amount,setAmount]=useState('100000'),[horizon,setHorizon]=useState('1m'),[deflator,setDeflator]=useState('cpi');
  useEffect(()=>{const controller=new AbortController();fetch('/api/financial-returns',{signal:controller.signal}).then(async response=>{const result=await response.json();if(!response.ok)throw Error(result.message||'TÜİK verisi şu anda alınamıyor.');return result}).then(setPayload).catch(error=>{if(!controller.signal.aborted)setLoadError(error.message||'TÜİK verisine şu anda ulaşılamıyor.')});return()=>controller.abort()},[]);
- const principal=Number(amount.replace(/\./g,'').replace(',','.'));
+ const principal=Number(amount);
  const rows=useMemo(()=>{
   if(!payload||!Number.isFinite(principal)||principal<=0)return [];
   return instruments.map(([id,label])=>{
@@ -26,7 +26,7 @@ export function FinancialReturns(){
  return <section className="financial-returns" aria-labelledby="financial-returns-title">
   <div className="financial-returns-heading"><p className="eyebrow">TÜİK · GEÇMİŞ DÖNEM KARŞILAŞTIRMASI</p><h2 id="financial-returns-title">Aynı tutar, farklı yatırım araçlarında ne kadar değişti?</h2><p>Bir tutar seçin; TÜİK’in yayımladığı son aylık veride 1, 3, 6 ve 12 aylık getirileri karşılaştırın. Reel tutar, seçtiğiniz enflasyon endeksine göre satın alma gücü değişimini gösterir.</p></div>
   <div className="financial-returns-controls">
-   <label>Başlangıç tutarı (TL)<input inputMode="decimal" value={amount} onChange={event=>setAmount(event.target.value)} aria-label="Başlangıç tutarı, TL" placeholder="Örn. 100.000" /></label>
+   <label>Başlangıç tutarı (TL)<input type="number" min="1" step="any" inputMode="decimal" value={amount} onChange={event=>setAmount(event.target.value)} aria-label="Başlangıç tutarı, TL" placeholder="Örn. 100000" /></label>
    <label>Getiri dönemi<select value={horizon} onChange={event=>setHorizon(event.target.value)}>{horizons.map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
    <label>Satın alma gücü hesabı<select value={deflator} onChange={event=>setDeflator(event.target.value)}><option value="cpi">TÜFE ile (tüketici fiyatları)</option><option value="ppi">Yİ-ÜFE ile (üretici fiyatları)</option></select></label>
   </div>
