@@ -47,7 +47,7 @@ const fixed:Record<string,{component:any,title:string,description:string}>={
 '/hesaplama/kira-artis-orani':{component:RentIncrease,title:'Kira artış oranı hesaplama 2026 | TÜFE kira zammı',description:'TÜFE 12 aylık ortalamaya göre konut kira artış tutarını ve yeni aylık kirayı hesaplayın.'},
 '/hesaplama/altin-bazli-konut':{component:GoldProperty,title:'Konut kaç gram altın ediyor? | Altın bazlı konut değeri',description:'Konut fiyatını AltınSeyir güncel gram altın referansıyla karşılaştırın; konutun kaç gram ve kaç kilo altın ettiğini görün.'},
 '/hesaplama/hisseli-tapu':{component:ShareTool,title:'Hisseli tapu ve miras payı hesaplama',description:'Tapudaki veya veraset ilamındaki pay/payda oranına göre matematiksel metrekare ve değer karşılığını hesaplayın.'},
-'/karsilastir':{component:Compare,title:'Konut, mevduat ve altın karşılaştırması',description:'Alım giderleri, kira, stopaj ve enflasyon dahil bir yıllık yatırım senaryosu.'},
+'/karsilastir':{component:Compare,title:'Konut, mevduat ve altın karşılaştırması | TÜİK reel getirileri',description:'Konut, mevduat ve altın senaryolarını karşılaştırın. Tutar girip TÜİK’in 1, 3, 6 ve 12 aylık nominal ve TÜFE/Yİ-ÜFE reel getirilerini inceleyin.'},
 '/rehber':{component:Guides,title:'Konut satın alma ve yatırım rehberleri',description:'Kira çarpanı, net getiri, tapu ve maliyet konularında açıklamalar.'},
 '/sehirler':{component:Cities,title:'Şehir konut piyasaları',description:'Bölgesel konut verilerinin kapsamı ve resmî kaynakları.'},
 '/kontrol-listesi':{component:Checklist,title:'Ev satın alma kontrol listesi',description:'Tapu, iskân, teknik inceleme ve kiracı kontrollerinizi takip edin.'},
