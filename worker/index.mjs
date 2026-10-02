@@ -2,6 +2,7 @@ import {definitions,cityHousingSeries,goldPrice,parseFX,parseEVDS,observation,ye
 import {selectorConfig,getProvider,parseListingData,extractHtml,analyzeListing,fetchListing} from './listing-analyzer.mjs';
 import {isRelevantNews,newsFeeds,refreshNews,refreshEmlakKonut} from './news.mjs';
 import {discoverGroups,resolveProvinceSeries,parseQuarterlyObservations,calculateTcmc,validateListingInput,readEvdsJson} from './tcmb-listing.mjs';
+import {financialReturnCatalog} from './financial-returns.mjs';
 
 const json=(data,status=200,cache='public, max-age=300')=>Response.json(data,{status,headers:{'Cache-Control':cache,'X-Content-Type-Options':'nosniff'}});
 async function fetchText(url,headers={}){const r=await fetch(url,{headers,signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('Upstream unavailable');return r.text()}
@@ -57,6 +58,12 @@ async function districtSalesRanking(env,city,requestedLimit=20){
  const allowed=new Set(['istanbul','ankara','izmir','adana','antalya','bursa','kocaeli','konya','gaziantep','trabzon','balikesir','mugla']);if(!allowed.has(city))return null;
  const limit=Math.max(1,Math.min(50,Number(requestedLimit)||20));
  try{const {results=[]}=await env.DB.prepare('SELECT district_name districtName,period,total FROM district_sales WHERE city_slug=? AND period=(SELECT MAX(period) FROM district_sales WHERE city_slug=?) ORDER BY total DESC LIMIT ?').bind(city,city,limit).all();return {city,period:results[0]?.period??null,items:results,status:results.length?'available':'unavailable',source:'TÜİK',sourceUrl:'https://veriportali.tuik.gov.tr/'};}catch(error){console.error('district-sales query failed',error);return {city,period:null,items:[],status:'error',message:'İlçe satış verisi sorgulanamadı.',source:'TÜİK',sourceUrl:'https://veriportali.tuik.gov.tr/'};}
+}
+
+async function financialReturns(env){
+ const {results=[]}=await env.DB.prepare('SELECT period,instrument,horizon,deflator,kind,value,retrieved_at retrievedAt FROM financial_returns WHERE period=(SELECT MAX(period) FROM financial_returns) ORDER BY instrument,horizon,kind,deflator').all();
+ if(!results.length)return json({status:'unavailable',message:'TÜİK finansal getiri verisi henüz alınamadı.'},503,'no-store');
+ return json({status:'available',period:results[0].period,retrievedAt:results[0].retrievedAt,items:results,instruments:financialReturnCatalog.instruments.map(({id,label})=>({id,label})),horizons:financialReturnCatalog.horizons.map(({id,label})=>({id,label})),source:'TÜİK Finansal Yatırım Araçlarının Reel Getiri Oranları',sourceUrl:'https://veriportali.tuik.gov.tr/tr/databrowser/tuik/categories/9/9_2/TR,DF_FINANSAL_YATIRIM_ARAC_REEL_GETIRI,1.0'},200,'public, max-age=900');
 }
 
 async function listNews(env,url){
@@ -303,6 +310,7 @@ export default {
    if(path==='/api/news')return json(await listNews(env,url));
    if(path.startsWith('/api/news/')){const slug=decodeURIComponent(path.slice('/api/news/'.length));const item=await env.DB.prepare('SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,NULL imageUrl FROM news WHERE slug=?').bind(slug).first();return item?json(item):json({error:'Haber bulunamadı'},404)}
    if(path==='/api/city-market'){const item=await cityMarket(env,url.searchParams.get('slug')||'');return item?json(item):json({error:'Bilinmeyen şehir'},404)}
+   if(path==='/api/financial-returns')return await financialReturns(env);
    if(path==='/api/city-sales'){const item=await citySales(env,url.searchParams.get('slug')||'');return item?json(item):json({error:'Bilinmeyen şehir'},404)}
    if(path==='/api/district-sales'){const item=await districtSalesRanking(env,url.searchParams.get('city')||'',url.searchParams.get('limit')||20);return item?json(item):json({error:'Bilinmeyen şehir'},404)}
    if(path==='/api/history'){const series=url.searchParams.get('series');if(!Object.hasOwn(definitions,series))return json({error:'Unknown series'},400);const {results}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 60').bind(series).all();return json({series,source:definitions[series],observations:results.reverse()})}
