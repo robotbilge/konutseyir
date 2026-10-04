@@ -3,6 +3,7 @@ import {selectorConfig,getProvider,parseListingData,extractHtml,analyzeListing,f
 import {isRelevantNews,newsFeeds,refreshNews,refreshEmlakKonut} from './news.mjs';
 import {discoverGroups,resolveProvinceSeries,parseQuarterlyObservations,calculateTcmc,validateListingInput,readEvdsJson} from './tcmb-listing.mjs';
 import {financialReturnCatalog} from './financial-returns.mjs';
+import {unitPriceSeries,parseUnitPriceRows} from './unit-prices.mjs';
 
 const json=(data,status=200,cache='public, max-age=300')=>Response.json(data,{status,headers:{'Cache-Control':cache,'X-Content-Type-Options':'nosniff'}});
 async function fetchText(url,headers={}){const r=await fetch(url,{headers,signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('Upstream unavailable');return r.text()}
@@ -21,6 +22,25 @@ async function fetchEVDS(env,code,series,frequency=5){
  return parseEVDS(JSON.parse(await fetchText(url,{key:tcmbKey(env)})),code,series);
 }
 
+async function fetchEVDSBatch(env,codes,frequency=6){
+ if(!tcmbKey(env)||!codes.length||codes.some(code=>!/^[A-Za-z0-9.]+$/.test(code)))throw Error('Invalid series');
+ const end=new Date(),start=new Date(Date.UTC(end.getUTCFullYear()-2,end.getUTCMonth(),1));
+ const url=`https://evds3.tcmb.gov.tr/igmevdsms-dis/series=${codes.join('-')}&startDate=${fmt(start)}&endDate=${fmt(end)}&type=json&frequency=${frequency}`;
+ return JSON.parse(await fetchText(url,{key:tcmbKey(env)}));
+}
+async function refreshUnitPrices(env){
+ if(!tcmbKey(env))return;
+ const entries=Object.entries(unitPriceSeries);
+ try{
+  const payload=await fetchEVDSBatch(env,entries.map(([,item])=>item.code),6);
+  for(const [slug,item] of entries){
+   const series='unit-price:'+slug,rows=parseUnitPriceRows(payload,item.code,slug);
+   if(rows.length){await save(env,rows);await status(env,series,'available')}
+   else await status(env,series,'unavailable');
+  }
+ }catch(error){for(const slug of Object.keys(unitPriceSeries))await status(env,'unit-price:'+slug,'error');console.error('TCMB unit prices refresh failed',error?.message||'unavailable')}
+}
+
 async function refreshSeries(env,series,code,frequency=5){
  try{await save(env,await fetchEVDS(env,code,series,frequency));await status(env,series,'available');return true}
  catch{await status(env,series,tcmbKey(env)&&code?'error':'not_configured');return false}
@@ -34,6 +54,7 @@ export async function refresh(env){
  await refreshSeries(env,'deposit1m',env.EVDS_DEPOSIT_1M_SERIES,3);
  await refreshSeries(env,'policy',env.EVDS_POLICY_SERIES,1);
  for(const [slug,item] of Object.entries(cityHousingSeries))await refreshSeries(env,`housing:${slug}`,item.code);
+ await refreshUnitPrices(env);
 }
 
 async function cityMarket(env,slug){
@@ -309,6 +330,15 @@ export default {
    if(path==='/api/push/config')return json({publicKey:env.VAPID_PUBLIC_KEY||null,configured:!!(env.VAPID_PUBLIC_KEY&&env.VAPID_PRIVATE_KEY)},200,'no-store');
    if(path==='/api/news')return json(await listNews(env,url));
    if(path.startsWith('/api/news/')){const slug=decodeURIComponent(path.slice('/api/news/'.length));const item=await env.DB.prepare('SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,NULL imageUrl FROM news WHERE slug=?').bind(slug).first();return item?json(item):json({error:'Haber bulunamadı'},404)}
+   if(path==='/api/housing-unit-prices'){
+    const items=[];
+    for(const [slug,item] of Object.entries(unitPriceSeries)){
+     const {results=[]}=await env.DB.prepare('SELECT period,value,retrieved_at retrievedAt FROM observations WHERE series=? ORDER BY period DESC LIMIT 8').bind('unit-price:'+slug).all();
+     const latest=results[0],period=latest?.period||null,month=period?Number(period.slice(5,7)):0;
+     items.push({slug,name:item.name,pricePerM2:latest?.value??null,period,quarter:period&&month?period.slice(0,4)+'-Q'+(Math.floor((month-1)/3)+1):null,retrievedAt:latest?.retrievedAt??null,status:latest?'available':'unavailable',source:'TCMB EVDS',sourceUrl:'https://evds3.tcmb.gov.tr/'});
+    }
+    return json({items,source:'TCMB EVDS · Konut Birim Fiyatları',unit:'TL/brüt m²'});
+   }
    if(path==='/api/city-market'){const item=await cityMarket(env,url.searchParams.get('slug')||'');return item?json(item):json({error:'Bilinmeyen şehir'},404)}
    if(path==='/api/financial-returns')return await financialReturns(env);
    if(path==='/api/city-sales'){const item=await citySales(env,url.searchParams.get('slug')||'');return item?json(item):json({error:'Bilinmeyen şehir'},404)}

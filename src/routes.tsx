@@ -1,4 +1,5 @@
 import Home from '../app/page';
+import GoldHousingPage from '../app/altinla-konut/page';
 import HomeAnalysis from '../app/ev-analizi/page';
 import LoanCalculator from '../app/kredi-hesaplama/page';
 import OfficialChecks from '../app/resmi-kontroller/page';
@@ -33,6 +34,7 @@ import {guides,cities} from '../lib/content';
 import {Header,Footer} from '../components/site-chrome';
 const fixed:Record<string,{component:any,title:string,description:string}>={
 '/' :{component:Home,title:'Satılık konut ilanı analizi ve m² fiyat karşılaştırması | KonutSeyir',description:'Satılık konut ilanının net ve brüt m² fiyatını hesaplayın. Brüt fiyatı TCMB’nin il göstergesiyle karşılaştırın; kira ve amortisman raporunu inceleyin.'},
+'/altinla-konut':{component:GoldHousingPage,title:'Altının Ne Kadar Konut Alıyor? | Altınla konut alım gücü',description:'Altın birikiminizin İstanbul, Ankara, İzmir ve veri bulunan diğer şehirlerde yaklaşık kaç brüt metrekare konuta karşılık geldiğini TCMB konut birim fiyatlarıyla hesaplayın.'},
 '/hesaplama':{component:Tools,title:'Konut hesaplama araçları | Kira, tapu, m² ve maliyet',description:'Kira çarpanı, net kira, metrekare fiyatı, alım maliyeti, tapu harcı, emlak komisyonu, kira artışı ve diğer konut hesaplama araçlarını seçin.'},
 '/ev-analizi':{component:HomeAnalysis,title:'Konut yatırım analizi ve kira çarpanı hesaplama',description:'Konutun net kira getirisini, amortisman süresini, metrekare fiyatını, alım maliyetini ve reel yatırım getirisini hesaplayın.'},
 '/kredi-hesaplama':{component:LoanCalculator,title:'Konut kredisi toplam maliyet hesaplama',description:'Aylık taksit, toplam geri ödeme, faiz ve ek kredi giderlerini hesaplayın.'},
