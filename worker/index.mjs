@@ -31,6 +31,7 @@ async function fetchEVDSBatch(env,codes,frequency=6){
 async function refreshUnitPrices(env){
  if(!tcmbKey(env))return;
  const entries=Object.entries(unitPriceSeries);
+ await status(env,'unit-price:catalog','fetching');
  try{
   const payload=await fetchEVDSBatch(env,entries.map(([,item])=>item.code),6);
   for(const [slug,item] of entries){
@@ -38,7 +39,8 @@ async function refreshUnitPrices(env){
    if(rows.length){await save(env,rows);await status(env,series,'available')}
    else await status(env,series,'unavailable');
   }
- }catch(error){for(const slug of Object.keys(unitPriceSeries))await status(env,'unit-price:'+slug,'error');console.error('TCMB unit prices refresh failed',error?.message||'unavailable')}
+  await status(env,'unit-price:catalog','available');
+ }catch(error){for(const slug of Object.keys(unitPriceSeries))await status(env,'unit-price:'+slug,'error');await status(env,'unit-price:catalog','error');console.error('TCMB unit prices refresh failed',error?.message||'unavailable')}
 }
 
 async function refreshSeries(env,series,code,frequency=5){
@@ -331,6 +333,10 @@ export default {
    if(path==='/api/news')return json(await listNews(env,url));
    if(path.startsWith('/api/news/')){const slug=decodeURIComponent(path.slice('/api/news/'.length));const item=await env.DB.prepare('SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,NULL imageUrl FROM news WHERE slug=?').bind(slug).first();return item?json(item):json({error:'Haber bulunamadı'},404)}
    if(path==='/api/housing-unit-prices'){
+    const hasPrices=await env.DB.prepare("SELECT 1 FROM observations WHERE series LIKE 'unit-price:%' LIMIT 1").first();
+    const catalog=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind('unit-price:catalog').first();
+    const lastAttempt=Date.parse(catalog?.attempted_at||'');
+    if(!hasPrices&&tcmbKey(env)&&catalog?.state!=='fetching'&&(!Number.isFinite(lastAttempt)||Date.now()-lastAttempt>30*60*1000))await refreshUnitPrices(env);
     const items=[];
     for(const [slug,item] of Object.entries(unitPriceSeries)){
      const {results=[]}=await env.DB.prepare('SELECT period,value,retrieved_at retrievedAt FROM observations WHERE series=? ORDER BY period DESC LIMIT 8').bind('unit-price:'+slug).all();
