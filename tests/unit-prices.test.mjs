@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {unitPriceSeries,parseUnitPriceRows,quarterOf} from '../worker/unit-prices.mjs';
-import {areaFromValue,dateLabel,parseTrNumber,positive,goldAssets} from '../lib/gold-housing.mjs';
+import {areaFromValue,dateLabel,parseTrNumber,parseQueryNumber,positive,goldAssets,isGoldAsset} from '../lib/gold-housing.mjs';
 test('TCMB unit price catalog uses city-level TL/m2 series',()=>{assert.equal(unitPriceSeries.istanbul.code,'TP.BIRIMFIYAT.IST');assert.equal(unitPriceSeries.mugla.code,'TP.BIRIMFIYAT.MUGLA');assert.equal(unitPriceSeries.gaziantep.code,'TP.BIRIMFIYAT.ANTEP')});
 test('quarterly EVDS values parse to quarter starts and ignore invalid data',()=>{const rows=parseUnitPriceRows({items:[{Tarih:'2026-04',TP_BIRIMFIYAT_IST:'83500.5'},{Tarih:'2026-07',TP_BIRIMFIYAT_IST:'NaN'},{Tarih:'bad',TP_BIRIMFIYAT_IST:'1'}]},unitPriceSeries.istanbul.code,'istanbul');assert.deepEqual(rows,[{series:'unit-price:istanbul',period:'2026-04-01',value:83500.5}]);assert.equal(quarterOf(rows[0].period),'2026-Q2')});
 test('Turkish amounts and area calculation reject invalid and extreme values',()=>{assert.equal(parseTrNumber('1.250.000,50'),1250000.5);assert.equal(positive('-4'),null);assert.equal(positive('Infinity'),null);assert.equal(areaFromValue(2000000,50000),40);assert.equal(areaFromValue(2000000,0),null)});
@@ -8,3 +8,5 @@ test('supported gold types carry pure gram approximations',()=>{for(const key of
 
 test('empty, zero, malformed and extreme input values are rejected',()=>{for(const value of ['', '0', '-1', 'NaN', 'Infinity', '1000001'])assert.equal(positive(value,1000000),null);assert.equal(parseTrNumber('1.250'),1250);assert.equal(parseTrNumber('1.250.000,50'),1250000.5)});
 test('malformed gold snapshot timestamps do not render as dates',()=>{assert.equal(dateLabel('not-a-date'),null)});
+
+test('machine query decimals use dot decimals and reject inherited asset names',()=>{assert.equal(parseQueryNumber('1.603'),1.603);assert.equal(parseQueryNumber('1.250'),1.25);assert.equal(parseQueryNumber('1.250.000,50'),1250000.5);assert.equal(parseQueryNumber('NaN'),null);assert.equal(isGoldAsset('bilezik22'),true);assert.equal(isGoldAsset('__proto__'),false);assert.equal(isGoldAsset('constructor'),false)});
