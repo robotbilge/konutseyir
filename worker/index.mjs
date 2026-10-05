@@ -345,14 +345,17 @@ export default {
     const hasPrices=await env.DB.prepare("SELECT 1 FROM observations WHERE series LIKE 'unit-price:%' LIMIT 1").first();
     const catalog=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind('unit-price:catalog').first();
     const lastAttempt=Date.parse(catalog?.attempted_at||'');
-    if(!hasPrices&&tcmbKey(env)&&catalog?.state!=='fetching'&&(catalog?.state==='error'||!Number.isFinite(lastAttempt)||Date.now()-lastAttempt>30*60*1000))await refreshUnitPrices(env);
+    const configured=!!tcmbKey(env);
+    if(!hasPrices&&configured&&catalog?.state!=='fetching'&&(catalog?.state==='error'||!Number.isFinite(lastAttempt)||Date.now()-lastAttempt>30*60*1000))await refreshUnitPrices(env);
+    const currentCatalog=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind('unit-price:catalog').first();
     const items=[];
     for(const [slug,item] of Object.entries(unitPriceSeries)){
      const {results=[]}=await env.DB.prepare('SELECT period,value,retrieved_at retrievedAt FROM observations WHERE series=? ORDER BY period DESC LIMIT 8').bind('unit-price:'+slug).all();
+     const sourceState=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind('unit-price:'+slug).first();
      const latest=results[0],period=latest?.period||null,month=period?Number(period.slice(5,7)):0;
-     items.push({slug,name:item.name,pricePerM2:latest?.value??null,period,quarter:period&&month?period.slice(0,4)+'-Q'+(Math.floor((month-1)/3)+1):null,retrievedAt:latest?.retrievedAt??null,status:latest?'available':'unavailable',source:'TCMB EVDS',sourceUrl:'https://evds3.tcmb.gov.tr/'});
+     items.push({slug,name:item.name,pricePerM2:latest?.value??null,period,quarter:period&&month?period.slice(0,4)+'-Q'+(Math.floor((month-1)/3)+1):null,retrievedAt:latest?.retrievedAt??null,status:latest?'available':sourceState?.state||(configured?'unavailable':'not_configured'),source:'TCMB EVDS',sourceUrl:'https://evds3.tcmb.gov.tr/'});
     }
-    return json({items,source:'TCMB EVDS · Konut Birim Fiyatları',unit:'TL/brüt m²'});
+    return json({items,configured,catalogStatus:currentCatalog?.state||(configured?'not_fetched':'not_configured'),catalogAttemptedAt:currentCatalog?.attempted_at||null,source:'TCMB EVDS · Konut Birim Fiyatları',unit:'TL/brüt m²'});
    }
    if(path==='/api/city-market'){const item=await cityMarket(env,url.searchParams.get('slug')||'');return item?json(item):json({error:'Bilinmeyen şehir'},404)}
    if(path==='/api/financial-returns')return await financialReturns(env);
