@@ -78,7 +78,7 @@ export function ListingAnalyzer(){
    {result?.status==='available'&&result.comparison&&<div className="tcmb-report" aria-live="polite">
     <div className="tcmb-report-heading"><span>İL BAZLI GÖSTERGE RAPORU</span><b>{result.listing?.city}{result.listing?.district?` · ${result.listing.district}`:''}{result.listing?.neighborhood?` · ${result.listing.neighborhood}`:''}</b></div>
     <p className="tcmb-report-intro">İlanın net ve brüt m² fiyatlarını aynı alan türündeki göstergelerle eşleştiriyoruz: brütü brütle, neti netle. Net TCMB karşılığı yaklaşık olarak bu ilanın alan oranıyla türetilir.</p>
-    <div className={`tcmb-plain-summary tcmb-summary-${comparisonTone}`}><strong>{comparisonSummary}</strong><p>Bu, ilan fiyatını il düzeyindeki bir referansla karşılaştırır; tek başına “ucuz” veya “pahalı” sonucu değildir. Mahalle emsallerini ve dairenin özelliklerini ayrıca kontrol edin. Yeşil düşük, amber yüksek, gri ise yakın farkı gösterir.</p></div>
+    <div className={`tcmb-plain-summary tcmb-summary-${comparisonTone}`}><strong>{comparisonSummary}</strong><p>Bu, ilan fiyatını il düzeyindeki bir referansla karşılaştırır; tek başına “ucuz” veya “pahalı” sonucu değildir. Mahalle emsallerini ve dairenin özelliklerini ayrıca kontrol edin. Yeşil düşük, amber yüksek, mavi ise yakın farkı gösterir.</p></div>
     <div className="tcmb-metric-grid">
      {result.listing?.grossM2Price!=null&&<article><span>İlan m² fiyatı · brüt alan</span><strong>{money(result.listing.grossM2Price)} / m²</strong></article>}
      {result.listing?.netM2Price!=null&&<article><span>İlan m² fiyatı · net alan</span><strong>{money(result.listing.netM2Price)} / m²</strong></article>}
