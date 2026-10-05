@@ -10,3 +10,5 @@ test('empty, zero, malformed and extreme input values are rejected',()=>{for(con
 test('malformed gold snapshot timestamps do not render as dates',()=>{assert.equal(dateLabel('not-a-date'),null)});
 
 test('machine query decimals use dot decimals and reject inherited asset names',()=>{assert.equal(parseQueryNumber('1.603'),1.603);assert.equal(parseQueryNumber('1.250'),1.25);assert.equal(parseQueryNumber('1.250.000,50'),1250000.5);assert.equal(parseQueryNumber('NaN'),null);assert.equal(isGoldAsset('bilezik22'),true);assert.equal(isGoldAsset('__proto__'),false);assert.equal(isGoldAsset('constructor'),false)});
+
+test('TCMB unit prices parse Turkish thousands and decimal separators',()=>{const rows=parseUnitPriceRows({items:[{Tarih:'2026-04','TP_BIRIMFIYAT_IST':'87.153,42'},{Tarih:'2026-01','TP_BIRIMFIYAT_IST':'87.153'}]},unitPriceSeries.istanbul.code,'istanbul');assert.deepEqual(rows,[{series:'unit-price:istanbul',period:'2026-04-01',value:87153.42},{series:'unit-price:istanbul',period:'2026-01-01',value:87153}])});
