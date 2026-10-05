@@ -324,6 +324,7 @@ body{background:#f7f7f3}
 .tcmb-report-heading{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:13px;color:var(--green);font-size:10px;font-weight:850;letter-spacing:.1em}
 .tcmb-report-heading b{letter-spacing:0;font-size:13px}
 .tcmb-report-intro{margin:0 0 12px;color:var(--muted);font-size:12px;line-height:1.55}
+.tcmb-plain-summary{margin:0 0 12px;padding:14px 15px;border:1px solid #d9e1dc;border-radius:11px;background:#eef2ef;line-height:1.5}.tcmb-plain-summary strong{display:block;font-size:15px}.tcmb-plain-summary p{margin:5px 0 0;color:#53645a;font-size:11px}.tcmb-summary-below{background:#eaf4ed;border-color:#c9e0d0}.tcmb-summary-above{background:#fff1e8;border-color:#efc5a8}.tcmb-summary-above p{color:#70452f}.tcmb-summary-near{background:#edf3f7;border-color:#d1dfe9}.tcmb-summary-neutral{background:#f2f2f0;border-color:#ddd}
 .tcmb-metric-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
 .tcmb-metric-grid article{min-width:0;padding:13px;border:1px solid #e2e9e5;border-radius:11px;background:#fff}
 .tcmb-metric-grid article span,.tcmb-metric-grid article small{display:block;color:var(--muted);font-size:10px;line-height:1.45}
