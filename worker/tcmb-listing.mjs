@@ -72,8 +72,14 @@ export function resolveProvinceSeries(payload, province, kind) {
  const exactName = kind === 'price'
    ? new Set([norm(province+' Konut Birim Fiyatları'), norm(province+' Housing Unit Prices')])
    : new Set([norm('Değerlemesi Yapılan Konutların Birim Kiraları '+province),norm('Değerlemesi Yapılan Konutların Birim Kiraları - '+province),norm('Valued Residential Property Unit Rents '+province)]);
- const match = rows.find(row => exactName.has(norm(row.name)) ||
-   (kind === 'rent' && norm(row.name).includes('degerlemesi yapilan konutlarin birim kiralari') && norm(row.name).endsWith(expectedProvince)));
+ const match = rows.find(row => {
+   const name=norm(row.name);
+   const exact=exactName.has(name);
+   const rentMatch=kind === 'rent' && name.includes('degerlemesi yapilan konutlarin birim kiralari') && name.endsWith(expectedProvince);
+   // TCMB catalogue labels vary in token order across provinces; require both the province token and the official series subject.
+   const priceMatch=kind === 'price' && (name.includes('konut birim fiyat') || name.includes('housing unit price')) && name.split(' ').includes(expectedProvince);
+   return exact || rentMatch || priceMatch;
+  });
  if (!match) return null;
  // EVDS serieList metadata exposes the official frequency and source links but does not expose a unit field.
  // Units are taken from the matching official EVDS dataset page; rent's monthly basis is documented by TCMB's

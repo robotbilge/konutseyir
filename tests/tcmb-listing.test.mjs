@@ -34,6 +34,7 @@ test('official EVDS series catalogue resolves province series and quarterly meta
  assert.equal(resolveProvinceSeries({items:[{SERIE_CODE:'VERIFIED_TURKEY_SERIES',SERIE_NAME:'Türkiye Konut Birim Fiyatları',FREQUENCY_STR:'Üç Aylık'}]},'İstanbul','price'),null);
  assert.throws(()=>resolveProvinceSeries({items:[{SERIE_CODE:'WRONG_FREQUENCY',SERIE_NAME:'İstanbul Konut Birim Fiyatları',FREQUENCY_STR:'Aylık'}]},'İstanbul','price'),{message:'metadata_mismatch'});
 });
+test('unit-price catalogue matches province names even when TCMB changes token order',()=>{const match=resolveProvinceSeries({items:[{SERIE_CODE:'ANKARA_SERIES',SERIE_NAME:'Konut Birim Fiyatları (Ankara)',FREQUENCY_STR:'Üç Aylık'}]},'Ankara','price');assert.equal(match.code,'ANKARA_SERIES');assert.equal(resolveProvinceSeries({items:[{SERIE_CODE:'TURKEY_SERIES',SERIE_NAME:'Türkiye Konut Birim Fiyatları',FREQUENCY_STR:'Üç Aylık'}]},'Ankara','price'),null)});
 test('quarterly rent metadata uses verified monthly unit basis from TCMB methodology',()=>{
  const match=resolveProvinceSeries({items:[{SERIE_CODE:'VERIFIED_RENT_SERIES',SERIE_NAME:'Değerlemesi Yapılan Konutların Birim Kiraları İstanbul',FREQUENCY_STR:'Üç Aylık'}]},'İstanbul','rent');
  assert.equal(match.unit,'TL/m²/ay');
