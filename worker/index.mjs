@@ -33,9 +33,18 @@ async function refreshUnitPrices(env){
  const entries=Object.entries(unitPriceSeries);
  await status(env,'unit-price:catalog','fetching');
  try{
-  const payload=await fetchEVDSBatch(env,entries.map(([,item])=>item.code),6);
+  const groups=await evdsGroups(env);
+  const catalog=await evdsJson(`https://evds3.tcmb.gov.tr/igmevdsms-dis/serieList/type=json&code=${encodeURIComponent(groups.price)}`,tcmbKey(env));
+  const resolved=[];
   for(const [slug,item] of entries){
-   const series='unit-price:'+slug,rows=parseUnitPriceRows(payload,item.code,slug);
+   const meta=resolveProvinceSeries(catalog,item.name,'price');
+   if(meta)resolved.push({slug,item,meta});
+   else await status(env,'unit-price:'+slug,'unavailable');
+  }
+  if(!resolved.length)throw Error('No province series in TCMB catalog');
+  const payload=await fetchEVDSBatch(env,resolved.map(({meta})=>meta.code),6);
+  for(const {slug,meta} of resolved){
+   const series='unit-price:'+slug,rows=parseUnitPriceRows(payload,meta.code,slug);
    if(rows.length){await save(env,rows);await status(env,series,'available')}
    else await status(env,series,'unavailable');
   }
@@ -336,7 +345,7 @@ export default {
     const hasPrices=await env.DB.prepare("SELECT 1 FROM observations WHERE series LIKE 'unit-price:%' LIMIT 1").first();
     const catalog=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind('unit-price:catalog').first();
     const lastAttempt=Date.parse(catalog?.attempted_at||'');
-    if(!hasPrices&&tcmbKey(env)&&catalog?.state!=='fetching'&&(!Number.isFinite(lastAttempt)||Date.now()-lastAttempt>30*60*1000))await refreshUnitPrices(env);
+    if(!hasPrices&&tcmbKey(env)&&catalog?.state!=='fetching'&&(catalog?.state==='error'||!Number.isFinite(lastAttempt)||Date.now()-lastAttempt>30*60*1000))await refreshUnitPrices(env);
     const items=[];
     for(const [slug,item] of Object.entries(unitPriceSeries)){
      const {results=[]}=await env.DB.prepare('SELECT period,value,retrieved_at retrievedAt FROM observations WHERE series=? ORDER BY period DESC LIMIT 8').bind('unit-price:'+slug).all();
