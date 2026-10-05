@@ -342,7 +342,9 @@ export default {
    if(path.startsWith('/api/news/')){const slug=decodeURIComponent(path.slice('/api/news/'.length));const item=await env.DB.prepare('SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,NULL imageUrl FROM news WHERE slug=?').bind(slug).first();return item?json(item):json({error:'Haber bulunamadı'},404)}
    if(path==='/api/housing-unit-prices'){
     const configured=!!tcmbKey(env),catalog=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind('unit-price:catalog').first(),attempted=Date.parse(catalog?.attempted_at||'');
-    if(configured&&catalog?.state!=='fetching'&&(!Number.isFinite(attempted)||Date.now()-attempted>7*86400000))await refreshUnitPrices(env);
+    const {count:availableSeries=0}=await env.DB.prepare("SELECT COUNT(*) AS count FROM source_status WHERE series LIKE 'tcmb:price:%' AND state='available'").first();
+    const partial=Number(availableSeries)<Object.keys(unitPriceSeries).length,refreshInterval=partial?60*60*1000:7*86400000;
+    if(configured&&catalog?.state!=='fetching'&&(!Number.isFinite(attempted)||Date.now()-attempted>refreshInterval))await refreshUnitPrices(env);
     const currentCatalog=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind('unit-price:catalog').first();
     const items=[];
     for(const [slug,item] of Object.entries(unitPriceSeries)){
@@ -352,8 +354,8 @@ export default {
      const latest=results[0],match=String(latest?.period||'').match(/^(\d{4})-Q([1-4])$/),period=match?match[1]+'-'+String((Number(match[2])-1)*3+1).padStart(2,'0')+'-01':latest?.period||null;
      items.push({slug,name:item.name,pricePerM2:latest?.value??null,period,quarter:match?match[1]+'-Q'+match[2]:null,retrievedAt:latest?.retrievedAt??null,status:latest?'available':sourceState?.state||(configured?'unavailable':'not_configured'),source:'TCMB EVDS',sourceUrl:'https://evds3.tcmb.gov.tr/'});
     }
-    const anyAvailable=items.some(item=>item.status==='available'),catalogStatus=currentCatalog?.state||(configured?'not_fetched':'not_configured');
-    return json({items,configured,catalogStatus:catalogStatus==='available'&&!anyAvailable?'unavailable':catalogStatus,catalogAttemptedAt:currentCatalog?.attempted_at||null,source:'TCMB EVDS · Konut Birim Fiyatları',unit:'TL/brüt m²'});
+    const availableCount=items.filter(item=>item.status==='available'&&Number(item.pricePerM2)>0).length,anyAvailable=availableCount>0,catalogStatus=currentCatalog?.state||(configured?'not_fetched':'not_configured');
+    return json({items,availableCount,totalCount:items.length,configured,catalogStatus:catalogStatus==='available'&&!anyAvailable?'unavailable':catalogStatus,catalogAttemptedAt:currentCatalog?.attempted_at||null,source:'TCMB EVDS · Konut Birim Fiyatları',unit:'TL/brüt m²'});
    }
    if(path==='/api/city-market'){const item=await cityMarket(env,url.searchParams.get('slug')||'');return item?json(item):json({error:'Bilinmeyen şehir'},404)}
    if(path==='/api/financial-returns')return await financialReturns(env);
