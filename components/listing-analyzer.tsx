@@ -44,6 +44,10 @@ export function ListingAnalyzer(){
  }
  function submit(event:React.FormEvent<HTMLFormElement>){event.preventDefault();void request(false)}
  const source=result?.sources;
+ const comparisonDelta=result?.comparison?.grossDifferencePercent??result?.comparison?.netDifferencePercent;
+ const comparisonBasis=result?.comparison?.grossDifferencePercent!=null?'brüt':'net (yaklaşık)';
+ const comparisonTone=comparisonDelta==null?'neutral':Math.abs(comparisonDelta)<5?'near':comparisonDelta<0?'below':'above';
+ const comparisonSummary=comparisonDelta==null?'İlan m² fiyatı için karşılaştırılabilir alan verisi yok.':Math.abs(comparisonDelta)<5?`${comparisonBasis} m² fiyatı il göstergesine yakın.`:`İlanın ${comparisonBasis} m² fiyatı TCMB il göstergesinden %${number(Math.abs(comparisonDelta))} ${comparisonDelta>0?'yüksek':'düşük'}.`;
  return <section id="ilan-analizi" className="listing-analyzer tcmb-listing-analyzer" aria-labelledby="listing-analyzer-title">
   <div className="listing-analyzer-copy">
    <p className="eyebrow">KONUT İLANI · TCMB GÖSTERGESİ</p>
@@ -74,6 +78,7 @@ export function ListingAnalyzer(){
    {result?.status==='available'&&result.comparison&&<div className="tcmb-report" aria-live="polite">
     <div className="tcmb-report-heading"><span>İL BAZLI GÖSTERGE RAPORU</span><b>{result.listing?.city}{result.listing?.district?` · ${result.listing.district}`:''}{result.listing?.neighborhood?` · ${result.listing.neighborhood}`:''}</b></div>
     <p className="tcmb-report-intro">İlanın net ve brüt m² fiyatlarını aynı alan türündeki göstergelerle eşleştiriyoruz: brütü brütle, neti netle. Net TCMB karşılığı yaklaşık olarak bu ilanın alan oranıyla türetilir.</p>
+    <div className={`tcmb-plain-summary tcmb-summary-${comparisonTone}`}><strong>{comparisonSummary}</strong><p>Bu, ilan fiyatını il düzeyindeki bir referansla karşılaştırır; tek başına “ucuz” veya “pahalı” sonucu değildir. Mahalle emsallerini ve dairenin özelliklerini ayrıca kontrol edin. Yeşil düşük, amber yüksek, gri ise yakın farkı gösterir.</p></div>
     <div className="tcmb-metric-grid">
      {result.listing?.grossM2Price!=null&&<article><span>İlan m² fiyatı · brüt alan</span><strong>{money(result.listing.grossM2Price)} / m²</strong></article>}
      {result.listing?.netM2Price!=null&&<article><span>İlan m² fiyatı · net alan</span><strong>{money(result.listing.netM2Price)} / m²</strong></article>}
