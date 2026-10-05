@@ -35,23 +35,22 @@ async function refreshUnitPrices(env){
  try{
   const groups=await evdsGroups(env);
   const catalog=await evdsJson(`https://evds3.tcmb.gov.tr/igmevdsms-dis/serieList/type=json&code=${encodeURIComponent(groups.price)}`,tcmbKey(env));
-  const resolved=[];
-  for(const [slug,item] of entries){
-   const meta=resolveProvinceSeries(catalog,item.name,'price');
-   if(meta)resolved.push({slug,item,meta});
-   else await status(env,'unit-price:'+slug,'unavailable');
+  const resolved=entries.map(([slug,item])=>({slug,item,id:String(item.name).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/ı/g,'i').replace(/[^a-z0-9]+/g,'-'),meta:resolveProvinceSeries(catalog,item.name,'price')}));
+  const expiresAt=Date.now()+6*60*60*1000;
+  for(const {id,meta} of resolved){
+   if(meta)tcmbSeriesMetadataCache.set(`${groups.price}:price:${id}`,{value:meta,expiresAt});
+   else await status(env,'tcmb:price:'+id,'unavailable');
   }
-  if(!resolved.length)throw Error('No province series in TCMB catalog');
-  const payload=await fetchEVDSBatch(env,resolved.map(({meta})=>meta.code),6);
-  for(const {slug,meta} of resolved){
-   const series='unit-price:'+slug,rows=parseUnitPriceRows(payload,meta.code,slug);
-   if(rows.length){await save(env,rows);await status(env,series,'available')}
-   else await status(env,series,'unavailable');
-  }
+  await Promise.all(resolved.filter(x=>x.meta).map(async({item,id})=>{
+   try{await tcmbProvinceValue(env,item.name,'price',groups.price,true)}
+   catch(error){await status(env,'tcmb:price:'+id,'error');console.error('TCMB unit price refresh failed',id,error?.message||'unavailable')}
+  }));
   await status(env,'unit-price:catalog','available');
- }catch(error){for(const slug of Object.keys(unitPriceSeries))await status(env,'unit-price:'+slug,'error');await status(env,'unit-price:catalog','error');console.error('TCMB unit prices refresh failed',error?.message||'unavailable')}
+ }catch(error){
+  await status(env,'unit-price:catalog','error');
+  console.error('TCMB unit prices refresh failed',error?.message||'unavailable');
+ }
 }
-
 async function refreshSeries(env,series,code,frequency=5){
  try{await save(env,await fetchEVDS(env,code,series,frequency));await status(env,series,'available');return true}
  catch{await status(env,series,tcmbKey(env)&&code?'error':'not_configured');return false}
@@ -203,12 +202,12 @@ function quarterDate(date){
  const match=String(date||'').match(/^(\d{4})-(\d{2})/);if(!match)return String(date||'');
  const q=Math.ceil(Number(match[2])/3);return `${match[1]}-Q${q}`;
 }
-async function tcmbProvinceValue(env,province,kind,groupCode){
+async function tcmbProvinceValue(env,province,kind,groupCode,force=false){
  const key=tcmbKey(env);if(!key)throw new Error('tcmb_not_configured');
  const id=String(province).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/ı/g,'i').replace(/[^a-z0-9]+/g,'-');
  const dbKey=`tcmb:${kind}:${id}`;
  const negative=await env.DB.prepare('SELECT state,attempted_at attemptedAt FROM source_status WHERE series=?').bind(dbKey).first();
- if(negative?.state==='unavailable'&&Date.now()-Date.parse(negative.attemptedAt)<7*86400000)return null;
+ if(!force&&negative?.state==='unavailable'&&Date.now()-Date.parse(negative.attemptedAt)<7*86400000)return null;
  const metaCacheKey=`${groupCode}:${kind}:${id}`;
  let cachedMeta=tcmbSeriesMetadataCache.get(metaCacheKey);
  let meta=cachedMeta&&Date.now()<cachedMeta.expiresAt?cachedMeta.value:null;
@@ -342,20 +341,19 @@ export default {
    if(path==='/api/news')return json(await listNews(env,url));
    if(path.startsWith('/api/news/')){const slug=decodeURIComponent(path.slice('/api/news/'.length));const item=await env.DB.prepare('SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,NULL imageUrl FROM news WHERE slug=?').bind(slug).first();return item?json(item):json({error:'Haber bulunamadı'},404)}
    if(path==='/api/housing-unit-prices'){
-    const hasPrices=await env.DB.prepare("SELECT 1 FROM observations WHERE series LIKE 'unit-price:%' LIMIT 1").first();
-    const catalog=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind('unit-price:catalog').first();
-    const lastAttempt=Date.parse(catalog?.attempted_at||'');
-    const configured=!!tcmbKey(env);
-    if(!hasPrices&&configured&&catalog?.state!=='fetching'&&(catalog?.state==='error'||!Number.isFinite(lastAttempt)||Date.now()-lastAttempt>30*60*1000))await refreshUnitPrices(env);
+    const configured=!!tcmbKey(env),catalog=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind('unit-price:catalog').first(),attempted=Date.parse(catalog?.attempted_at||'');
+    if(configured&&catalog?.state!=='fetching'&&(!Number.isFinite(attempted)||Date.now()-attempted>7*86400000))await refreshUnitPrices(env);
     const currentCatalog=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind('unit-price:catalog').first();
     const items=[];
     for(const [slug,item] of Object.entries(unitPriceSeries)){
-     const {results=[]}=await env.DB.prepare('SELECT period,value,retrieved_at retrievedAt FROM observations WHERE series=? ORDER BY period DESC LIMIT 8').bind('unit-price:'+slug).all();
-     const sourceState=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind('unit-price:'+slug).first();
-     const latest=results[0],period=latest?.period||null,month=period?Number(period.slice(5,7)):0;
-     items.push({slug,name:item.name,pricePerM2:latest?.value??null,period,quarter:period&&month?period.slice(0,4)+'-Q'+(Math.floor((month-1)/3)+1):null,retrievedAt:latest?.retrievedAt??null,status:latest?'available':sourceState?.state||(configured?'unavailable':'not_configured'),source:'TCMB EVDS',sourceUrl:'https://evds3.tcmb.gov.tr/'});
+     const id=String(item.name).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/ı/g,'i').replace(/[^a-z0-9]+/g,'-');
+     const series='tcmb:price:'+id,{results=[]}=await env.DB.prepare('SELECT period,value,retrieved_at retrievedAt FROM observations WHERE series=? ORDER BY period DESC LIMIT 8').bind(series).all();
+     const sourceState=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind(series).first();
+     const latest=results[0],match=String(latest?.period||'').match(/^(\d{4})-Q([1-4])$/),period=match?match[1]+'-'+String((Number(match[2])-1)*3+1).padStart(2,'0')+'-01':latest?.period||null;
+     items.push({slug,name:item.name,pricePerM2:latest?.value??null,period,quarter:match?match[1]+'-Q'+match[2]:null,retrievedAt:latest?.retrievedAt??null,status:latest?'available':sourceState?.state||(configured?'unavailable':'not_configured'),source:'TCMB EVDS',sourceUrl:'https://evds3.tcmb.gov.tr/'});
     }
-    return json({items,configured,catalogStatus:currentCatalog?.state||(configured?'not_fetched':'not_configured'),catalogAttemptedAt:currentCatalog?.attempted_at||null,source:'TCMB EVDS · Konut Birim Fiyatları',unit:'TL/brüt m²'});
+    const anyAvailable=items.some(item=>item.status==='available'),catalogStatus=currentCatalog?.state||(configured?'not_fetched':'not_configured');
+    return json({items,configured,catalogStatus:catalogStatus==='available'&&!anyAvailable?'unavailable':catalogStatus,catalogAttemptedAt:currentCatalog?.attempted_at||null,source:'TCMB EVDS · Konut Birim Fiyatları',unit:'TL/brüt m²'});
    }
    if(path==='/api/city-market'){const item=await cityMarket(env,url.searchParams.get('slug')||'');return item?json(item):json({error:'Bilinmeyen şehir'},404)}
    if(path==='/api/financial-returns')return await financialReturns(env);
