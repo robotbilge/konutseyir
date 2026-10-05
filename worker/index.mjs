@@ -33,9 +33,18 @@ async function refreshUnitPrices(env){
  const entries=Object.entries(unitPriceSeries);
  await status(env,'unit-price:catalog','fetching');
  try{
-  const payload=await fetchEVDSBatch(env,entries.map(([,item])=>item.code),6);
+  const groups=await evdsGroups(env);
+  const catalog=await evdsJson(`https://evds3.tcmb.gov.tr/igmevdsms-dis/serieList/type=json&code=${encodeURIComponent(groups.price)}`,tcmbKey(env));
+  const resolved=[];
   for(const [slug,item] of entries){
-   const series='unit-price:'+slug,rows=parseUnitPriceRows(payload,item.code,slug);
+   const meta=resolveProvinceSeries(catalog,item.name,'price');
+   if(meta)resolved.push({slug,item,meta});
+   else await status(env,'unit-price:'+slug,'unavailable');
+  }
+  if(!resolved.length)throw Error('No province series in TCMB catalog');
+  const payload=await fetchEVDSBatch(env,resolved.map(({meta})=>meta.code),6);
+  for(const {slug,meta} of resolved){
+   const series='unit-price:'+slug,rows=parseUnitPriceRows(payload,meta.code,slug);
    if(rows.length){await save(env,rows);await status(env,series,'available')}
    else await status(env,series,'unavailable');
   }
