@@ -1,4 +1,5 @@
 import {definitions,cityHousingSeries,goldPrice,parseFX,parseEVDS,observation,yearChange} from './data.mjs';
+import {createD1Guard} from './d1-guard.mjs';
 import {selectorConfig,getProvider,parseListingData,extractHtml,analyzeListing,fetchListing} from './listing-analyzer.mjs';
 import {isRelevantNews,newsFeeds,refreshNews,refreshEmlakKonut} from './news.mjs';
 import {discoverGroups,resolveProvinceSeries,parseQuarterlyObservations,calculateTcmc,validateListingInput,readEvdsJson} from './tcmb-listing.mjs';
@@ -7,6 +8,7 @@ import {adminNewsRequest} from './admin-news.mjs';
 import {unitPriceSeries,parseUnitPriceRows} from './unit-prices.mjs';
 
 const json=(data,status=200,cache='public, max-age=300')=>Response.json(data,{status,headers:{'Cache-Control':cache,'X-Content-Type-Options':'nosniff'}});
+const d1Guard=createD1Guard();
 async function fetchText(url,headers={}){const r=await fetch(url,{headers,signal:AbortSignal.timeout(15000)});if(!r.ok)throw Error('Upstream unavailable');return r.text()}
 async function save(env,rows){if(!rows.length)throw Error('No valid observations');const now=new Date().toISOString();await env.DB.batch(rows.map(r=>env.DB.prepare('INSERT INTO observations(series,period,value,retrieved_at) VALUES(?,?,?,?) ON CONFLICT(series,period) DO UPDATE SET value=excluded.value,retrieved_at=excluded.retrieved_at').bind(r.series,r.period,r.value,now)))}
 async function status(env,series,state){await env.DB.prepare('INSERT INTO source_status(series,state,attempted_at) VALUES(?,?,?) ON CONFLICT(series) DO UPDATE SET state=excluded.state,attempted_at=excluded.attempted_at').bind(series,state,new Date().toISOString()).run()}
@@ -16,6 +18,7 @@ async function refreshNewsTracked(env,notify=true){
 const fmt=d=>`${String(d.getUTCDate()).padStart(2,'0')}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${d.getUTCFullYear()}`;
 
 async function fetchEVDS(env,code,series,frequency=5){
+ d1Guard.assertAvailable();
  if(!tcmbKey(env)||!code)throw Error('EVDS not configured');
  if(!/^[A-Za-z0-9.]+$/.test(code))throw Error('Invalid series');
  const end=new Date(),start=new Date(Date.UTC(end.getUTCFullYear()-2,end.getUTCMonth(),1));
@@ -24,6 +27,7 @@ async function fetchEVDS(env,code,series,frequency=5){
 }
 
 async function fetchEVDSBatch(env,codes,frequency=6){
+ d1Guard.assertAvailable();
  if(!tcmbKey(env)||!codes.length||codes.some(code=>!/^[A-Za-z0-9.]+$/.test(code)))throw Error('Invalid series');
  const end=new Date(),start=new Date(Date.UTC(end.getUTCFullYear()-2,end.getUTCMonth(),1));
  const url=`https://evds3.tcmb.gov.tr/igmevdsms-dis/series=${codes.join('-')}&startDate=${fmt(start)}&endDate=${fmt(end)}&type=json&frequency=${frequency}`;
@@ -42,10 +46,14 @@ async function refreshUnitPrices(env){
    if(meta)tcmbSeriesMetadataCache.set(`${groups.price}:price:${id}`,{value:meta,expiresAt});
    else await status(env,'tcmb:price:'+id,'unavailable');
   }
-  await Promise.all(resolved.filter(x=>x.meta).map(async({item,id})=>{
+  for(const {item,id} of resolved.filter(x=>x.meta)){
    try{await tcmbProvinceValue(env,item.name,'price',groups.price,true)}
-   catch(error){await status(env,'tcmb:price:'+id,'error');console.error('TCMB unit price refresh failed',id,error?.message||'unavailable')}
-  }));
+   catch(error){
+    if(error?.code==='D1_READ_LIMIT')throw error;
+    await status(env,'tcmb:price:'+id,'error');
+    console.error('TCMB unit price refresh failed',id,error?.message||'unavailable');
+   }
+  }
   await status(env,'unit-price:catalog','available');
  }catch(error){
   await status(env,'unit-price:catalog','error');
@@ -274,6 +282,7 @@ async function tcmbListingRequest(request,env){
  if(checked.missing.length)return json({status:'needs_input',listing,missing:checked.missing,extraction,message:extractionMessage},200,'no-store');
  if(!env.DB)return json({status:'unavailable',error:'Veri hizmeti şu anda kullanılamıyor.',extraction},503,'no-store');
  try{
+  await env.DB.prepare('SELECT series FROM source_status LIMIT 1').first();
   const groups=await evdsGroups(env);
   const [housePrice,rent]=await Promise.all([
    tcmbProvinceValue(env,checked.city,'price',groups.price),
@@ -286,6 +295,7 @@ async function tcmbListingRequest(request,env){
   const result=calculateTcmc({...listing,thresholdPercent:Number.isFinite(threshold)&&threshold>0?threshold:20},{housePrice,rent});
   return json({...result,extraction},200,'no-store');
  }catch(error){
+  if(error?.code==='D1_READ_LIMIT')return json({status:'unavailable',error:'Cloudflare D1 günlük okuma kotası doldu; EVDS sorguları UTC gece yarısına kadar durduruldu.',errorCode:'D1_READ_LIMIT',retryAt:error.retryAt,listing:checked,extraction},503,'no-store');
   const allowedCodes=new Set(['tcmb_not_configured','catalog_unavailable','metadata_mismatch','tcmb_format','tcmb_unavailable','empty_data']);
   const errorCode=allowedCodes.has(error?.message)?error.message:'tcmb_unavailable';
   const messages={
@@ -303,6 +313,7 @@ async function tcmbListingRequest(request,env){
 
 export default {
  async scheduled(event,env,ctx){
+  if(env.DB)env={...env,DB:d1Guard.wrap(env.DB)};
   const tasks=[];
   if(event.cron==='30 13 * * 1-5')tasks.push(refresh(env));
   if(event.cron==='0 5-20 * * *'){
@@ -313,6 +324,7 @@ export default {
   ctx.waitUntil(Promise.allSettled(tasks));
  },
  async fetch(request,env){
+  if(env.DB)env={...env,DB:d1Guard.wrap(env.DB)};
   const url=new URL(request.url),path=url.pathname;
   if(path==='/api/analyze'||path==='/api/selectors'||path==='/api/tcmb-listing'){
    if(request.method==='OPTIONS')return corsify(new Response(null,{status:204,headers:{'Access-Control-Max-Age':'86400'}}),request);
@@ -366,6 +378,6 @@ export default {
    if(path==='/api/history'){const series=url.searchParams.get('series');if(!Object.hasOwn(definitions,series))return json({error:'Unknown series'},400);const {results}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 60').bind(series).all();return json({series,source:definitions[series],observations:results.reverse()})}
    if(path==='/api/market-data'){const data=[];for(const series of Object.keys(definitions)){let {results}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 400').bind(series).all();if(!results.length&&series==='policy'&&tcmbKey(env)){await refreshSeries(env,'policy',env.EVDS_POLICY_SERIES,1);({results}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 400').bind(series).all())}const s=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind(series).first();data.push(observation(series,results,s))}return json({generatedAt:new Date().toISOString(),data})}
    return json({error:'Not found'},404);
-  }catch{return json({status:'unavailable',error:'Data store unavailable'},503,'no-store')}
+  }catch(error){if(error?.code==='D1_READ_LIMIT')return json({status:'unavailable',error:'Cloudflare D1 günlük okuma kotası doldu; veri sorguları UTC gece yarısına kadar durduruldu.',errorCode:'D1_READ_LIMIT',retryAt:error.retryAt},503,'no-store');return json({status:'unavailable',error:'Data store unavailable'},503,'no-store')}
  }
 };
