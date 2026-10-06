@@ -30,6 +30,7 @@ import CookiePolicy from '../app/cerez-politikasi/page';
 import Editorial from '../app/yayin-ilkeleri/page';
 import News from '../app/haberler/page';
 import NewsDetail from '../app/haberler/haber/page';
+import NewsAdmin from '../app/yonetim/haberler/page';
 import {guides,cities} from '../lib/content';
 import {Header,Footer} from '../components/site-chrome';
 const fixed:Record<string,{component:any,title:string,description:string}>={
@@ -55,6 +56,7 @@ const fixed:Record<string,{component:any,title:string,description:string}>={
 '/kontrol-listesi':{component:Checklist,title:'Ev satın alma kontrol listesi',description:'Tapu, iskân, teknik inceleme ve kiracı kontrollerinizi takip edin.'},
 '/veri':{component:Data,title:'Veri kaynakları ve servis durumu',description:'KonutSeyir verilerinin kaynağı, dönemi ve bağlantı durumu.'},
 '/haberler':{component:News,title:'Emlak ve konut haberleri',description:'Konut, kira, tapu ve gayrimenkul gündemini tarihe göre izleyin.'},
+'/yonetim/haberler':{component:NewsAdmin,title:'Haber yönetimi | KonutSeyir',description:'KonutSeyir haberlerini listeleyin ve yönetin.',noindex:true},
 '/haberler/haber':{component:NewsDetail,title:'Emlak haberi',description:'Haber özeti ve özgün kaynak bağlantısı.'},
 '/hakkimizda':{component:About,title:'KonutSeyir hakkında',description:'KonutSeyir hesaplama yöntemi ve amacı.'},
 '/iletisim':{component:Contact,title:'İletişim',description:'KonutSeyir iletişim bilgileri.'},
