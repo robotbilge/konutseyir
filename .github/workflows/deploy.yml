@@ -30,6 +30,7 @@ jobs:
     environment: production
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      NEWS_ADMIN_PASSWORD: ${{ secrets.NEWS_ADMIN_PASSWORD }}
       CLOUDFLARE_ACCOUNT_ID: ea5e08f7044d873900c9c8b6b4cfdb8f
       EVDS_CPI_SERIES: ${{ vars.EVDS_CPI_SERIES }}
       EVDS_HOUSING_SERIES: ${{ vars.EVDS_HOUSING_SERIES }}
@@ -46,11 +47,14 @@ jobs:
         run: |
           test -n "$CLOUDFLARE_API_TOKEN"
           test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$NEWS_ADMIN_PASSWORD"
       - run: pnpm install --frozen-lockfile
       - name: Apply D1 schema
         continue-on-error: true
         run: pnpm exec wrangler d1 migrations apply konutseyir-data --remote --config worker/wrangler.jsonc
       - run: pnpm exec wrangler deploy --config worker/wrangler.jsonc
+      - name: Set news admin password secret
+        run: printf '%s' "$NEWS_ADMIN_PASSWORD" | pnpm exec wrangler secret put NEWS_ADMIN_PASSWORD --config worker/wrangler.jsonc
       - run: pnpm build
       - name: Ensure Pages project exists
         continue-on-error: true
