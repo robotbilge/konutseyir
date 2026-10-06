@@ -15,7 +15,7 @@ test('D1 read-limit errors open the breaker until the next UTC midnight', async 
     return true;
   });
   assert.equal(guard.isBlocked(), true);
-  await assert.rejects(guarded.prepare('SELECT 2').first(), {code: 'D1_READ_LIMIT'});
+  assert.throws(() => guarded.prepare('SELECT 2'), {code: 'D1_READ_LIMIT'});
   assert.equal(calls, 1);
 
   now = Date.UTC(2026, 9, 7, 0, 0);
@@ -35,6 +35,6 @@ test('D1 batch quota failures stop later database operations too', async () => {
   const guarded = guard.wrap(db);
   const statement = guarded.prepare('INSERT INTO t VALUES (?)').bind(1);
   await assert.rejects(guarded.batch([statement]), {code:'D1_READ_LIMIT'});
-  await assert.rejects(guarded.prepare('SELECT 1'), {code:'D1_READ_LIMIT'});
+  assert.throws(() => guarded.prepare('SELECT 1'), {code:'D1_READ_LIMIT'});
   assert.equal(calls, 2);
 });
