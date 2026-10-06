@@ -3,6 +3,7 @@ import {selectorConfig,getProvider,parseListingData,extractHtml,analyzeListing,f
 import {isRelevantNews,newsFeeds,refreshNews,refreshEmlakKonut} from './news.mjs';
 import {discoverGroups,resolveProvinceSeries,parseQuarterlyObservations,calculateTcmc,validateListingInput,readEvdsJson} from './tcmb-listing.mjs';
 import {financialReturnCatalog} from './financial-returns.mjs';
+import {adminNewsRequest} from './admin-news.mjs';
 import {unitPriceSeries,parseUnitPriceRows} from './unit-prices.mjs';
 
 const json=(data,status=200,cache='public, max-age=300')=>Response.json(data,{status,headers:{'Cache-Control':cache,'X-Content-Type-Options':'nosniff'}});
@@ -322,6 +323,7 @@ export default {
     catch(error){console.error('Listing analysis failed',error);return corsify(json({error:'İlan analizi sırasında geçici bir hata oluştu.'},500,'no-store'),request)}
    }
   }
+  if(path==='/api/admin/news'||path.startsWith('/api/admin/news/'))return adminNewsRequest(request,env,url);
   const pushMutation=path==='/api/push/subscribe'&&(request.method==='POST'||request.method==='DELETE');
   if(request.method!=='GET'&&!pushMutation)return json({error:'Method not allowed'},405,'no-store');
   if(!env.DB)return json({status:'not_configured',error:'D1 binding missing'},503);
