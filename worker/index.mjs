@@ -282,6 +282,7 @@ async function tcmbListingRequest(request,env){
  if(checked.missing.length)return json({status:'needs_input',listing,missing:checked.missing,extraction,message:extractionMessage},200,'no-store');
  if(!env.DB)return json({status:'unavailable',error:'Veri hizmeti şu anda kullanılamıyor.',extraction},503,'no-store');
  try{
+  await env.DB.prepare('SELECT series FROM source_status LIMIT 1').first();
   const groups=await evdsGroups(env);
   const [housePrice,rent]=await Promise.all([
    tcmbProvinceValue(env,checked.city,'price',groups.price),
