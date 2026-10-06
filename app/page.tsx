@@ -37,6 +37,7 @@ export default function Home(){return <><Header/><main>
     </div>
   </div>
   <MarketSnapshot/>
+  <section className="cross-network-card tuik-history-card" aria-labelledby="tuik-history-card-title"><div><span className="cross-network-badge">TÜİK · GEÇMİŞ DÖNEM KARŞILAŞTIRMASI</span><h2 id="tuik-history-card-title">Yatırım araçlarının geçmiş getirilerini karşılaştırın</h2><p>TÜİK’in yayımladığı geçmiş dönem verileriyle altın, mevduat, döviz, BIST 100 ve DİBS getirilerini aynı tutar üzerinden inceleyin.</p></div><div><a href="/karsilastir#financial-returns-title">TÜİK karşılaştırmasını aç <ArrowUpRight size={16}/></a></div></section>
   <LatestNews/>
   <div className="inner">
     <section className="home-sales-radar"><div><p className="eyebrow">TÜRKİYE KONUT SATIŞ RADARI</p><h2>En çok konut satılan ilçeleri izleyin</h2><p>Resmî TÜİK kayıtlarında doğrulanmış ilçe kırılımı bulunan şehirlerin satış hareketini inceleyin.</p><DistrictSalesRanking city="istanbul"/></div><a className="primary-link" href="/sehirler">Şehir verilerini incele <ArrowUpRight size={17}/></a></section>
