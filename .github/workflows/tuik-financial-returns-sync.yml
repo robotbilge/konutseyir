@@ -8,7 +8,7 @@ on:
       - worker/financial-returns.mjs
       - migrations/0006_financial_returns.sql
   schedule:
-    - cron: '20 8 10 * *'
+    - cron: '20 8 8-10 * *'
 permissions:
   contents: read
 concurrency:
