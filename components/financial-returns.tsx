@@ -25,6 +25,11 @@ export function FinancialReturns(){
  const best=rows[0];
  return <section className="financial-returns" aria-labelledby="financial-returns-title">
   <div className="financial-returns-heading"><p className="eyebrow">TÜİK · GEÇMİŞ DÖNEM KARŞILAŞTIRMASI</p><h2 id="financial-returns-title">Aynı tutar, farklı yatırım araçlarında ne kadar değişti?</h2><p>Bir tutar seçin; TÜİK’in yayımladığı son aylık veride 1, 3, 6 ve 12 aylık getirileri karşılaştırın. Reel tutar, seçtiğiniz enflasyon endeksine göre satın alma gücü değişimini gösterir.</p></div>
+  <aside className="financial-returns-method" aria-label="Veri kaynağı ve hesaplama yöntemi">
+   <strong>Veri kaynağı ve nasıl okunur?</strong>
+   <p>{payload?<>Ekrandaki dönem <b>{displayPeriod(payload.period)}</b>; bu, TÜİK’in son yayımladığı bülten dönemidir. Veriler TÜİK’in resmi finansal getiri veri tablosundan aktarılır.</>:<>Veriler TÜİK’in finansal yatırım araçlarının reel getiri veri tablosundan alınır. Bültenler aylık yayımlanır; aktarım, olası yayın gecikmesini karşılamak için her ayın 8–10’unda yeniden denenir.</>} TÜİK’in yayımladığı nominal ve reel getiri yüzdeleri seçtiğiniz başlangıç tutarına uygulanır. Reel tutar, satın alma gücü değişimini gösterir; geleceğe yönelik tahmin değildir.</p>
+   <div><a href={payload?.sourceUrl||'https://veriportali.tuik.gov.tr/tr/databrowser/tuik/categories/9/9_2/TR,DF_FINANSAL_YATIRIM_ARAC_REEL_GETIRI,1.0'} target="_blank" rel="noreferrer">TÜİK veri tablosunu aç</a><a href="https://tuik.gov.tr/Kurumsal/Veri_Takvimi" target="_blank" rel="noreferrer">TÜİK yayın takvimini aç</a></div>
+  </aside>
   <div className="financial-returns-controls">
    <label>Başlangıç tutarı (TL)<input type="number" min="1" step="any" inputMode="decimal" value={amount} onChange={event=>setAmount(event.target.value)} aria-label="Başlangıç tutarı, TL" placeholder="Örn. 100000" /></label>
    <label>Getiri dönemi<select value={horizon} onChange={event=>setHorizon(event.target.value)}>{horizons.map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>
