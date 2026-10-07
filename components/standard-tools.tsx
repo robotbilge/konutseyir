@@ -19,7 +19,7 @@ export function RentIncreaseCalculator(){
  const[p,s]=useState({rent:30000,rate:Number.NaN});
  const cpi=useMarketData().find(item=>item.series==='cpi');
  const liveRate=cpi?.twelveMonthAverage??null;
- const period=cpi?.twelveMonthAveragePeriod??cpi?.period??'';
+ const period=liveRate!==null&&Number.isFinite(liveRate)?(cpi?.twelveMonthAveragePeriod??cpi?.period??''):'';
  useEffect(()=>{if(liveRate!==null&&Number.isFinite(liveRate))s(x=>({...x,rate:liveRate}))},[liveRate]);
  const validRate=Number.isFinite(p.rate),next=validRate?p.rent*(1+p.rate/100):null;
  return <Box><h2>Kira artış oranı hesaplama</h2><div className="fields"><N label="Mevcut aylık kira (TL)" value={p.rent} onChange={v=>s({...p,rent:v})}/><N label="TÜFE 12 aylık ortalama (%)" value={p.rate} onChange={v=>s({...p,rate:v})} hint={period?'Resmî TÜFE 12 aylık ortalama verisi: '+period+'. İsterseniz oranı değiştirebilirsiniz.':'Resmî veri yüklenemezse sözleşmenin yenilendiği aya ait TÜİK oranını girin.'}/></div><div className="metric-row"><p>Azami artış tutarı <b>{next===null?'Resmî oran bekleniyor':money(next-p.rent)}</b></p><p>Artış sonrası kira <b>{next===null?'—':money(next)}</b></p></div><small>Kaynak: <a href="https://veriportali.tuik.gov.tr/" target="_blank" rel="noreferrer">TÜİK TÜFE</a> / TCMB EVDS. Oran, son 12 aylık TÜFE endeksi ortalamasının önceki 12 aylık ortalamaya göre değişimidir. Dönem: {period||'henüz alınamadı'}. Konut kiraları için sözleşme ve mevzuat durumunu ayrıca kontrol edin.</small></Box>
