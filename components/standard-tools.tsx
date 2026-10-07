@@ -1,6 +1,7 @@
 import {useEffect,useState} from 'react';
 import {money} from './calculator';
 import {goldPropertyScenario} from '../lib/gold-housing.mjs';
+import {useMarketData} from './live-data';
 
 const pct=(n:number)=>`%${n.toLocaleString('tr-TR',{maximumFractionDigits:2})}`;
 function N({label,value,onChange,hint,min,max}:{label:string,value:number,onChange:(v:number)=>void,hint?:string,min?:number,max?:number}){return <label className="calc-field"><span>{label}</span><input type="number" step="any" min={min} max={max} value={Number.isNaN(value)?'':value} onChange={e=>onChange(e.target.value===''?0:Number(e.target.value))}/>{hint&&<small>{hint}</small>}</label>}
@@ -15,8 +16,13 @@ export function CommissionCalculator(){
  return <Box><h2>Emlak danışmanı hizmet bedeli</h2><div className="fields"><N label="Satış bedeli (TL)" value={p.price} onChange={v=>s({...p,price:v})}/><N label="KDV (%)" value={p.vat} onChange={v=>s({...p,vat:v})}/></div><div className="metric-row"><p>Bir taraf için tavan (%2) <b>{money(side)}</b></p><p>KDV <b>{money(vat)}</b></p><p>Bir taraf KDV dahil <b>{money(total)}</b></p><p>İki taraf toplam tavan <b>{money(total*2)}</b></p></div><small>Satış aracılık hizmet bedeli KDV hariç satış bedelinin %4'ünü aşamaz; aksi kararlaştırılmadıkça taraflar arasında eşit paylaşılır.</small></Box>
 }
 export function RentIncreaseCalculator(){
- const[p,s]=useState({rent:30000,rate:0}); const[period,setPeriod]=useState(''); useEffect(()=>{fetch('/api/data').then(r=>r.json()).then(j=>{const v=Number(j?.inflation?.twelveMonthAverage??j?.rentIncrease?.value);if(Number.isFinite(v)&&v>0){s(x=>({...x,rate:v}));setPeriod(j?.inflation?.period||j?.rentIncrease?.period||'')}}).catch(()=>{})},[]); const next=p.rent*(1+p.rate/100);
- return <Box><h2>Kira artış oranı hesaplama</h2><div className="fields"><N label="Mevcut aylık kira (TL)" value={p.rent} onChange={v=>s({...p,rent:v})}/><N label="TÜFE 12 aylık ortalama (%)" value={p.rate} onChange={v=>s({...p,rate:v})} hint={period?`Resmî veri: ${period}. Gerekirse oranı değiştirebilirsiniz.`:"Güncel resmî veri alınamazsa sözleşmenin yenilendiği aya ilişkin TÜİK 12 aylık ortalamasını girin."}/></div><div className="metric-row"><p>Azami artış tutarı <b>{money(next-p.rent)}</b></p><p>Artış sonrası kira <b>{money(next)}</b></p></div><small>Konut kiralarında genel kural TBK m.344 çerçevesindeki on iki aylık TÜFE ortalamasıdır. Sözleşmeye ve özel duruma göre hukuki değerlendirme gerekebilir.</small></Box>
+ const[p,s]=useState({rent:30000,rate:Number.NaN});
+ const cpi=useMarketData().find(item=>item.series==='cpi');
+ const liveRate=cpi?.twelveMonthAverage??null;
+ const period=liveRate!==null&&Number.isFinite(liveRate)?(cpi?.twelveMonthAveragePeriod??cpi?.period??''):'';
+ useEffect(()=>{if(liveRate!==null&&Number.isFinite(liveRate))s(x=>({...x,rate:liveRate}))},[liveRate]);
+ const validRate=Number.isFinite(p.rate),next=validRate?p.rent*(1+p.rate/100):null;
+ return <Box><h2>Kira artış oranı hesaplama</h2><div className="fields"><N label="Mevcut aylık kira (TL)" value={p.rent} onChange={v=>s({...p,rent:v})}/><N label="TÜFE 12 aylık ortalama (%)" value={p.rate} onChange={v=>s({...p,rate:v})} hint={period?'Resmî TÜFE 12 aylık ortalama verisi: '+period+'. İsterseniz oranı değiştirebilirsiniz.':'Resmî veri yüklenemezse sözleşmenin yenilendiği aya ait TÜİK oranını girin.'}/></div><div className="metric-row"><p>Azami artış tutarı <b>{next===null?'Resmî oran bekleniyor':money(next-p.rent)}</b></p><p>Artış sonrası kira <b>{next===null?'—':money(next)}</b></p></div><small>Kaynak: <a href="https://veriportali.tuik.gov.tr/" target="_blank" rel="noreferrer">TÜİK TÜFE</a> / TCMB EVDS. Oran, son 12 aylık TÜFE endeksi ortalamasının önceki 12 aylık ortalamaya göre değişimidir. Dönem: {period||'henüz alınamadı'}. Konut kiraları için sözleşme ve mevzuat durumunu ayrıca kontrol edin.</small></Box>
 }
 export function GoldPropertyCalculator(){
  const[p,s]=useState({price:5000000,gram:0,ownedGrams:250,downPaymentRate:20}); const[auto,setAuto]=useState<number|null>(null); const[loading,setLoading]=useState(true);

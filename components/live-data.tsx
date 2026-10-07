@@ -1,7 +1,7 @@
 import {useEffect,useState} from 'react';
 import {ArrowUpRight,Landmark,Newspaper,Percent} from 'lucide-react';
 
-export type MarketItem={series:string,value:number|null,period:string|null,status:string,annualChange:number|null,retrievedAt:string|null};
+export type MarketItem={series:string,value:number|null,period:string|null,status:string,annualChange:number|null,twelveMonthAverage:number|null,twelveMonthAveragePeriod:string|null,retrievedAt:string|null};
 export function useMarketData(){
  const[data,setData]=useState<MarketItem[]>([]);
  useEffect(()=>{const controller=new AbortController();fetch('/api/market-data',{signal:controller.signal}).then(r=>r.ok?r.json():Promise.reject()).then(j=>Array.isArray(j.data)&&setData(j.data)).catch(()=>{});return()=>controller.abort()},[]);
