@@ -26,7 +26,7 @@ export function twelveMonthAverageChange(rows){
  const byMonth=new Map();
  for(const row of rows){
   const period=String(row?.period||'').slice(0,7),value=Number(row?.value);
-  if(/^\\d{4}-\\d{2}$/.test(period)&&Number.isFinite(value)&&value>0)byMonth.set(period,value);
+  if(/^\d{4}-\d{2}$/.test(period)&&Number.isFinite(value)&&value>0)byMonth.set(period,value);
  }
  const points=[...byMonth].sort(([a],[b])=>a.localeCompare(b)).slice(-24);
  if(points.length!==24)return null;
