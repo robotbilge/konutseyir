@@ -83,7 +83,7 @@ async function cityMarket(env,slug){
  if(!results.length&&tcmbKey(env)){await refreshSeries(env,series,item.code);({results=[]}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 400').bind(series).all())}
  const sourceStatus=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind(series).first();
  const last=results[0];
- return {slug,region:item.region,value:last?.value??null,period:last?.period??null,retrievedAt:last?.retrieved_at??null,annualChange:yearChange(results),history:results.slice(0,24).reverse().map(row=>({period:row.period,value:row.value})),status:last?(sourceStatus?.state==='error'?'cached':'available'):(sourceStatus?.state||'unavailable'),source:'TCMB EVDS',sourceUrl:'https://evds3.tcmb.gov.tr/'};
+ return {slug,region:item.region,value:last?.value??null,period:last?.period??null,retrievedAt:last?.retrieved_at??null,annualChange:yearChange(results),history:results.slice(0,61).reverse().map(row=>({period:row.period,value:row.value})),status:last?(sourceStatus?.state==='error'?'cached':'available'):(sourceStatus?.state||'unavailable'),source:'TCMB EVDS',sourceUrl:'https://evds3.tcmb.gov.tr/'};
 }
 
 async function citySales(env,slug){
