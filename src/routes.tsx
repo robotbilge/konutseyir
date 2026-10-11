@@ -20,6 +20,7 @@ import Guides from '../app/rehber/page';
 import Guide from '../app/rehber/[slug]/page';
 import Cities from '../app/sehirler/page';
 import City from '../app/sehirler/[slug]/page';
+import CityComparison from '../app/sehir-karsilastir/page';
 import Checklist from '../app/kontrol-listesi/page';
 import Data from '../app/veri/page';
 import About from '../app/hakkimizda/page';
@@ -53,6 +54,7 @@ const fixed:Record<string,{component:any,title:string,description:string}>={
 '/karsilastir':{component:Compare,title:'Konut, mevduat ve altın karşılaştırması | TÜİK reel getirileri',description:'Konut, mevduat ve altın senaryolarını karşılaştırın. Tutar girip TÜİK’in 1, 3, 6 ve 12 aylık nominal ve TÜFE/Yİ-ÜFE reel getirilerini inceleyin.'},
 '/rehber':{component:Guides,title:'Konut satın alma ve yatırım rehberleri',description:'Kira çarpanı, net getiri, tapu ve maliyet konularında açıklamalar.'},
 '/sehirler':{component:Cities,title:'Şehir konut piyasaları',description:'Bölgesel konut verilerinin kapsamı ve resmî kaynakları.'},
+'/sehir-karsilastir':{component:CityComparison,title:'Şehirler arası konut fiyat eğilimi karşılaştırması',description:'İstanbul, Ankara ve İzmir dahil şehirlerin TCMB bölgesel konut fiyat endekslerini 1, 3 veya 5 yılda karşılaştırın.'},
 '/kontrol-listesi':{component:Checklist,title:'Ev satın alma kontrol listesi',description:'Tapu, iskân, teknik inceleme ve kiracı kontrollerinizi takip edin.'},
 '/veri':{component:Data,title:'Veri kaynakları ve servis durumu',description:'KonutSeyir verilerinin kaynağı, dönemi ve bağlantı durumu.'},
 '/haberler':{component:News,title:'Emlak ve konut haberleri',description:'Konut, kira, tapu ve gayrimenkul gündemini tarihe göre izleyin.'},

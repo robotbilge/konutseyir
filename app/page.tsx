@@ -1,6 +1,6 @@
 import {ArrowDown,ArrowUpRight,BadgeCheck,Calculator as CalculatorIcon,Database,Info,SearchCheck,ShieldCheck} from 'lucide-react';
 import {Header,Footer} from '../components/site-chrome';
-import {Calculator,Credit,Deposit} from '../components/calculator';
+import {Credit,Deposit} from '../components/calculator';
 import {LatestNews,MarketSnapshot,DistrictSalesRanking} from '../components/live-data';
 import {ListingAnalyzer} from '../components/listing-analyzer';
 
@@ -29,7 +29,13 @@ export default function Home(){return <><Header/><main>
   </section>
   <ListingAnalyzer/>
   <div className="inner">
-    <Calculator/>
+    <section className="home-user-paths" aria-labelledby="home-user-paths-title">
+      <header><p className="eyebrow">İHTİYACINIZA GÖRE İLERLEYİN</p><h2 id="home-user-paths-title">Konut alıcısı mısınız, yatırımcı mı?</h2><p>Bir sonraki adımı seçin; her araç kendi karar sorusuna odaklanır.</p></header>
+      <div className="home-user-path-grid">
+        <article><p className="eyebrow">EV ALACAKLAR</p><h3>Satın alma kararını hazırlayın</h3><p>İlanı inceleyin, toplam maliyeti ve kredi yükünü hesaplayın, tapu öncesi kontrolleri tamamlayın.</p><a className="home-path-primary" href="/ev-analizi">Konut analizini aç <ArrowUpRight size={16}/></a><div><a href="/kredi-hesaplama">Kredi taksiti ve maliyeti</a><a href="/hesaplama/alim-maliyeti">Toplam alım gideri</a><a href="/kontrol-listesi">Satın alma kontrol listesi</a></div></article>
+        <article><p className="eyebrow">KONUT YATIRIMCILARI</p><h3>Kira ve alternatifleri karşılaştırın</h3><p>Net kira akışını ölçün, aynı sermayeyi farklı senaryolarda değerlendirin ve şehir eğilimine bakın.</p><a className="home-path-primary" href="/karsilastir">Yatırım karşılaştırmasını aç <ArrowUpRight size={16}/></a><div><a href="/hesaplama/net-kira">Net kira getirisi</a><a href="/sehirler">Şehir verileri</a><a href="/rehber/ev-mi-mevduat-mi">Konut mu mevduat mı?</a></div></article>
+      </div>
+    </section>
     <div className="section-heading support-heading"><div><p className="eyebrow">BAĞIMSIZ HESAP ARAÇLARI</p><h2>Nakit getirisi ve kredi maliyeti</h2></div><p>Mevduat vadesini ve kredi masraflarını ayrı hesaplayın. Bu hesaplar, üstteki konut karşılaştırmasının yerine geçmez.</p></div>
     <div className="support-tools">
       <div className="support-tool-row deposit-tool"><div className="support-tool-copy"><span>NAKİT GETİRİSİ</span><h3>Paranız mevduatta ne kazanır?</h3><p>Seçtiğiniz vade sonunda stopaj sonrası net tutarı hesaplayın.</p></div><Deposit/></div>
