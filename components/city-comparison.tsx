@@ -49,7 +49,7 @@ export function CityComparison(){
  },[selected,years,data]);
 
  const toggle=(slug:string)=>{
-  setSelected(current=>current.includes(slug)?current.filter(x=>x!==slug):current.length<3?[...current,slug]:current);
+  setSelected(current=>current.includes(slug)?(current.length>2?current.filter(x=>x!==slug):current):current.length<3?[...current,slug]:current);
  };
  return <section className="city-comparison" aria-labelledby="city-comparison-title">
   <div className="city-comparison-heading"><div><p className="eyebrow">AYNI DÖNEMDE ŞEHİR KIYASI</p><h2 id="city-comparison-title">Konut fiyat eğilimini şehirler arasında karşılaştırın</h2><p>TCMB bölgesel konut fiyat endekslerini aynı başlangıç değerine getirerek karşılaştırın. Endeks değişimini gösterir; şehirlerdeki mutlak konut fiyatlarını karşılaştırmaz.</p></div><label className="city-range">Dönem<select value={years} onChange={e=>setYears(Number(e.target.value))}><option value={1}>1 yıl</option><option value={3}>3 yıl</option><option value={5}>5 yıl</option></select></label></div>
