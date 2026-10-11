@@ -4,6 +4,8 @@ import {cities} from '../lib/content';
 
 type Observation={period:string;value:number};
 type CityData={value:number|null;period:string|null;history:Observation[];status:string;source:string};
+type TrendSeries={slug:string;name:string;color:string;values:{period:string;value:number}[]};
+type CityComparisonResult={series:TrendSeries[];points:string[];low:number;high:number;x:(i:number)=>number;y:(v:number)=>number;line:(values:{period:string;value:number}[])=>string;base:string;latest:string}|{error:string}|null;
 const colors=['#17684e','#b26719','#3e64a3'];
 const monthNumber=(period:string)=>{const m=period.match(/^(\d{4})-(\d{2})/);return m?Number(m[1])*12+Number(m[2])-1:NaN};
 const moneyIndex=(n:number)=>n.toLocaleString('tr-TR',{maximumFractionDigits:2});
@@ -27,7 +29,7 @@ export function CityComparison(){
   return()=>controller.abort();
  },[selectionKey]);
 
- const comparison=useMemo(()=>{
+ const comparison=useMemo<CityComparisonResult>(()=>{
   if(selected.length<2||selected.some(slug=>!data[slug]))return null;
   const sets=selected.map(slug=>new Map((data[slug].history||[]).filter(x=>Number.isFinite(Number(x.value))&&Number(x.value)>0).map(x=>[x.period,Number(x.value)])));
   const shared=[...sets[0].keys()].filter(period=>sets.every(set=>set.has(period))).sort();
