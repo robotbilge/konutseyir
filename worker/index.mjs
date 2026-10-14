@@ -151,7 +151,7 @@ function corsify(response,request){
 async function cachedOpenData(cacheName,url,init,ttl){
  const cache=globalThis.caches?.default,key=new Request(`https://konutseyir.com/__open-data-cache/${cacheName}`);
  if(cache){const hit=await cache.match(key);if(hit)return hit}
- const upstream=await fetch(url,{...init,signal:AbortSignal.timeout(18000)});
+ const upstream=await fetch(url,{...init,signal:AbortSignal.timeout(26000)});
  if(!upstream.ok)throw new Error('Open data service unavailable');
  const body=await upstream.json(),response=json(body,200,`public, max-age=${ttl}`);
  if(cache)await cache.put(key,response.clone());
