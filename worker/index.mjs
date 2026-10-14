@@ -153,7 +153,7 @@ function calculatorLink(listing){
  if(listing.price)params.set("price",String(Math.round(listing.price)));
  if(listing.area)params.set("area",String(Math.round(listing.area)));
  if(listing.monthlyRent)params.set("rent",String(Math.round(listing.monthlyRent)));
- return "https://konutseyir.com/?"+params.toString()+"#analiz";
+ return "https://konutseyir.com/ev-analizi/?"+params.toString()+"#ilan-analizi";
 }
 async function analyzeRequest(request){
  if(Number(request.headers.get("Content-Length")||0)>20000)return json({error:"İstek boyutu çok büyük."},413,"no-store");

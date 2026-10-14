@@ -1,8 +1,6 @@
-import {ArrowDown,ArrowUpRight,BadgeCheck,Calculator as CalculatorIcon,Database,Info,SearchCheck,ShieldCheck} from 'lucide-react';
+import {ArrowUpRight,BadgeCheck,Calculator as CalculatorIcon,Database,Info,SearchCheck,ShieldCheck} from 'lucide-react';
 import {Header,Footer} from '../components/site-chrome';
-import {Credit,Deposit} from '../components/calculator';
 import {LatestNews,MarketSnapshot,DistrictSalesRanking} from '../components/live-data';
-import {ListingAnalyzer} from '../components/listing-analyzer';
 
 export default function Home(){return <><Header/><main>
   <section className="hero home-hero">
@@ -12,8 +10,8 @@ export default function Home(){return <><Header/><main>
       <h1>Satılık konut ilanını m² fiyatı ve <em>kira göstergeleriyle</em> karşılaştırın.</h1>
       <p className="hero-tagline">Bir evin fiyatını değil, <strong>yatırım mantığını</strong> ölçün.</p>
       <p className="lead">İlan bilgilerini bağlantıdan aktarın. Brüt m² fiyatını TCMB’nin il göstergesiyle; kira, getiri ve amortismanı ayrı ayrı inceleyin.</p>
-      <div className="hero-actions"><a className="primary-link" href="#ilan-analizi">İlanı analiz et <ArrowDown size={17}/></a><a className="text-link" href="/veri">Veri kaynakları <ArrowUpRight size={16}/></a></div>
-      <div className="hero-proof"><span><ShieldCheck/> Üyelik gerekmez</span><span><CalculatorIcon/> Sonuç anında güncellenir</span><span><Database/> Varsayımlar size ait</span></div>
+      <div className="hero-actions"><a className="primary-link" href="/ev-analizi">İlanı analiz et <ArrowUpRight size={17}/></a><a className="text-link" href="/veri">Veri kaynakları <ArrowUpRight size={16}/></a></div>
+      <div className="hero-proof"><span><ShieldCheck/> Üyelik gerekmez</span><span><CalculatorIcon/> Kaynak dönemi görünür</span><span><Database/> Varsayımlar size ait</span></div>
     </div>
     <aside className="hero-analysis-preview" aria-labelledby="hero-analysis-title">
       <p className="eyebrow">RAPOR ÖNİZLEMESİ</p>
@@ -27,26 +25,18 @@ export default function Home(){return <><Header/><main>
       
     </aside>
   </section>
-  <ListingAnalyzer/>
   <div className="inner">
     <section className="home-user-paths" aria-labelledby="home-user-paths-title">
-      <header><p className="eyebrow">İHTİYACINIZA GÖRE İLERLEYİN</p><h2 id="home-user-paths-title">Konut alıcısı mısınız, yatırımcı mı?</h2><p>Bir sonraki adımı seçin; her araç kendi karar sorusuna odaklanır.</p></header>
+      <header><p className="eyebrow">İHTİYACINIZA GÖRE İLERLEYİN</p><h2 id="home-user-paths-title">Konut için hangi adımı atıyorsunuz?</h2><p>Bir sonraki adımı seçin; her araç kendi karar sorusuna odaklanır.</p></header>
       <div className="home-user-path-grid">
-        <article><p className="eyebrow">EV ALACAKLAR</p><h3>Satın alma kararını hazırlayın</h3><p>İlanı inceleyin, toplam maliyeti ve kredi yükünü hesaplayın, tapu öncesi kontrolleri tamamlayın.</p><a className="home-path-primary" href="/ev-analizi">Konut analizini aç <ArrowUpRight size={16}/></a><div><a href="/kredi-hesaplama">Kredi taksiti ve maliyeti</a><a href="/hesaplama/alim-maliyeti">Toplam alım gideri</a><a href="/kontrol-listesi">Satın alma kontrol listesi</a><a href="/karar-araclari#maksimum-butce">Bütçeme göre konut tutarı</a></div></article>
-        <article><p className="eyebrow">KONUT YATIRIMCILARI</p><h3>Kira ve alternatifleri karşılaştırın</h3><p>Net kira akışını ölçün, aynı sermayeyi farklı senaryolarda değerlendirin ve şehir eğilimine bakın.</p><a className="home-path-primary" href="/karsilastir">Yatırım karşılaştırmasını aç <ArrowUpRight size={16}/></a><div><a href="/hesaplama/net-kira">Net kira getirisi</a><a href="/sehirler">Şehir verileri</a><a href="/rehber/ev-mi-mevduat-mi">Konut mu mevduat mı?</a><a href="/karar-araclari#ev-al-kirala">Almak mı kiralamak mı?</a></div></article>
-        <article><p className="eyebrow">EVİNİ SATACAKLAR</p><h3>Satışı hazırlayın, tutarı görün</h3><p>Kendi girdiğiniz ilan emsallerini, giderleri ve ilan bilgilerini düzenleyin; otomatik fiyat vaadi almayın.</p><a className="home-path-primary" href="/karar-araclari#satici-referans">Satıcı araçlarını aç <ArrowUpRight size={16}/></a><div><a href="/karar-araclari#net-satis">Net satış tutarı</a><a href="/karar-araclari#ilan-yardimcisi">İlan yardımcısı</a></div></article>
+        <article><p className="eyebrow">EV ALACAĞIM</p><h3>Satın alma kararını hazırlayın</h3><p>İlanı inceleyin, toplam maliyeti ve kredi yükünü hesaplayın, tapu öncesi kontrolleri tamamlayın.</p><a className="home-path-primary" href="/ev-analizi">Konut analizini aç <ArrowUpRight size={16}/></a><div><a href="/kredi-hesaplama">Kredi taksiti ve maliyeti</a><a href="/hesaplama/alim-maliyeti">Toplam alım gideri</a><a href="/kontrol-listesi">Satın alma kontrol listesi</a><a href="/kredi-hesaplama#maksimum-butce">Bütçeme göre konut tutarı</a></div></article>
+        <article><p className="eyebrow">KONUTA YATIRIM YAPACAĞIM</p><h3>Kira ve alternatifleri karşılaştırın</h3><p>Net kira hesabını, TÜİK geçmiş getirilerini ve şehirlerin fiyat eğilimini inceleyin.</p><a className="home-path-primary" href="/karsilastir">Yatırım karşılaştırmasını aç <ArrowUpRight size={16}/></a><div><a href="/hesaplama/net-kira">Net kira getirisi</a><a href="/sehirler">Şehir verileri</a><a href="/rehber/ev-mi-mevduat-mi">Konut mu mevduat mı?</a><a href="/hesaplama/mevduat">Net mevduat getirisi</a></div></article>
+        <article><p className="eyebrow">EVİMİ SATACAĞIM</p><h3>Satışı hazırlayın, tutarı görün</h3><p>Satış fiyatından borç ve giderleri düşün; tapu ve resmî kayıt kontrollerini tamamlayın.</p><a className="home-path-primary" href="/karar-araclari#net-satis">Net satış tutarını hesapla <ArrowUpRight size={16}/></a><div><a href="/hesaplama/tapu-harci">Tapu gideri</a><a href="/resmi-kontroller">Resmî kontroller</a></div></article>
       </div>
     </section>
     <section className="cross-network-card gold-housing-promo" aria-labelledby="gold-housing-promo-title"><div><span className="cross-network-badge">AYNI YAYIN AĞI · DOĞRUDAN ARAÇLAR</span><h2 id="gold-housing-promo-title">Altın birikiminiz konutta ne kadar alım gücü sağlıyor?</h2><p>Altın birikiminizin farklı şehirlerde yaklaşık kaç brüt metrekareye karşılık geldiğini hesaplayın. Canlı gram altın grafiği ve AltınSeyir geçiş hesabı da elinizin altında.</p></div><div><a className="gold-external" href="/altinla-konut">Altınla konut alım gücümü hesapla <ArrowUpRight size={16}/></a><a className="gold-price-link" href="https://altinseyir.com/altindan-konuta" target="_blank" rel="noopener noreferrer">AltınSeyir geçiş hesabını aç <ArrowUpRight size={16}/></a><a className="gold-price-link" href="https://altinseyir.com/gram-altin" target="_blank" rel="noopener noreferrer">Canlı gram altın grafiği <ArrowUpRight size={16}/></a></div></section>
-    <div className="section-heading support-heading"><div><p className="eyebrow">BAĞIMSIZ HESAP ARAÇLARI</p><h2>Nakit getirisi ve kredi maliyeti</h2></div><p>Mevduat vadesini ve kredi masraflarını ayrı hesaplayın. Bu hesaplar, üstteki konut karşılaştırmasının yerine geçmez.</p></div>
-
-    <div className="support-tools">
-      <div className="support-tool-row deposit-tool"><div className="support-tool-copy"><span>NAKİT GETİRİSİ</span><h3>Paranız mevduatta ne kazanır?</h3><p>Seçtiğiniz vade sonunda stopaj sonrası net tutarı hesaplayın.</p></div><Deposit/></div>
-      <div className="support-tool-row credit-tool"><div className="support-tool-copy"><span>FİNANSMAN MALİYETİ</span><h3>Konut kredisi gerçekte neye mal olur?</h3><p>Aylık taksiti, toplam geri ödemeyi ve ek masrafları birlikte görün.</p></div><Credit/></div>
-    </div>
   </div>
   <MarketSnapshot/>
-  <section className="cross-network-card tuik-history-card" aria-labelledby="tuik-history-card-title"><div><span className="cross-network-badge">TÜİK · GEÇMİŞ DÖNEM KARŞILAŞTIRMASI</span><h2 id="tuik-history-card-title">Yatırım araçlarının geçmiş getirilerini karşılaştırın</h2><p>TÜİK’in yayımladığı geçmiş dönem verileriyle altın, mevduat, döviz, BIST 100 ve DİBS getirilerini aynı tutar üzerinden inceleyin.</p></div><div><a href="/karsilastir#financial-returns-title">TÜİK karşılaştırmasını aç <ArrowUpRight size={16}/></a></div></section>
   <LatestNews/>
   <div className="inner">
     <section className="home-sales-radar"><div><p className="eyebrow">TÜRKİYE KONUT SATIŞ RADARI</p><h2>En çok konut satılan ilçeleri izleyin</h2><p>Resmî TÜİK kayıtlarında doğrulanmış ilçe kırılımı bulunan şehirlerin satış hareketini inceleyin.</p><DistrictSalesRanking city="istanbul"/></div><a className="primary-link" href="/sehirler">Şehir verilerini incele <ArrowUpRight size={17}/></a></section>

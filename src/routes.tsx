@@ -14,6 +14,7 @@ import RentIncrease from '../app/hesaplama/kira-artis-orani/page';
 import GoldProperty from '../app/hesaplama/altin-bazli-konut/page';
 import ShareTool from '../app/hesaplama/hisseli-tapu/page';
 import Tools from '../app/hesaplama/page';
+import DepositPage from '../app/hesaplama/mevduat/page';
 import DecisionToolsPage from '../app/karar-araclari/page';
 
 import Compare from '../app/karsilastir/page';
@@ -39,8 +40,9 @@ const fixed:Record<string,{component:any,title:string,description:string}>={
 '/' :{component:Home,title:'Satılık konut ilanı analizi ve m² fiyat karşılaştırması | KonutSeyir',description:'Satılık konut ilanının net ve brüt m² fiyatını hesaplayın. Brüt fiyatı TCMB’nin il göstergesiyle karşılaştırın; kira ve amortisman raporunu inceleyin.'},
 '/altinla-konut':{component:GoldHousingPage,title:'Altının Ne Kadar Konut Alıyor? | Altınla konut alım gücü',description:'Altın birikiminizin İstanbul, Ankara, İzmir ve veri bulunan diğer şehirlerde yaklaşık kaç brüt metrekare konuta karşılık geldiğini TCMB konut birim fiyatlarıyla hesaplayın.'},
 '/hesaplama':{component:Tools,title:'Konut hesaplama araçları | Kira, tapu, m² ve maliyet',description:'Kira çarpanı, net kira, metrekare fiyatı, alım maliyeti, tapu harcı, emlak komisyonu, kira artışı ve diğer konut hesaplama araçlarını seçin.'},
-'/karar-araclari':{component:DecisionToolsPage,title:'Konut karar araçları | Almak mı kiralamak mı, satıcı araçları',description:'Almak mı kiralamak mı senaryosu, bütçeye göre kredi tutarı, kullanıcı emsali fiyat referansı, net satış ve ilan hazırlama araçları.'},
-'/ev-analizi':{component:HomeAnalysis,title:'Konut yatırım analizi ve kira çarpanı hesaplama',description:'Konutun net kira getirisini, amortisman süresini, metrekare fiyatını, alım maliyetini ve reel yatırım getirisini hesaplayın.'},
+'/karar-araclari':{component:DecisionToolsPage,title:'Net satış tutarı hesaplama | Satış giderleri',description:'Satış fiyatından kalan borç, emlak hizmet bedeli, tadilat, taşınma ve diğer giderleri düşerek yaklaşık net satış tutarını hesaplayın.'},
+'/hesaplama/mevduat':{component:DepositPage,title:'Net mevduat faizi hesaplama | Vade ve stopaj',description:'Anapara, yıllık brüt faiz, vade günü ve stopaj oranıyla net mevduat getirisini hesaplayın.'},
+'/ev-analizi':{component:HomeAnalysis,title:'Konut ilanı analizi | TCMB il m² ve kira göstergeleri',description:'İlanın net ve brüt m² fiyatını hesaplayın; TCMB il konut birim fiyatı ve kira göstergesiyle kaynak dönemini belirterek karşılaştırın.'},
 '/kredi-hesaplama':{component:LoanCalculator,title:'Konut kredisi toplam maliyet hesaplama',description:'Aylık taksit, toplam geri ödeme, faiz ve ek kredi giderlerini hesaplayın.'},
 '/resmi-kontroller':{component:OfficialChecks,title:'Ev almadan önce resmî kontroller',description:'Tapu, parsel, deprem tehlikesi ve satın alma kontrol adımlarına ulaşın.'},
 '/hesaplama/kira-carpani':{component:RentMultiplier,title:'Kira çarpanı hesaplama',description:'Satış fiyatı ve aylık kirayla brüt kira çarpanını ay ve yıl olarak hesaplayın.'},
@@ -53,7 +55,7 @@ const fixed:Record<string,{component:any,title:string,description:string}>={
 '/hesaplama/kira-artis-orani':{component:RentIncrease,title:'Kira artış oranı hesaplama 2026 | TÜFE kira zammı',description:'TÜFE 12 aylık ortalamaya göre konut kira artış tutarını ve yeni aylık kirayı hesaplayın.'},
 '/hesaplama/altin-bazli-konut':{component:GoldProperty,title:'Konut kaç gram altın ediyor? | Altın bazlı konut değeri',description:'Konut fiyatını AltınSeyir güncel gram altın referansıyla karşılaştırın; konutun kaç gram ve kaç kilo altın ettiğini görün.'},
 '/hesaplama/hisseli-tapu':{component:ShareTool,title:'Hisseli tapu ve miras payı hesaplama',description:'Tapudaki veya veraset ilamındaki pay/payda oranına göre matematiksel metrekare ve değer karşılığını hesaplayın.'},
-'/karsilastir':{component:Compare,title:'Konut, mevduat ve altın karşılaştırması | TÜİK reel getirileri',description:'Konut, mevduat ve altın senaryolarını karşılaştırın. Tutar girip TÜİK’in 1, 3, 6 ve 12 aylık nominal ve TÜFE/Yİ-ÜFE reel getirilerini inceleyin.'},
+'/karsilastir':{component:Compare,title:'Yatırım araçları karşılaştırması | TÜİK reel getirileri',description:'Tutar girip TÜİK’in 1, 3, 6 ve 12 aylık nominal ve TÜFE/Yİ-ÜFE reel getirilerini inceleyin. Altın, mevduat, döviz, BIST 100 ve DİBS geçmiş dönem verileri.'},
 '/rehber':{component:Guides,title:'Konut satın alma ve yatırım rehberleri',description:'Kira çarpanı, net getiri, tapu ve maliyet konularında açıklamalar.'},
 '/sehirler':{component:Cities,title:'Şehir konut piyasaları',description:'Bölgesel konut verilerinin kapsamı ve resmî kaynakları.'},
 '/sehir-karsilastir':{component:CityComparison,title:'Şehirler arası konut fiyat eğilimi karşılaştırması',description:'İstanbul, Ankara ve İzmir dahil şehirlerin TCMB bölgesel konut fiyat endekslerini 1, 3 veya 5 yılda karşılaştırın.'},
