@@ -1,5 +1,5 @@
 'use client';
-import {useState} from 'react';
+import {useEffect,useState} from 'react';
 import {ArrowUpRight,Info,ShieldCheck,Search} from 'lucide-react';
 import {provinces} from '../lib/provinces.mjs';
 
@@ -13,6 +13,8 @@ const emptyListing:Listing={city:'İstanbul',price:'',area:'',areaType:'',monthl
 
 export function ListingAnalyzer(){
  const [form,setForm]=useState<Listing>(emptyListing);
+ useEffect(()=>{const params=new URLSearchParams(location.search),value=(key:string)=>{const n=Number(params.get(key));return Number.isFinite(n)&&n>0?n:''};const net=value('netArea')||value('area'),gross=value('grossArea'),city=params.get('city');setForm(prev=>({...prev,city:city&&provinces.includes(city)?city:prev.city,price:value('price'),netArea:net,grossArea:gross,area:gross||net,areaType:gross?'gross':net?'net':'',monthlyRent:value('rent')}))},[]);
+
  const [url,setUrl]=useState('');
  const [listingFetched,setListingFetched]=useState(false);
  const [result,setResult]=useState<Payload|null>(null);
@@ -101,6 +103,7 @@ export function ListingAnalyzer(){
     </div>
     {!result.rent&&<p className="tcmb-rent-missing">{!result.listing?.grossArea?'TCMB kira göstergesi brüt alan bazındadır; brüt ilan alanı olmadığı için tahmini kira hesaplanmadı.':'Bu il/dönem için karşılaştırılabilir birim kira verisi bulunamadı; kira tahmini gösterilmedi.'}</p>}
     <p className="tcmb-disclaimer">Bu sonuçlar TCMB’nin il bazlı değerleme verilerinden üretilen yaklaşık göstergelerdir; belirli bir konut için ekspertiz, gerçekleşmiş satış fiyatı, kira garantisi veya yatırım tavsiyesi değildir. İlan fiyatı gerçekleşen satış fiyatından farklı olabilir. Brüt kira getirisi ve amortisman hesabı vergi, aidat, bakım, boş kalma süresi ve diğer masrafları içermez. İl göstergesi mahalle veya daire özelliklerine göre emsal karşılaştırmasının yerine geçmez.</p>
+    <button type="button" className="print-button" onClick={()=>window.print()}>Raporu yazdır / PDF kaydet</button>
    </div>}
   </div>
  </section>;
