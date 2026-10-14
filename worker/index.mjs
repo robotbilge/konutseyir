@@ -157,6 +157,29 @@ async function cachedOpenData(cacheName,url,init,ttl){
  if(cache)await cache.put(key,response.clone());
  return response;
 }
+async function cachedOpenDataFallback(cacheName,endpoints,init,ttl){
+ const cache=globalThis.caches?.default,key=new Request(`https://konutseyir.com/__open-data-cache/${cacheName}`);
+ if(cache){const hit=await cache.match(key);if(hit)return hit}
+ let lastError;
+ for(const endpoint of endpoints){
+  try{
+   const upstream=await fetch(endpoint,{...init,signal:AbortSignal.timeout(11000)});
+   if(!upstream.ok){
+    const error=new Error(`Open data service returned ${upstream.status}`);
+    if(upstream.status===429||upstream.status===406)throw error;
+    lastError=error;
+    continue;
+   }
+   const body=await upstream.json(),response=json(body,200,`public, max-age=${ttl}`);
+   if(cache)await cache.put(key,response.clone());
+   return response;
+  }catch(error){
+   if(error?.message?.includes('returned 429')||error?.message?.includes('returned 406'))throw error;
+   lastError=error;
+  }
+ }
+ throw lastError||new Error('Open data services unavailable');
+}
 function calculatorLink(listing){
  const params=new URLSearchParams();
  if(listing.price)params.set("price",String(Math.round(listing.price)));
@@ -340,8 +363,11 @@ export default {
    const lat=Number(body?.lat),lon=Number(body?.lon),radius=Math.max(300,Math.min(1200,Number(body?.radius)||900));
    if(!Number.isFinite(lat)||lat < -90||lat > 90||!Number.isFinite(lon)||lon < -180||lon > 180)return corsify(json({error:'Enlem veya boylam geçersiz.'},400,'no-store'),request);
    const la=lat.toFixed(3),lo=lon.toFixed(3),r=Math.round(radius/100)*100;
-   const query=`[out:json][timeout:15];(node(around:${r},${la},${lo})[public_transport];way(around:${r},${la},${lo})[public_transport];node(around:${r},${la},${lo})[highway=bus_stop];node(around:${r},${la},${lo})[railway~"^(tram_stop|station)$"];node(around:${r},${la},${lo})[shop~"^(supermarket|convenience)$"];way(around:${r},${la},${lo})[shop~"^(supermarket|convenience)$"];node(around:${r},${la},${lo})[amenity~"^(marketplace|pharmacy|hospital|clinic|doctors|dentist|school|kindergarten|college|university)$"];way(around:${r},${la},${lo})[amenity~"^(marketplace|pharmacy|hospital|clinic|doctors|dentist|school|kindergarten|college|university)$"];node(around:${r},${la},${lo})[leisure~"^(park|garden)$"];way(around:${r},${la},${lo})[leisure~"^(park|garden)$"];way(around:${r},${la},${lo})[landuse~"^(grass|forest)$"];way(around:${r},${la},${lo})[natural=wood];);out center tags 150;`;
-   try{const response=await cachedOpenData(`places-${la}-${lo}-${r}`,'https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json','User-Agent':'KonutSeyir/1.0 (https://konutseyir.com)'},body:new URLSearchParams({data:query})},21600);return corsify(response,request)}catch{return corsify(json({error:'OpenStreetMap çevre verisi şu anda yanıt vermiyor. Daha sonra tekrar deneyin.'},503,'no-store'),request)}
+   const around=`around:${r},${la},${lo}`;
+   const query=`[out:json][timeout:10];(nwr(${around})[public_transport];node(${around})[highway=bus_stop];node(${around})[railway~"^(tram_stop|station)$"];nwr(${around})[shop~"^(supermarket|convenience)$"];nwr(${around})[amenity~"^(marketplace|pharmacy|hospital|clinic|doctors|dentist|school|kindergarten|college|university)$"];nwr(${around})[leisure~"^(park|garden)$"];way(${around})[landuse~"^(grass|forest)$"];way(${around})[natural=wood];);out center tags 120;`;
+   const init={method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json','User-Agent':'KonutSeyir/1.0 (https://konutseyir.com)'},body:new URLSearchParams({data:query})};
+   try{const response=await cachedOpenDataFallback(`places-${la}-${lo}-${r}`,['https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter'],init,21600);return corsify(response,request)}catch{return corsify(json({error:'Açık harita servisi şu anda yanıt vermiyor. Daha sonra tekrar deneyin.'},503,'no-store'),request)}
+
   }
   if(path==='/api/nearby-quakes'&&request.method==='GET'){
    const lat=Number(url.searchParams.get('lat')),lon=Number(url.searchParams.get('lon'));
