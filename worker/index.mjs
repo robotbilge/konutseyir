@@ -148,6 +148,15 @@ function corsify(response,request){
  headers.set("Vary","Origin");
  return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
 }
+async function cachedOpenData(cacheName,url,init,ttl){
+ const cache=globalThis.caches?.default,key=new Request(`https://konutseyir.com/__open-data-cache/${cacheName}`);
+ if(cache){const hit=await cache.match(key);if(hit)return hit}
+ const upstream=await fetch(url,{...init,signal:AbortSignal.timeout(18000)});
+ if(!upstream.ok)throw new Error('Open data service unavailable');
+ const body=await upstream.json(),response=json(body,200,`public, max-age=${ttl}`);
+ if(cache)await cache.put(key,response.clone());
+ return response;
+}
 function calculatorLink(listing){
  const params=new URLSearchParams();
  if(listing.price)params.set("price",String(Math.round(listing.price)));
@@ -326,6 +335,21 @@ export default {
  async fetch(request,env){
   if(env.DB)env={...env,DB:d1Guard.wrap(env.DB)};
   const url=new URL(request.url),path=url.pathname;
+  if(path==='/api/nearby-places'&&request.method==='POST'){
+   let body;try{body=await request.json()}catch{return corsify(json({error:'Konum isteği okunamadı.'},400,'no-store'),request)}
+   const lat=Number(body?.lat),lon=Number(body?.lon),radius=Math.max(300,Math.min(1200,Number(body?.radius)||900));
+   if(!Number.isFinite(lat)||lat < -90||lat > 90||!Number.isFinite(lon)||lon < -180||lon > 180)return corsify(json({error:'Enlem veya boylam geçersiz.'},400,'no-store'),request);
+   const la=lat.toFixed(3),lo=lon.toFixed(3),r=Math.round(radius/100)*100;
+   const query=`[out:json][timeout:15];(node(around:${r},${la},${lo})[public_transport];way(around:${r},${la},${lo})[public_transport];node(around:${r},${la},${lo})[highway=bus_stop];node(around:${r},${la},${lo})[railway~"^(tram_stop|station)$"];node(around:${r},${la},${lo})[shop~"^(supermarket|convenience)$"];way(around:${r},${la},${lo})[shop~"^(supermarket|convenience)$"];node(around:${r},${la},${lo})[amenity~"^(marketplace|pharmacy|hospital|clinic|doctors|dentist|school|kindergarten|college|university)$"];way(around:${r},${la},${lo})[amenity~"^(marketplace|pharmacy|hospital|clinic|doctors|dentist|school|kindergarten|college|university)$"];node(around:${r},${la},${lo})[leisure~"^(park|garden)$"];way(around:${r},${la},${lo})[leisure~"^(park|garden)$"];way(around:${r},${la},${lo})[landuse~"^(grass|forest)$"];way(around:${r},${la},${lo})[natural=wood];);out center tags 150;`;
+   try{const response=await cachedOpenData(`places-${la}-${lo}-${r}`,'https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json','User-Agent':'KonutSeyir/1.0 (https://konutseyir.com)'},body:new URLSearchParams({data:query})},21600);return corsify(response,request)}catch{return corsify(json({error:'OpenStreetMap çevre verisi şu anda yanıt vermiyor. Daha sonra tekrar deneyin.'},503,'no-store'),request)}
+  }
+  if(path==='/api/nearby-quakes'&&request.method==='GET'){
+   const lat=Number(url.searchParams.get('lat')),lon=Number(url.searchParams.get('lon'));
+   if(!Number.isFinite(lat)||lat < -90||lat > 90||!Number.isFinite(lon)||lon < -180||lon > 180)return corsify(json({error:'Enlem veya boylam geçersiz.'},400,'no-store'),request);
+   const round=(n)=>Math.round(n*100)/100,la=round(lat),lo=round(lon),end=new Date(),start=new Date(end.getTime()-30*86400000),stamp=d=>d.toISOString().replace('T',' ').slice(0,19);
+   const params=new URLSearchParams({lat:String(la),lon:String(lo),maxrad:'25000',minrad:'0',start:stamp(start),end:stamp(end),limit:'100',orderby:'time',format:'json'});
+   try{const response=await cachedOpenData(`quakes-${la}-${lo}-${start.toISOString().slice(0,10)}`,`https://deprem.afad.gov.tr/apiv2/event/filter?${params}`,{headers:{Accept:'application/json','User-Agent':'KonutSeyir/1.0 (https://konutseyir.com)'}},900);return corsify(response,request)}catch{return corsify(json({error:'AFAD deprem servisine şu anda erişilemiyor. Resmî AFAD sorgusunu kullanabilirsiniz.'},503,'no-store'),request)}
+  }
   if(path==='/api/analyze'||path==='/api/selectors'||path==='/api/tcmb-listing'){
    if(request.method==='OPTIONS')return corsify(new Response(null,{status:204,headers:{'Access-Control-Max-Age':'86400'}}),request);
    if(path==='/api/selectors'&&request.method==='GET')return corsify(json(selectorConfig,200,'public, max-age=300'),request);
@@ -356,17 +380,18 @@ export default {
    if(path.startsWith('/api/news/')){const slug=decodeURIComponent(path.slice('/api/news/'.length));const item=await env.DB.prepare('SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,NULL imageUrl FROM news WHERE slug=?').bind(slug).first();return item?json(item):json({error:'Haber bulunamadı'},404)}
    if(path==='/api/housing-unit-prices'){
     const configured=!!tcmbKey(env),catalog=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind('unit-price:catalog').first(),attempted=Date.parse(catalog?.attempted_at||'');
-    const {count:availableSeries=0}=await env.DB.prepare("SELECT COUNT(*) AS count FROM source_status WHERE series LIKE 'tcmb:price:%' AND state='available'").first();
-    const partial=Number(availableSeries)<Object.keys(unitPriceSeries).length,refreshInterval=partial?60*60*1000:7*86400000;
+    const {results:previousStates=[]}=await env.DB.prepare("SELECT series,state,attempted_at FROM source_status WHERE series LIKE 'tcmb:price:%'").all();
+    const availableSeries=previousStates.filter(row=>row.state==='available').length,partial=availableSeries<Object.keys(unitPriceSeries).length,refreshInterval=partial?60*60*1000:7*86400000;
     if(configured&&catalog?.state!=='fetching'&&(!Number.isFinite(attempted)||Date.now()-attempted>refreshInterval))await refreshUnitPrices(env);
     const currentCatalog=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind('unit-price:catalog').first();
+    const {results:observations=[]}=await env.DB.prepare("SELECT o.series,o.period,o.value,o.retrieved_at retrievedAt FROM observations o JOIN (SELECT series,MAX(period) period FROM observations WHERE series LIKE 'tcmb:price:%' GROUP BY series) latest ON latest.series=o.series AND latest.period=o.period").all();
+    const {results:sourceStates=[]}=await env.DB.prepare("SELECT series,state,attempted_at FROM source_status WHERE series LIKE 'tcmb:price:%'").all();
     const items=[];
     for(const [slug,item] of Object.entries(unitPriceSeries)){
      const id=String(item.name).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/ı/g,'i').replace(/[^a-z0-9]+/g,'-');
-     const series='tcmb:price:'+id,{results=[]}=await env.DB.prepare('SELECT period,value,retrieved_at retrievedAt FROM observations WHERE series=? ORDER BY period DESC LIMIT 8').bind(series).all();
-     const sourceState=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind(series).first();
-     const latest=results[0],match=String(latest?.period||'').match(/^(\d{4})-Q([1-4])$/),period=match?match[1]+'-'+String((Number(match[2])-1)*3+1).padStart(2,'0')+'-01':latest?.period||null;
-     items.push({slug,name:item.name,pricePerM2:latest?.value??null,period,quarter:match?match[1]+'-Q'+match[2]:null,retrievedAt:latest?.retrievedAt??null,status:latest?'available':sourceState?.state||(configured?'unavailable':'not_configured'),source:'TCMB EVDS',sourceUrl:'https://evds3.tcmb.gov.tr/'});
+     const series='tcmb:price:'+id,latest=observations.find(row=>row.series===series),sourceState=sourceStates.find(row=>row.series===series),match=String(latest?.period||'').match(/^(\d{4})-Q([1-4])$/),period=match?match[1]+'-'+String((Number(match[2])-1)*3+1).padStart(2,'0')+'-01':latest?.period||null;
+     const stale=latest&&Date.now()-Date.parse(latest.period+'T00:00:00Z')>180*86400000;
+     items.push({slug,name:item.name,pricePerM2:latest?.value??null,period,quarter:match?match[1]+'-Q'+match[2]:null,retrievedAt:latest?.retrievedAt??null,status:latest?(sourceState?.state==='error'?'cached':stale?'stale':'available'):sourceState?.state||(configured?'unavailable':'not_configured'),source:'TCMB EVDS',sourceUrl:'https://evds3.tcmb.gov.tr/'});
     }
     const availableCount=items.filter(item=>item.status==='available'&&Number(item.pricePerM2)>0).length,anyAvailable=availableCount>0,catalogStatus=currentCatalog?.state||(configured?'not_fetched':'not_configured');
     return json({items,availableCount,totalCount:items.length,configured,catalogStatus:catalogStatus==='available'&&!anyAvailable?'unavailable':catalogStatus,catalogAttemptedAt:currentCatalog?.attempted_at||null,source:'TCMB EVDS · Konut Birim Fiyatları',unit:'TL/brüt m²'});

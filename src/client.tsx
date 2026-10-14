@@ -6,4 +6,5 @@ import '../app/audit.css';
 import '../app/legal.css';
 import '../app/analytics.css';
 import './style.css';
+import '../app/decision-tools.css';
 page(location.pathname).then(element=>hydrateRoot(document.getElementById('root')!,element));

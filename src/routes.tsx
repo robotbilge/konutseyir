@@ -14,6 +14,8 @@ import RentIncrease from '../app/hesaplama/kira-artis-orani/page';
 import GoldProperty from '../app/hesaplama/altin-bazli-konut/page';
 import ShareTool from '../app/hesaplama/hisseli-tapu/page';
 import Tools from '../app/hesaplama/page';
+import DecisionToolsPage from '../app/karar-araclari/page';
+import EnvironmentPage from '../app/yasam-cevresi/page';
 
 import Compare from '../app/karsilastir/page';
 import Guides from '../app/rehber/page';
@@ -38,6 +40,8 @@ const fixed:Record<string,{component:any,title:string,description:string}>={
 '/' :{component:Home,title:'Satılık konut ilanı analizi ve m² fiyat karşılaştırması | KonutSeyir',description:'Satılık konut ilanının net ve brüt m² fiyatını hesaplayın. Brüt fiyatı TCMB’nin il göstergesiyle karşılaştırın; kira ve amortisman raporunu inceleyin.'},
 '/altinla-konut':{component:GoldHousingPage,title:'Altının Ne Kadar Konut Alıyor? | Altınla konut alım gücü',description:'Altın birikiminizin İstanbul, Ankara, İzmir ve veri bulunan diğer şehirlerde yaklaşık kaç brüt metrekare konuta karşılık geldiğini TCMB konut birim fiyatlarıyla hesaplayın.'},
 '/hesaplama':{component:Tools,title:'Konut hesaplama araçları | Kira, tapu, m² ve maliyet',description:'Kira çarpanı, net kira, metrekare fiyatı, alım maliyeti, tapu harcı, emlak komisyonu, kira artışı ve diğer konut hesaplama araçlarını seçin.'},
+'/karar-araclari':{component:DecisionToolsPage,title:'Konut karar araçları | Almak mı kiralamak mı, satıcı araçları',description:'Almak mı kiralamak mı senaryosu, bütçeye göre kredi tutarı, kullanıcı emsali fiyat referansı, net satış ve ilan hazırlama araçları.'},
+'/yasam-cevresi':{component:EnvironmentPage,title:'Çevresel yaşam analizi ve yakın geçmiş depremler',description:'Haritadan konum seçip OpenStreetMap çevre noktalarını ve AFAD’ın son 30 gündeki yakın deprem kayıtlarını inceleyin.'},
 '/ev-analizi':{component:HomeAnalysis,title:'Konut yatırım analizi ve kira çarpanı hesaplama',description:'Konutun net kira getirisini, amortisman süresini, metrekare fiyatını, alım maliyetini ve reel yatırım getirisini hesaplayın.'},
 '/kredi-hesaplama':{component:LoanCalculator,title:'Konut kredisi toplam maliyet hesaplama',description:'Aylık taksit, toplam geri ödeme, faiz ve ek kredi giderlerini hesaplayın.'},
 '/resmi-kontroller':{component:OfficialChecks,title:'Ev almadan önce resmî kontroller',description:'Tapu, parsel, deprem tehlikesi ve satın alma kontrol adımlarına ulaşın.'},
