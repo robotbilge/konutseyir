@@ -148,38 +148,6 @@ function corsify(response,request){
  headers.set("Vary","Origin");
  return new Response(response.body,{status:response.status,statusText:response.statusText,headers});
 }
-async function cachedOpenData(cacheName,url,init,ttl){
- const cache=globalThis.caches?.default,key=new Request(`https://konutseyir.com/__open-data-cache/${cacheName}`);
- if(cache){const hit=await cache.match(key);if(hit)return hit}
- const upstream=await fetch(url,{...init,signal:AbortSignal.timeout(26000)});
- if(!upstream.ok)throw new Error('Open data service unavailable');
- const body=await upstream.json(),response=json(body,200,`public, max-age=${ttl}`);
- if(cache)await cache.put(key,response.clone());
- return response;
-}
-async function cachedOpenDataFallback(cacheName,endpoints,init,ttl){
- const cache=globalThis.caches?.default,key=new Request(`https://konutseyir.com/__open-data-cache/${cacheName}`);
- if(cache){const hit=await cache.match(key);if(hit)return hit}
- let lastError;
- for(const endpoint of endpoints){
-  try{
-   const upstream=await fetch(endpoint,{...init,signal:AbortSignal.timeout(11000)});
-   if(!upstream.ok){
-    const error=new Error(`Open data service returned ${upstream.status}`);
-    if(upstream.status===429||upstream.status===406)throw error;
-    lastError=error;
-    continue;
-   }
-   const body=await upstream.json(),response=json(body,200,`public, max-age=${ttl}`);
-   if(cache)await cache.put(key,response.clone());
-   return response;
-  }catch(error){
-   if(error?.message?.includes('returned 429')||error?.message?.includes('returned 406'))throw error;
-   lastError=error;
-  }
- }
- throw lastError||new Error('Open data services unavailable');
-}
 function calculatorLink(listing){
  const params=new URLSearchParams();
  if(listing.price)params.set("price",String(Math.round(listing.price)));
@@ -358,24 +326,6 @@ export default {
  async fetch(request,env){
   if(env.DB)env={...env,DB:d1Guard.wrap(env.DB)};
   const url=new URL(request.url),path=url.pathname;
-  if(path==='/api/nearby-places'&&request.method==='POST'){
-   let body;try{body=await request.json()}catch{return corsify(json({error:'Konum isteği okunamadı.'},400,'no-store'),request)}
-   const lat=Number(body?.lat),lon=Number(body?.lon),radius=Math.max(300,Math.min(1200,Number(body?.radius)||900));
-   if(!Number.isFinite(lat)||lat < -90||lat > 90||!Number.isFinite(lon)||lon < -180||lon > 180)return corsify(json({error:'Enlem veya boylam geçersiz.'},400,'no-store'),request);
-   const la=lat.toFixed(3),lo=lon.toFixed(3),r=Math.round(radius/100)*100;
-   const around=`around:${r},${la},${lo}`;
-   const query=`[out:json][timeout:10];(nwr(${around})[public_transport];node(${around})[highway=bus_stop];node(${around})[railway~"^(tram_stop|station)$"];nwr(${around})[shop~"^(supermarket|convenience)$"];nwr(${around})[amenity~"^(marketplace|pharmacy|hospital|clinic|doctors|dentist|school|kindergarten|college|university)$"];nwr(${around})[leisure~"^(park|garden)$"];way(${around})[landuse~"^(grass|forest)$"];way(${around})[natural=wood];);out center tags 120;`;
-   const init={method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json','User-Agent':'KonutSeyir/1.0 (https://konutseyir.com)'},body:new URLSearchParams({data:query})};
-   try{const response=await cachedOpenDataFallback(`places-${la}-${lo}-${r}`,['https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter'],init,21600);return corsify(response,request)}catch{return corsify(json({error:'Açık harita servisi şu anda yanıt vermiyor. Daha sonra tekrar deneyin.'},503,'no-store'),request)}
-
-  }
-  if(path==='/api/nearby-quakes'&&request.method==='GET'){
-   const lat=Number(url.searchParams.get('lat')),lon=Number(url.searchParams.get('lon'));
-   if(!Number.isFinite(lat)||lat < -90||lat > 90||!Number.isFinite(lon)||lon < -180||lon > 180)return corsify(json({error:'Enlem veya boylam geçersiz.'},400,'no-store'),request);
-   const round=(n)=>Math.round(n*100)/100,la=round(lat),lo=round(lon),end=new Date(),start=new Date(end.getTime()-30*86400000),stamp=d=>d.toISOString().replace('T',' ').slice(0,19);
-   const params=new URLSearchParams({lat:String(la),lon:String(lo),maxrad:'25000',minrad:'0',start:stamp(start),end:stamp(end),limit:'100',orderby:'time',format:'json'});
-   try{const response=await cachedOpenData(`quakes-${la}-${lo}-${start.toISOString().slice(0,10)}`,`https://deprem.afad.gov.tr/apiv2/event/filter?${params}`,{headers:{Accept:'application/json','User-Agent':'KonutSeyir/1.0 (https://konutseyir.com)'}},900);return corsify(response,request)}catch{return corsify(json({error:'AFAD deprem servisine şu anda erişilemiyor. Resmî AFAD sorgusunu kullanabilirsiniz.'},503,'no-store'),request)}
-  }
   if(path==='/api/analyze'||path==='/api/selectors'||path==='/api/tcmb-listing'){
    if(request.method==='OPTIONS')return corsify(new Response(null,{status:204,headers:{'Access-Control-Max-Age':'86400'}}),request);
    if(path==='/api/selectors'&&request.method==='GET')return corsify(json(selectorConfig,200,'public, max-age=300'),request);
