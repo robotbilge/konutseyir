@@ -1,135 +1,698 @@
 export const cities=[
- {slug:"istanbul",name:"İstanbul",region:"İstanbul",note:"Yüksek işlem hacmi, geniş ilçe farkları ve kira piyasası nedeniyle tek bir şehir ortalaması karar vermek için yeterli değildir."},
- {slug:"ankara",name:"Ankara",region:"Ankara",note:"Kamu istihdamı, üniversiteler ve yeni gelişim bölgeleri talebi farklı alt pazarlara ayırır."},
- {slug:"izmir",name:"İzmir",region:"İzmir",note:"Merkez, kıyı ve çevre ilçeler arasında kullanım amacı ve sezon etkisi belirgin biçimde değişir."},
- {slug:"adana",name:"Adana",region:"Adana ve Mersin",note:"Kira getirisi ile bina niteliği birlikte incelenmeli; yalnızca metrekare fiyatına göre karar verilmemelidir."},
- {slug:"antalya",name:"Antalya",region:"Antalya, Burdur ve Isparta",note:"Turizm, yabancı talebi ve sezonluk kiralama fiyat ile kira serilerini oynaklaştırabilir."},
- {slug:"bursa",name:"Bursa",region:"Bursa, Eskişehir ve Bilecik",note:"Sanayi koridorları, ulaşım ve yeni konut arzı ilçeler arasında farklı talep yaratır."},
- {slug:"kocaeli",name:"Kocaeli",region:"Kocaeli, Sakarya, Düzce, Bolu ve Yalova",note:"Sanayi istihdamı ve İstanbul bağlantısı güçlüdür; ulaşım süresi analizde ayrıca değerlendirilmelidir."},
- {slug:"konya",name:"Konya",region:"Konya ve Karaman",note:"Geniş şehir yapısı nedeniyle merkez ilçeler ve çevre bölgeler aynı fiyat dinamiğine sahip değildir."},
- {slug:"gaziantep",name:"Gaziantep",region:"Gaziantep, Adıyaman ve Kilis",note:"Nüfus, sanayi ve yeniden yapılaşma göstergeleri satış adediyle birlikte okunmalıdır."},
- {slug:"trabzon",name:"Trabzon",region:"Trabzon, Ordu, Giresun, Rize, Artvin ve Gümüşhane",note:"Topoğrafya, ulaşım ve yabancı talebi mikro konum farklarını büyütebilir."},
- {slug:"balikesir",name:"Balıkesir",region:"Balıkesir ve Çanakkale",note:"Kıyı ilçeleri ile merkez ve iç kesimlerdeki konut talebi farklı dinamiklerle hareket eder."},
- {slug:"mugla",name:"Muğla",region:"Aydın, Denizli ve Muğla",note:"Turizm ve ikinci konut talebi nedeniyle kıyı ilçeleri ile merkez ilçeler ayrı değerlendirilmelidir."},
+ {slug:"istanbul",name:"İstanbul",region:"İstanbul",note:"İstanbul’da ulaşım vaadini zamanla sınayın."},
+ {slug:"ankara",name:"Ankara",region:"Ankara",note:"Ankara’da toplam aylık barınma giderini karşılaştırın."},
+ {slug:"izmir",name:"İzmir",region:"İzmir",note:"İzmir’de sürekli kullanım ile dönemsel kullanım bütçesini ayırın."},
+ {slug:"adana",name:"Adana",region:"Adana ve Mersin",note:"Adana’da alan ve kullanım giderini birlikte kontrol edin."},
+ {slug:"antalya",name:"Antalya",region:"Antalya, Burdur ve Isparta",note:"Antalya’da sezonluk bedelden yıllık gelire geçerken boş ayları yazın."},
+ {slug:"bursa",name:"Bursa",region:"Bursa, Eskişehir ve Bilecik",note:"Bursa’da konut arzını ilan sayısından farklı okuyun."},
+ {slug:"kocaeli",name:"Kocaeli",region:"Kocaeli, Sakarya, Düzce, Bolu ve Yalova",note:"Kocaeli’de bağlantı mesafesini günlük yolculukla doğrulayın."},
+ {slug:"konya",name:"Konya",region:"Konya ve Karaman",note:"Konya’da büyük metrekareyi kullanılabilir alanla sınayın."},
+ {slug:"gaziantep",name:"Gaziantep",region:"Gaziantep, Adıyaman ve Kilis",note:"Gaziantep’te yeni yapı beyanını belgeyle eşleştirin."},
+ {slug:"trabzon",name:"Trabzon",region:"Trabzon, Ordu, Giresun, Rize, Artvin ve Gümüşhane",note:"Trabzon’da güzergâh ve bina bakımını konum ilanından ayırın."},
+ {slug:"balikesir",name:"Balıkesir",region:"Balıkesir ve Çanakkale",note:"Balıkesir’de kıyı konutu ile merkez konutunu aynı kirayla sıralamayın."},
+ {slug:"mugla",name:"Muğla",region:"Aydın, Denizli ve Muğla",note:"Muğla’da kiralama vaadini uygulanabilir sözleşme ve izinle sınayın."},
 ] as const;
 
 export const guides=[
- {slug:"kira-carpani-nedir",title:"Kira çarpanı nedir?",summary:"Bir evin fiyatının yıllık kiraya oranını doğru yorumlama yöntemi.",body:["Kira çarpanı, satış fiyatının yıllık brüt kiraya bölünmesiyle bulunur. 5.000.000 TL değerindeki bir ev ayda 30.000 TL kira getiriyorsa yıllık kira 360.000 TL, kira çarpanı yaklaşık 13,9 yıldır.","Bu sonuç tek başına ucuzluk göstergesi değildir. Boş kalma süresi, bakım, aidat, vergi, sigorta ve satın alma masrafları net getiriyi düşürür. Aynı zamanda binanın yaşı ve bölgede beklenen arz da gelecekteki kirayı etkiler.","Karşılaştırmayı aynı semtte, benzer bina yaşı ve benzer kullanım niteliğine sahip evlerle yapın. Brüt ve net kira çarpanlarını ayrı gösterin."]},
- {slug:"ev-pahali-mi",title:"Bir evin pahalı olduğu nasıl anlaşılır?",summary:"İlan fiyatını tek bir ortalamaya değil, birden fazla ölçüte göre test edin.",body:["Önce ilandaki net ve brüt alanın hangisinin kullanıldığını belirleyin. Satış fiyatını karşılaştırırken aynı alan tanımını kullanmayan iki ilan yanıltıcı sonuç verir.","Metrekare fiyatına ek olarak kira çarpanı, bina yaşı, kat, cephe, otopark, deprem incelemesi ve hukuki durum değerlendirilmelidir. Bölgesel endeks yalnızca genel eğilimi gösterir; tek bir dairenin değerini belirlemez.","En doğru soru 'Bu ev kaç lira eder?' değil, 'Bu fiyat hangi varsayımlar gerçekleşirse mantıklı olur?' sorusudur."]},
- {slug:"net-kira-getirisi",title:"Net kira getirisi nasıl hesaplanır?",summary:"Brüt kira yerine elde kalan gerçek nakit akışını hesaplayın.",body:["Net yıllık kira; tahsil edilen kiradan boş kalma, bakım, malikçe ödenen aidat, sigorta ve vergiler çıkarılarak hesaplanır. Net getiri oranında payda yalnızca ev fiyatı değil, tapu ve tadilat gibi başlangıç maliyetlerini de içermelidir.","Bir aylık boş kalma olasılığını sıfır kabul etmek sonucu gereğinden iyi gösterir. Eski binalarda bakım payı için ayrıca senaryo oluşturmak gerekir.","Vergi kişiye ve döneme göre değişebildiği için sabit oran kullanmak yerine kullanıcıya düzenlenebilir gider alanı sunulmalıdır."]},
- {slug:"reel-konut-getirisi",title:"Reel konut getirisi neden önemlidir?",summary:"TL fiyat artışı ile satın alma gücü artışını birbirinden ayırın.",body:["Konut fiyatı yüzde 40 artarken tüketici enflasyonu yüzde 50 ise yatırım nominal olarak yükselmiş, reel olarak gerilemiştir. Reel değişim basitçe 40-50 değildir; (1,40 / 1,50)-1 formülüyle yaklaşık eksi yüzde 6,7 bulunur.","Kira dahil toplam getiri hesaplanırken kira nakit akışı ayrıca eklenir. Geçmiş endeks performansı geleceğe ilişkin garanti değildir.","Reel getiri, farklı yılları ve yatırım türlerini ortak satın alma gücü ölçüsünde karşılaştırmayı sağlar."]},
- {slug:"ev-mi-mevduat-mi",title:"Ev mi mevduat mı?",summary:"Nakit akışı, likidite ve risk farklarını aynı vadede karşılaştırın.",body:["Mevduatın getirisi belirli vadede daha görünürdür; konutun getirisi ise kira, değer değişimi ve satış maliyetinin birleşimidir. Bu nedenle yalnızca yıllık faiz ile konut fiyat artışını karşılaştırmak eksik kalır.","Konut için tapu, komisyon, tadilat, boş kalma ve satış süresi; mevduat için stopaj ve vade yenileme riski hesaba katılmalıdır.","Karşılaştırma aynı başlangıç parası ve aynı dönem üzerinden yapılmalıdır. Kredi kullanılıyorsa özkaynak getirisi ayrıca hesaplanmalıdır."]},
- {slug:"konut-kredisi-maliyeti",title:"Konut kredisi gerçek maliyeti",summary:"Aylık faiz oranının toplam geri ödemeye etkisini görün.",body:["Eşit taksitli kredide faiz her ay kalan anapara üzerinden işler. Küçük görünen aylık oran, uzun vadede toplam geri ödemeyi ciddi biçimde büyütebilir.","Tahsis ücreti, ekspertiz, sigorta ve ipotek masrafları yalnızca faiz formülünde görünmez. Bankanın yıllık maliyet oranı ve ödeme planı birlikte incelenmelidir.","Vade uzadığında taksit düşebilir fakat toplam finansman maliyeti çoğunlukla artar. Farklı vadeleri aynı kredi tutarıyla karşılaştırın."]},
- {slug:"tapu-kontrolu",title:"Tapu kaydında neler kontrol edilmeli?",summary:"Malik, nitelik, pay ve kısıtlamaları ödeme öncesinde doğrulayın.",body:["Tapu belgesindeki bağımsız bölüm, arsa payı, nitelik ve malik bilgileri fiilî durumla eşleşmelidir. Kat irtifakı ile kat mülkiyeti aynı hukuki durumu ifade etmez.","İpotek, haciz, şerh ve beyanlar yetkili kanaldan kontrol edilmelidir. Ekran görüntüsü veya satıcının sözlü beyanı resmî kayıt yerine geçmez.","Belirsizlik varsa sözleşme ve ödeme öncesinde tapu müdürlüğü ile alanında uzman hukukçudan destek alınmalıdır."]},
- {slug:"iskan-kat-mulkiyeti",title:"İskân ve kat mülkiyeti farkı",summary:"Binanın kullanım izni ile bağımsız bölüm mülkiyetini ayırın.",body:["Yapı kullanma izin belgesi, yapının ruhsat ve eklerine uygun tamamlandığına ilişkin idari belgedir. Kat mülkiyeti ise bağımsız bölümler üzerindeki mülkiyet düzenidir.","Bir ilanda bu kavramlardan birinin yazması diğerinin otomatik olarak bulunduğu anlamına gelmez. Belediye ve tapu kayıtları ayrı ayrı doğrulanmalıdır.","Krediye uygunluk da tek başına bütün hukuki ve teknik risklerin giderildiğini göstermez."]},
- {slug:"deprem-riski-kontrolu",title:"Deprem riski nasıl araştırılır?",summary:"Bölgesel tehlike ile bina performansını birbirine karıştırmayın.",body:["AFAD haritası bölgesel yer hareketi tehlikesini gösterir; belirli bir binanın sağlamlığını ölçmez. Zemin, taşıyıcı sistem, proje, malzeme ve sonradan yapılan değişiklikler ayrıca değerlendirilir.","Bina yaşı tek başına güvenlik kararı verdirmez. Ruhsat ve proje kayıtları incelenmeli, gerekli durumda yetkili kuruluşlardan teknik inceleme alınmalıdır.","'Düşük riskli ilçe' gibi genel ifadeler tek bir yapı için güvence değildir."]},
- {slug:"aidat-borc-kontrolu",title:"Aidat ve ortak gider kontrolü",summary:"Dairenin düzenli maliyetlerini satın almadan önce görün.",body:["Yüksek aidat net kira getirisini düşürür ve yeniden satış talebini etkileyebilir. Yönetim planı, son dönem bütçesi ve planlanan büyük onarımlar incelenmelidir.","Geçmiş borçların kime ait olduğu ve devir tarihinde nasıl kapatılacağı sözleşmede açık olmalıdır. Site yönetiminden yazılı borç durumu alınması yararlıdır.","Asansör, çatı, cephe ve güçlendirme gibi yaklaşan harcamalar olağan aidattan ayrı değerlendirilmelidir."]},
- {slug:"kiracili-ev-almak",title:"Kiracılı ev alırken dikkat",summary:"Kira sözleşmesi ve tahliye varsayımını satın alma kararına katın.",body:["Mülkiyetin devri mevcut kira ilişkisini kendiliğinden sona erdirmez. Kira sözleşmesi, depozito, ödeme düzeni ve kullanım durumu incelenmelidir.","Evi kısa sürede boş teslim alma varsayımı hukuki dayanak olmadan fiyatlamaya eklenmemelidir. Tahliye süreçleri koşula göre değişir.","Satın alma amacı oturum ise teslim tarihi; yatırım ise mevcut kira ile piyasa kirası arasındaki fark ayrıca değerlendirilmelidir."]},
- {slug:"brut-net-metrekare",title:"Brüt ve net metrekare",summary:"İlan karşılaştırmalarındaki en yaygın ölçüm hatasını önleyin.",body:["Net alan, bağımsız bölüm içinde kullanılabilen alanı; brüt alan ise tanıma göre duvarları veya ortak alan paylarını içerebilir. İlanlarda kullanılan brüt tanımı standart olmayabilir.","Aynı fiyatlı iki evin ilandaki metrekareleri farklı yöntemle yazılmışsa metrekare fiyatı karşılaştırması yanlış çıkar.","Mimari proje, tapu bilgisi ve yerinde ölçüm arasında tutarlılık arayın; hesaplayıcıya hangi alanı girdiğinizi not edin."]},
- {slug:"ilan-fiyati-pazarlik",title:"İlan fiyatı ve pazarlık payı",summary:"İlan fiyatını gerçekleşmiş satış fiyatı gibi kullanmayın.",body:["İlan fiyatı satıcının talebidir; gerçekleşen tapu bedelini göstermez. Uzun süredir yayında olan veya sık fiyat değiştiren ilanlar piyasa değerine ilişkin tek başına kanıt değildir.","Benzer ilanları bina yaşı, sokak, kat, cephe ve hukuki durum bakımından daraltın. Pazarlık hedefini yalnızca yüzdesel alışkanlığa göre belirlemeyin.","Ekspertiz, kira getirisi ve alternatif yatırım maliyeti teklif sınırını belirlemede birlikte kullanılabilir."]},
- {slug:"emlak-alim-masraflari",title:"Ev alırken unutulan masraflar",summary:"Satış fiyatının dışındaki başlangıç maliyetlerini bütçeye ekleyin.",body:["Tapu harcı, döner sermaye, emlak hizmet bedeli, ekspertiz, kredi masrafları, sigorta, abonelik ve tadilat toplam yatırım maliyetini artırır.","Oran ve uygulamalar değişebildiği için işlem gününde resmî kaynak ve hizmet sağlayıcıdan doğrulama yapılmalıdır.","Getiri hesabında bu tutarları başlangıç maliyetine eklememek, yatırımın olduğundan daha kârlı görünmesine yol açar."]},
- {slug:"konut-endeksi-okuma",title:"Konut fiyat endeksi nasıl okunur?",summary:"Endeks değişimini tek bir evin ekspertiz değeri sanmayın.",body:["Konut Fiyat Endeksi, belirli bölgedeki genel fiyat hareketini zaman içinde izler. Endeksin yüzde 30 artması, bölgedeki her evin aynı oranda arttığı anlamına gelmez.","Nitelik, konum ve dönem farklılıkları mikro ölçekte büyük sapmalar yaratabilir. Endeks yön ve bağlam sağlar; ilan değerlemesinin yerini tutmaz.","Nominal endeks ile TÜFE'ye göre reel endeks ayrı izlenmelidir."]},
+  {
+    "slug": "kira-carpani-nedir",
+    "title": "Kira çarpanı nedir?",
+    "summary": "Brüt çarpanı net getiriden ayırın; iki benzer ilanı aynı kira ve maliyet tanımıyla karşılaştırın.",
+    "body": [
+      "Kira çarpanı satış fiyatının yıllık brüt kiraya oranıdır. Düşük çıkan sayının fırsat mı, eksik gider hesabı mı olduğunu anlamak için aşağıdaki iki aşamalı hesabı uygulayın."
+    ]
+  },
+  {
+    "slug": "ev-pahali-mi",
+    "title": "Bir evin pahalı olduğu nasıl anlaşılır?",
+    "summary": "Alan hatasını, il göstergesinden farkı ve kişisel bütçe sınırını ayrı kontrol edin.",
+    "body": [
+      "Bir ilanın il ortalamasından yüksek olması tek başına pahalı olduğunu göstermez. Önce aynı şeyleri karşılaştırdığınızdan emin olun; sonra fiyatın hangi belge ve nakit akışıyla desteklendiğini araştırın."
+    ]
+  },
+  {
+    "slug": "net-kira-getirisi",
+    "title": "Net kira getirisi nasıl hesaplanır?",
+    "summary": "Tahsilatı, malike kalan giderleri ve başlangıç sermayesini belgeleyerek elde kalan kirayı bulun.",
+    "body": [
+      "Sözleşmedeki aylık kira düzenli gelir vaadidir; net kira, tahsilat ve malikin giderleri düşüldükten sonra kalan tutardır. Aynı aidatı ya da vergiyi iki kez düşmek de hiç düşmemek kadar yanıltıcıdır."
+    ]
+  },
+  {
+    "slug": "reel-konut-getirisi",
+    "title": "Reel konut getirisi neden önemlidir?",
+    "summary": "TL kârını satın alma gücünden ayırın; dönem sonu yaklaşımının sınırını görün.",
+    "body": [
+      "Reel getiri, aynı dönem enflasyonuyla düzeltilmiş toplam sonucu gösterir. Yalnız fiyat artışından enflasyonu çıkarmak doğru oranı vermez."
+    ]
+  },
+  {
+    "slug": "ev-mi-mevduat-mi",
+    "title": "Ev mi mevduat mı?",
+    "summary": "Aynı sermaye ve aynı tarihlerde net nakdi karşılaştırın; vade yenilemesini garanti saymayın.",
+    "body": [
+      "Bu sorunun cevabı tek bir faiz veya fiyat artış oranı değildir. Evde oturmanın sağladığı kira tasarrufu ile kiraya verilerek elde edilen gelir ayrı senaryolardır."
+    ]
+  },
+  {
+    "slug": "konut-kredisi-maliyeti",
+    "title": "Konut kredisi gerçek maliyeti",
+    "summary": "Aylık oran, ödeme planı ve ek giderlerin toplam ödemeye etkisini ayrı okuyun.",
+    "body": [
+      "Aylık taksitin bütçeye uyması kredinin toplam maliyetini açıklamaz. Bankadan sözleşme öncesi bilgi formu ve ödeme planını isteyin; hesabı bu iki belgeyle kontrol edin."
+    ]
+  },
+  {
+    "slug": "tapu-kontrolu",
+    "title": "Tapu kaydında neler kontrol edilmeli?",
+    "summary": "Satın aldığınız bağımsız bölümün kimliğini ve kayıt üzerindeki sınırlamaları ödeme öncesinde eşleştirin.",
+    "body": [
+      "İlanda gösterilen daire ile tapudaki taşınmazın aynı olması kontrolün başlangıcıdır. Parsel haritası bir konumu gösterir; malik ve kısıtlama araştırmasının tamamı değildir."
+    ]
+  },
+  {
+    "slug": "iskan-kat-mulkiyeti",
+    "title": "İskân ve kat mülkiyeti farkı",
+    "summary": "Kullanım izni, tapu niteliği ve projeye uygunluğu üç ayrı kontrol olarak ele alın.",
+    "body": [
+      "Yapı kullanma izin belgesi ile kat mülkiyeti farklı kayıtlardır. İlandaki “iskânlı” veya “krediye uygun” ifadesi belge kontrolünü tamamlamaz."
+    ]
+  },
+  {
+    "slug": "deprem-riski-kontrolu",
+    "title": "Deprem riski nasıl araştırılır?",
+    "summary": "AFAD tehlike bilgisinden binaya özgü incelemeye geçiş adımlarını izleyin.",
+    "body": [
+      "Bir harita rengi veya yakın geçmiş deprem listesi satın alacağınız binanın dayanıklılık sonucu değildir. Konum bilgisi ile yapının performansını ayrı kanıtlarla araştırın."
+    ]
+  },
+  {
+    "slug": "aidat-borc-kontrolu",
+    "title": "Aidat ve ortak gider kontrolü",
+    "summary": "Aylık aidatın arkasındaki bütçeyi, büyük onarımı ve devir günündeki borcu görün.",
+    "body": [
+      "Bugünkü aidat tutarı tek başına yeterli değildir. Alıcının nakit ihtiyacını değiştiren unsur, henüz tahsil edilmemiş büyük onarım kararı da olabilir."
+    ]
+  },
+  {
+    "slug": "kiracili-ev-almak",
+    "title": "Kiracılı ev alırken dikkat",
+    "summary": "Mevcut kira sözleşmesini ve teslim beklentisini aynı alım dosyasında değerlendirin.",
+    "body": [
+      "Kiracılı evde piyasa kirası ile fiilen tahsil edeceğiniz kira farklı olabilir. Satın alma kararı “kiracı çıkar” sözüne dayanıyorsa önce hukuki ve teslim koşullarını netleştirin."
+    ]
+  },
+  {
+    "slug": "brut-net-metrekare",
+    "title": "Brüt ve net metrekare",
+    "summary": "İlanda ucuzluk algısını değiştiren payda hatasını örnekle ayıklayın.",
+    "body": [
+      "Metrekare fiyatında işlem basittir; belirleyici olan bölünen alanın neyi kapsadığıdır. Bir ilandaki brüt tanımı diğer ilanın brüt tanımıyla dahi aynı olmayabilir."
+    ]
+  },
+  {
+    "slug": "ilan-fiyati-pazarlik",
+    "title": "İlan fiyatı ve pazarlık payı",
+    "summary": "Rastgele indirim yüzdesi yerine belgelenmiş toplam maliyete dayalı teklif oluşturun.",
+    "body": [
+      "İlan bedeli satıcının talebidir. İndirim miktarı, tek başına iyi alım yapıldığını göstermez; yüksek başlangıç fiyatından büyük indirim hâlâ pahalı sonuç verebilir."
+    ]
+  },
+  {
+    "slug": "emlak-alim-masraflari",
+    "title": "Ev alırken unutulan masraflar",
+    "summary": "Başlangıç bütçesini yazılı teklifler ve resmî tahakkuklarla tamamlayın.",
+    "body": [
+      "Bir ev için ayırdığınız para satış bedeline tam yetiyorsa işlem bütçeniz henüz tamamlanmış değildir. Alım gideri ile yıllık gideri ve ayrılan nakit rezervini ayırın."
+    ]
+  },
+  {
+    "slug": "konut-endeksi-okuma",
+    "title": "Konut fiyat endeksi nasıl okunur?",
+    "summary": "KFE puanını TL fiyatından, bölgeyi ilden ve yayın tarihini veri döneminden ayırın.",
+    "body": [
+      "KFE fiyat hareketini izler; ilan için otomatik ekspertiz üretmez. Sonuç okumaya başlamadan serinin adını, kapsamını, birimini ve dönemini kontrol edin."
+    ]
+  }
 ] as const;
 
 export type GuideSection={heading:string;paragraphs:string[];bullets?:string[]};
 
 export const guideExpansions:Record<string,GuideSection[]>={
- "kira-carpani-nedir":[
-  {heading:"Kira çarpanı nasıl hesaplanır?",paragraphs:["Kira çarpanı, konut için ödenen toplam başlangıç tutarının bir yıllık kira gelirine bölünmesidir. Satış bedeli 5.000.000 TL, aylık kira 30.000 TL ise yıllık brüt kira 360.000 TL olur. Yalnızca satış bedeli kullanıldığında brüt kira çarpanı 13,9 yıl çıkar.","Hesabı ay cinsinden görmek için satış fiyatını aylık kiraya bölebilirsiniz. Aynı örnekte sonuç yaklaşık 167 aydır. Bu sayı, kira hiç değişmez ve konut hiç boş kalmazsa satış bedelinin brüt kirayla kaç ayda karşılanacağını anlatır; yatırımın gerçekten o tarihte kendini ödediğini garanti etmez."],bullets:["Brüt yıllık kira = aylık kira × 12","Brüt getiri = yıllık kira ÷ satış fiyatı × 100","Kira çarpanı = satış fiyatı ÷ yıllık kira"]},
-  {heading:"Net kira çarpanı neden daha uzundur?",paragraphs:["Tapu gideri, emlak hizmet bedeli ve başlangıç tadilatı yatırımın ilk günkü maliyetini artırır. Boş kalma, malik tarafından ödenen aidat, bakım, sigorta ve vergi ise her yıl elde kalan kirayı azaltır. Bu nedenle net hesapta pay büyür, yıllık gelir küçülür ve geri dönüş süresi uzar.","Örneğin toplam başlangıç maliyeti 5.250.000 TL ve giderlerden sonra yıllık net kira 300.000 TL ise net kira çarpanı 17,5 yıldır. Brüt 13,9 yıl ile net 17,5 yıl arasındaki fark, yalnızca küçük giderlerin değil satın alma maliyetlerinin de karar üzerindeki etkisini gösterir."]},
-  {heading:"Kaç yıllık çarpan iyidir?",paragraphs:["Her şehir ve mahalle için geçerli tek bir iyi çarpan yoktur. Yeni bina, güçlü ulaşım bağlantısı veya sınırlı arz daha yüksek çarpanla işlem görebilir. Bakım ihtiyacı yüksek, kiracı talebi zayıf ya da hukuki belirsizliği bulunan konutta düşük çarpan tek başına fırsat anlamına gelmez.","Aynı tarihte, aynı bölgede, benzer bina yaşı ve kullanım niteliğindeki konutları karşılaştırın. Bir ilanın çarpanını şehir ortalamasıyla karşılaştırmak yerine mümkünse aynı sokak veya yakın çevredeki gerçekçi kiralarla test edin. İlan kirasını değil, sürdürülebilir tahsil edilebilir kirayı kullanın."]},
-  {heading:"Karar verirken kontrol listesi",paragraphs:["Kira çarpanını ilk eleme aracı olarak kullanın; nihai değerleme olarak kullanmayın. Konutun satış süresi, gelecekteki büyük bakım giderleri, deprem ve zemin incelemesi, tapu durumu ve alternatif yatırım getirisi ayrıca değerlendirilmelidir."],bullets:["Aylık kira emsalini en az üç benzer ilanla doğrulayın.","Bir aylık boşluk ve olağan bakım için ayrı senaryo kurun.","Brüt ve net çarpanı yan yana görün.","Mevduatın stopaj sonrası net getirisiyle aynı süre üzerinden karşılaştırın."]}
- ],
- "ev-pahali-mi":[
-  {heading:"Önce karşılaştırılabilir konutu tanımlayın",paragraphs:["Bir evin pahalı olup olmadığını anlamanın ilk adımı, gerçekten benzer konutları ayırmaktır. Aynı ilçedeki iki daire; sokak, bina yaşı, kat, cephe, asansör, otopark, manzara, ısınma sistemi ve tapu niteliği nedeniyle farklı fiyatlanabilir.","Net alanı brüt alanla karşılaştırmak en yaygın hatadır. İlanlarda brüt metrekare tanımı standart uygulanmayabilir. Metrekare fiyatını hesaplarken aynı alan türünü kullandığınızdan emin olun ve mümkünse mimari proje ile yerinde ölçümü doğrulayın."],bullets:["Aynı mikro bölge","Benzer bina yaşı","Aynı net/brüt alan tanımı","Benzer kat, cephe ve donanım","Benzer hukuki durum"]},
-  {heading:"Fiyatı üç ayrı ölçüyle sınayın",paragraphs:["Birinci ölçü emsal metrekare fiyatıdır. İkinci ölçü, gerçekçi kira üzerinden bulunan net kira getirisi ve kira çarpanıdır. Üçüncü ölçü ise aynı sermayenin mevduat veya başka düşük riskli araçta sağlayabileceği net getiridir.","Üç ölçü de aynı yöne işaret ediyorsa karar daha güçlüdür. Metrekare fiyatı makul görünürken kira getirisi çok düşükse fiyat, yatırımcıdan çok oturum amaçlı talebi yansıtıyor olabilir. Kira getirisi yüksek görünen bir ilanda ise olağan dışı gider veya tahliye riski bulunabilir."]},
-  {heading:"Endeks ve ilan fiyatının sınırı",paragraphs:["TCMB Konut Fiyat Endeksi bölgesel eğilimi gösterir; tek bir dairenin ekspertiz değeri değildir. Endeks yükselirken belirli bir binanın yaşı, bakım ihtiyacı veya çevresindeki arz nedeniyle aynı ölçüde değer kazanmaması mümkündür.","İlan fiyatı gerçekleşmiş satış fiyatı değildir. Uzun süre yayında kalan ilanlar veya sık değiştirilen fiyatlar piyasanın kabul ettiği değeri göstermeyebilir. Teklifinizi ilan sahibinin istediği indirim yüzdesine göre değil, toplam maliyet ve beklenen nakit akışına göre sınırlandırın."]},
-  {heading:"Makul fiyat aralığı oluşturun",paragraphs:["Tek bir kesin değer yerine düşük, orta ve yüksek olmak üzere üç senaryo oluşturun. Kötümser senaryoda daha düşük kira, bir aylık boşluk ve ek tadilat; temel senaryoda doğrulanmış emsal; iyimser senaryoda ise ulaşılabilir fakat garanti olmayan değer artışı kullanın."],bullets:["Tapu ve başlangıç giderlerini fiyata ekleyin.","Beklenen tadilat için yazılı teklif alın.","Kredi kullanıyorsanız toplam finansman maliyetini dahil edin.","Ekspertiz, hukuki kontrol ve teknik incelemeyi pazarlıktan önce tamamlayın."]}
- ],
- "net-kira-getirisi":[
-  {heading:"Brüt gelirden net nakit akışına",paragraphs:["Brüt kira, aylık sözleşme bedelinin 12 ile çarpılmasıdır. Net kira geliri ise yıl içinde gerçekten tahsil edilmesi beklenen tutardan konuta bağlı giderlerin çıkarılmasıyla bulunur. Yatırım kararı için esas alınması gereken sayı net nakit akışıdır.","Aylık 30.000 TL kiralı bir konutun brüt yıllık geliri 360.000 TL'dir. Bir ay boş kalma, 20.000 TL bakım ve sigorta ile 15.000 TL malik gideri varsayılırsa vergi öncesi net tutar 295.000 TL'ye iner. Vergi etkisi kişinin durumuna göre ayrıca hesaplanmalıdır."],bullets:["Tahsil edilen kira","Boş kalma kaybı","Bakım ve yenileme","Malike ait aidat ve ortak gider","Sigorta ve vergiler"]},
-  {heading:"Doğru paydayı kullanın",paragraphs:["Net getiri oranında yalnızca ilan fiyatını kullanmak sonucu iyimser gösterir. Tapu gideri, emlak hizmet bedeli, ekspertiz, krediye bağlı masraflar ve kiraya vermek için yapılan tadilat toplam başlangıç yatırımına eklenmelidir.","Örneğin ev 5.000.000 TL olsa bile toplam yatırım 5.300.000 TL'ye çıkabilir. Yıllık net kira 295.000 TL ise net getiri yüzde 5,57 olur. Yalnızca satış fiyatına bölündüğünde görülen yüzde 5,90 aynı yatırımın daha yüksek getirili olduğu izlenimini verir."]},
-  {heading:"Vergiyi iki kez düşmeyin",paragraphs:["Kira gelir vergisi sabit bir gider değildir; istisna, gider yöntemi, diğer gelirler ve güncel tarifeye göre değişir. Hesaplayıcıya vergi sonrası net kira giriyorsanız ayrıca vergi gideri eklemeyin. Brüt kira giriyorsanız tahmini vergiyi tek kez düşürün.","Aynı yaklaşım aidat için de geçerlidir. Kiracının ödediği olağan aidatı malik giderine yeniden yazmak, getiriyi gereksiz yere düşürür. Büyük onarım, demirbaş ve malike kalan ortak giderler ise ayrı tutulmalıdır."]},
-  {heading:"Üç senaryoyla ölçün",paragraphs:["Tek bir yılın sonucuna güvenmek yerine doluluk ve gider varsayımlarını değiştirin. Kötümser senaryo, nakit akışının ne kadar dayanıklı olduğunu gösterir; iyimser senaryo ise kararın yalnızca yüksek kira artışına bağlı olup olmadığını ortaya çıkarır."],bullets:["Temel: 11 ay tahsilat ve olağan bakım","Kötümser: 10 ay tahsilat ve yüksek bakım","İyimser: 12 ay tahsilat; yine de sıfır gider değil","Her senaryoyu stopaj sonrası mevduatla aynı sermaye üzerinden karşılaştırın."]}
- ],
- "reel-konut-getirisi":[
-  {heading:"Nominal artış kazanç anlamına gelmeyebilir",paragraphs:["Konutun TL fiyatındaki artış nominal getiridir. Aynı dönemde genel fiyat düzeyi daha hızlı yükselmişse konutun satın alma gücü azalabilir. Bu nedenle yüzde 40 konut artışından yüzde 50 enflasyonu doğrudan çıkarmak yerine bileşik reel getiri formülü kullanılmalıdır.","Formül (1 + nominal getiri) ÷ (1 + enflasyon) − 1 şeklindedir. Yüzde 40 nominal artış ve yüzde 50 enflasyonda sonuç yaklaşık yüzde eksi 6,7'dir. Konut TL olarak değer kazanmış görünürken reel olarak kayıp oluşmuştur."]},
-  {heading:"Kira dahil toplam getiriyi kurun",paragraphs:["Yalnızca satış fiyatındaki değişimi kullanmak, kiraya verilen konutun toplam performansını eksik gösterir. Dönem içindeki net kira nakit akışı değer değişimine eklenmeli; başlangıç tapu ve tadilat giderleri ile satış maliyetleri düşülmelidir.","Kira farklı aylarda tahsil edildiği için ileri düzey karşılaştırmada nakit akışlarının zamanı da önemlidir. Basit yıllık hesap karar desteği sağlar; fakat uzun dönemli projeksiyonda kira artışı, boşluk, vergi ve yeniden yatırım varsayımları açıkça yazılmalıdır."]},
-  {heading:"Doğru enflasyon dönemini eşleştirin",paragraphs:["Ocak ayındaki alış ile aralık ayındaki değeri karşılaştırırken aynı tarih aralığının TÜFE değişimi kullanılmalıdır. Yıllık manşet oranı farklı tarihlere uygulamak dönem uyumsuzluğu yaratır. Aylık endeks değerleri başlangıç ve bitiş ayına göre eşleştirilmelidir.","TÜFE kişisel harcama sepetinizi birebir temsil etmeyebilir; buna rağmen farklı yıllardaki TL tutarlarını ortak bir satın alma gücü ölçüsünde karşılaştırmak için resmî ve tekrarlanabilir referanstır."]},
-  {heading:"Sonucu nasıl yorumlamalı?",paragraphs:["Pozitif reel getiri, konutun incelenen dönemde genel enflasyonun üzerinde performans gösterdiğini söyler; gelecekte de aynı sonucu vereceğini söylemez. Negatif reel getiri de konutun kullanım değeri veya kira geliri yokmuş gibi yorumlanmamalıdır."],bullets:["Nominal değer artışını ayrı gösterin.","Net kira gelirini ayrıca ekleyin.","Başlangıç ve satış maliyetlerini düşürün.","Aynı dönemin TÜFE endeksini kullanın.","Geçmiş sonucu gelecek tahmini olarak sunmayın."]}
- ],
- "ev-mi-mevduat-mi":[
-  {heading:"Aynı sermaye ve aynı süre kuralı",paragraphs:["Karşılaştırmanın adil olması için iki seçenekte de aynı başlangıç parası ve aynı yatırım dönemi kullanılmalıdır. Konutta peşinatı, tapu ve tadilat giderlerini; mevduatta ise yatırılan anaparayı başlangıç sermayesi olarak kaydedin.","Konut krediyle alınıyorsa yalnızca ev fiyatını mevduatla karşılaştırmak doğru değildir. Özkaynak, kredi taksitleri, faiz ve ek masraflar ayrı nakit akışlarıdır. Kredili senaryo, peşin alım senaryosundan ayrı değerlendirilmelidir."]},
-  {heading:"Mevduatın net sonucunu bulun",paragraphs:["Banka oranı yıllık brüt orandır. Vade getirisi gün sayısına göre hesaplanır ve stopaj yalnızca faiz üzerinden kesilir. Vade sonunda aynı oranın tekrar bulunacağı garanti olmadığı için bir yıllık karşılaştırmada yenileme oranı varsayımı açık olmalıdır.","Mevduatın güçlü tarafı likidite ve öngörülebilir kısa vadeli nakit akışıdır. Zayıf tarafı ise faiz düşüşünde yenileme getirisinin azalması ve yüksek enflasyon döneminde reel satın alma gücünün korunamamasıdır."]},
-  {heading:"Konutun bütün nakit akışını ekleyin",paragraphs:["Konut getirisi; net kira, değer değişimi ve satışta oluşan maliyetlerin toplamıdır. Boş kalma, bakım, aidat, vergi, sigorta ve tahsilat riski hesaba katılmadan yapılan karşılaştırma konutu olduğundan kârlı gösterir.","Konutun likiditesi mevduattan düşüktür. Satışın aylar sürmesi, pazarlık indirimi ve işlem gideri beklenen getirinin nakde dönüşmesini geciktirebilir. Buna karşılık konut kullanım hakkı ve uzun vadeli kira potansiyeli sunar."]},
-  {heading:"Sonuç bir sıralamadan fazlasıdır",paragraphs:["Bir yıllık beklenen TL kazancı en yüksek seçenek her kullanıcı için en doğru seçenek olmayabilir. Acil nakit ihtiyacı, borç kapasitesi, tek varlıkta yoğunlaşma ve yönetim yükü kararın parçasıdır."],bullets:["Net TL kazancı ve reel getiriyi birlikte görün.","Kötümser konut senaryosunu hesaba katın.","Mevduat yenileme faizini sabit varsaymayın.","Likidite ihtiyacını ve satış süresini değerlendirin.","Geçmiş endeks artışını garanti getiri kabul etmeyin."]}
- ],
- "konut-kredisi-maliyeti":[
-  {heading:"Aylık oran neden yanıltıcı olabilir?",paragraphs:["Konut kredileri genellikle aylık faiz oranıyla ifade edilir. Aylık yüzde 2,5 oranı yıllık yüzde 30 ile aynı maliyet değildir; bileşik etki ve masraflar toplam maliyeti yükseltir. Karşılaştırmada bankanın yıllık maliyet oranı ve ödeme planı birlikte incelenmelidir.","Eşit taksitli kredide her taksitin bir bölümü faiz, bir bölümü anaparadır. İlk aylarda faiz payı daha yüksek olabilir. Toplam faiz, aylık taksit ile vade çarpımından kredi anaparasının çıkarılmasıyla kabaca görülebilir; sigorta ve ücretler ayrıca eklenir."]},
-  {heading:"Masrafları kredi dışında bırakmayın",paragraphs:["Tahsis ücreti, ekspertiz, ipotek tesis gideri, zorunlu sigortalar ve hesapla bağlantılı maliyetler yalnızca faiz formülünde görünmez. Bazı kalemler başlangıçta peşin, bazıları her yıl tahsil edilir.","Bankalardan teklif alırken yalnızca aylık taksiti değil toplam geri ödeme, yıllık maliyet oranı, erken ödeme koşulları ve sigorta yenileme tutarlarını aynı tabloda isteyin. Düşük taksit, uzun vade nedeniyle daha yüksek toplam maliyet yaratabilir."]},
-  {heading:"Vade ve peşinat senaryosu",paragraphs:["Vade uzadıkça aylık ödeme genellikle düşer; fakat borcun faize maruz kaldığı süre uzar. Daha yüksek peşinat toplam faizi azaltabilir, ancak bütün nakdi eve bağlamak acil durum rezervini ortadan kaldırabilir.","En az üç senaryo kurun: yüksek peşinat-kısa vade, dengeli peşinat-orta vade ve düşük peşinat-uzun vade. Her senaryoda aylık ödeme kapasitesini ve toplam maliyeti birlikte değerlendirin."]},
-  {heading:"Stres testi yapın",paragraphs:["Kredi taksiti bugün ödenebilir görünse bile gelir azalması, aidat artışı veya beklenmeyen bakım gideri bütçeyi zorlayabilir. Taksit sonrası kalan nakit, temel giderler ve acil durum rezervi için yeterli olmalıdır."],bullets:["En az birkaç aylık ödeme rezervi bırakın.","Değişebilecek sigorta ve yan giderleri ekleyin.","Ara ödeme ve erken kapama koşullarını okuyun.","Kira gelirine güveniliyorsa boş kalma senaryosu uygulayın."]}
- ],
- "tapu-kontrolu":[
-  {heading:"Taşınmazın kimliğini doğrulayın",paragraphs:["Tapudaki il, ilçe, mahalle, ada, parsel, blok, bağımsız bölüm ve nitelik bilgileri satın alınan yerle birebir eşleşmelidir. Daire numarası ile tapudaki bağımsız bölüm numarasının farklı olabileceğini unutmayın; mimari proje üzerinden doğrulama yapın.","Malik bilgisi ve satış yetkisi kontrol edilmeden kapora veya ödeme yapılmamalıdır. Vekâletle satışta belgenin kapsamı, geçerliliği ve ilgili taşınmaz için satış yetkisi resmî kanaldan incelenmelidir."]},
-  {heading:"Şerh, beyan ve takyidatlar",paragraphs:["İpotek, haciz, intifa, aile konutu şerhi, satış vaadi ve diğer kısıtlamalar mülkiyet devrini veya kullanım hakkını etkileyebilir. Tapu kaydının yalnızca ön yüzü yeterli değildir; güncel takyidat bilgisi yetkili kanal üzerinden alınmalıdır.","Bir kaydın satış sırasında kaldırılacağı söyleniyorsa işlem sırası, ödeme yöntemi ve terkin koşulu yazılı biçimde planlanmalıdır. Sözlü taahhüt, resmî terkin işleminin yerine geçmez."]},
-  {heading:"Kat mülkiyeti ve arsa payı",paragraphs:["Kat irtifakı, kat mülkiyeti ve arsa tapusu farklı hukuki durumları ifade eder. Fiilen konut olarak kullanılan bir yerin tapu niteliği depo veya iş yeri olabilir. Bu fark kredi, kullanım, vergi ve yeniden satış süreçlerini etkileyebilir.","Arsa payının projedeki bağımsız bölümle uyumu ve ortak alan düzeni incelenmelidir. Özellikle dönüşüm ihtimali bulunan yapılarda arsa payı ilerideki hak dağılımı açısından önem taşıyabilir."]},
-  {heading:"Ödeme öncesi dosya",paragraphs:["Tapu kontrolü tek başına teknik güvenlik veya imar uygunluğu sağlamaz. Belediye ruhsatı, iskân, proje, yönetim planı ve bina incelemesi ayrı başlıklardır."],bullets:["Güncel tapu kaydı ve takyidat","Kimlik ve satış yetkisi","Bağımsız bölüm-proje eşleşmesi","Kat mülkiyeti veya irtifak durumu","Arsa payı ve yönetim planı","Gerekirse gayrimenkul hukukçusu incelemesi"]}
- ],
- "iskan-kat-mulkiyeti":[
-  {heading:"İskân neyi gösterir?",paragraphs:["Yapı kullanma izin belgesi, yapının ruhsat ve onaylı projelerine uygun tamamlandığına ilişkin idari belgedir. Belge bina veya ilgili bölüm için düzenlenir; yapının deprem performansını ya da bütün sonradan yapılan değişikliklerin uygunluğunu tek başına garanti etmez.","İskân bulunmaması abonelik, kredi, kat mülkiyetine geçiş ve yeniden satış süreçlerinde sorun yaratabilir. Neden alınmadığı, tamamlanmamış yükümlülük ve güncel belediye kayıtları incelenmelidir."]},
-  {heading:"Kat irtifakı ile kat mülkiyeti",paragraphs:["Kat irtifakı, yapılacak veya yapılmakta olan yapıda bağımsız bölümlere bağlanan arsa payı esaslı haktır. Kat mülkiyeti ise tamamlanmış yapıdaki bağımsız bölüm mülkiyetidir. Bir ilanda kat irtifakı yazması iskânın bulunduğunu göstermez.","Kat mülkiyetine geçilmiş olması da dairenin mevcut kullanımının projeye tamamen uygun olduğunu kanıtlamaz. Balkon kapatma, bölüm birleştirme veya ortak alan kullanımı gibi sonradan değişiklikler ayrıca araştırılmalıdır."]},
-  {heading:"Belgeler nasıl doğrulanır?",paragraphs:["Satıcıdan alınan fotoğraf veya ilan açıklaması yerine tapu ve belediye kayıtlarını kullanın. Bağımsız bölüm numarası, onaylı mimari projedeki konum ve fiilî daire birlikte kontrol edilmelidir.","Krediye uygunluk olumlu bir işaret olabilir; fakat bankanın ekspertizi alıcının bütün hukuki ve teknik inceleme yükümlülüğünü üstlenmez. Ekspertiz raporundaki şerh ve uyumsuzluk notlarını okuyun."]},
-  {heading:"Satın alma öncesi sorular",paragraphs:["Belirsizlik varsa kapora sözleşmesine belge doğrulama ve iade koşulları açıkça yazılmalıdır. İskân sorununun daha sonra kolayca çözüleceği varsayımı maliyet ve süre araştırılmadan kabul edilmemelidir."],bullets:["Yapı ruhsatı ve kullanım izni mevcut mu?","Tapu niteliği fiilî kullanımla uyumlu mu?","Bağımsız bölüm onaylı projede doğru yerde mi?","Ortak alan veya projeye aykırı değişiklik var mı?","Kat mülkiyetine geçiş için borç ya da eksik işlem bulunuyor mu?"]}
- ],
- "deprem-riski-kontrolu":[
-  {heading:"Harita bina güvenliği raporu değildir",paragraphs:["AFAD Türkiye Deprem Tehlike Haritası, belirli bir noktada beklenen yer hareketi düzeyini gösterir. Haritadaki değer bir binanın dayanıklı veya dayanıksız olduğunu söylemez; yapı sistemi, proje, malzeme, uygulama, zemin ve sonradan yapılan müdahaleler ayrıca incelenir.","İlçe veya mahalle için kullanılan düşük-yüksek risk ifadeleri tek bir bağımsız bölüm için güvence oluşturmaz. Aynı sokaktaki iki bina; taşıyıcı sistem, yapım kalitesi ve zemin etkileşimi nedeniyle farklı performans gösterebilir."]},
-  {heading:"Belge ve saha kontrolünü birlikte yürütün",paragraphs:["Yapı ruhsatı, kullanım izni, onaylı mimari ve statik proje ile fiilî durumun eşleşmesi araştırılmalıdır. Kolon-kirişlere müdahale, kat ekleme, dükkân birleştirme veya ağır kullanım değişikliği gibi durumlar uzman incelemesi gerektirir.","Bina yaşı yalnızca ön eleme bilgisidir. Yeni bina otomatik olarak güvenli, eski bina otomatik olarak güvensiz değildir. Gözle görülür çatlak veya korozyon da tek başına performans kararı verdirmez; yetkili mühendislik değerlendirmesi gerekir."],bullets:["AFAD bölgesel tehlike haritası","Belediye ruhsat ve proje dosyası","Zemin ve temel bilgileri","Yetkili teknik inceleme","DASK poliçesi ve bina geçmişi"]},
-  {heading:"Satın alma kararında nasıl kullanılır?",paragraphs:["Teknik belirsizlik varsa bunu yalnız pazarlık gerekçesine çevirmek doğru değildir. İnceleme tamamlanmadan kapora ve geri dönülmez ödeme yapılmamalı; sözleşmede belge ve teknik kontrol koşulları açıkça yazılmalıdır.","KonutSeyir teknik performans puanı üretmez. Resmî haritalara yönlendirir ve kontrol adımlarını hatırlatır; binaya özgü karar yalnız yetkili inceleme sonucuyla verilebilir."]}
- ],
- "aidat-borc-kontrolu":[
-  {heading:"Aidatı kira hesabına doğru ekleyin",paragraphs:["Kiracının ödediği olağan aidat ile malike kalan ortak gider aynı şey değildir. Net kira hesabına yalnızca malikin üstlendiği aidat, demirbaş, sigorta, bakım ve yenileme payları eklenmelidir. Aynı gideri hem aidat hem bakım kaleminde göstermek getiriyi iki kez düşürür.","Yüksek aidat yalnız aylık nakit akışını değil, gelecekteki kiracı ve alıcı talebini de etkileyebilir. Havuz, güvenlik, otopark, merkezi sistem ve sosyal tesislerin kullanım değeri ile maliyeti birlikte değerlendirilmelidir."]},
-  {heading:"Yönetim dosyasında ne aranmalı?",paragraphs:["Son dönem işletme bütçesi, gelir-gider dökümü, geçmiş genel kurul kararları ve planlanan büyük onarımlar incelenmelidir. Çatı, cephe, asansör, güçlendirme ve merkezi sistem yenilemesi olağan aidatın dışında yüksek ödeme doğurabilir.","Dairenin yönetim borcu için satıcı veya emlak danışmanının sözüyle yetinmeyin. Yönetimden yazılı borç durumu alın; devir gününe kadar oluşan borçların kimin tarafından kapatılacağını satış sözleşmesinde belirleyin."],bullets:["Güncel aidat tutarı","Daire borç yazısı","Yönetim planı","Genel kurul kararları","Beklenen büyük onarımlar"]},
-  {heading:"Getiriye etkisini senaryolaştırın",paragraphs:["Bugünkü aidatın değişmeyeceğini varsaymak uzun vadede iyimserdir. Temel senaryoda mevcut malik giderini, kötümser senaryoda büyük bakım ve boş kalma etkisini ayrıca çalıştırın.","Aidatın tamamını ev fiyatına eklemek yerine tekrar eden kısmı yıllık gider, satın alma öncesi kesinleşmiş tek seferlik katılım payını başlangıç maliyeti olarak değerlendirin."]}
- ],
- "kiracili-ev-almak":[
-  {heading:"Mevcut kira ilişkisini dosyalayın",paragraphs:["Mülkiyet devri kira ilişkisini kendiliğinden sona erdirmez. Yazılı sözleşme, başlangıç ve yenileme tarihleri, depozito, ödeme kayıtları, yan gider paylaşımı ve kullanım amacı incelenmelidir.","İlandaki 'kiracı çıkacak' ifadesi hukuki güvence değildir. Teslim tarihi kritikse satıcı, kiracı ve alıcının yükümlülükleri sözleşmede açıklaştırılmalı; hukuki destek alınmalıdır."]},
-  {heading:"Piyasa kirası ile mevcut kirayı ayırın",paragraphs:["Yatırım hesabında ilk yıl için fiilen tahsil edilecek mevcut kira kullanılmalıdır. Piyasa emsali daha yüksek olsa bile kiracı değişimi veya hukuki süreç olmadan bu tutarın hemen elde edileceği varsayılmamalıdır.","Mevcut kira düşükse fiyat indirimini yalnız farkın bir yıllık tutarıyla hesaplamak eksik olabilir. Artış zamanı, tahliye belirsizliği, boş kalma ve yeniden kiralama gideri birlikte modellenmelidir."],bullets:["Sözleşme ve ekleri","Son ödeme kayıtları","Depozitonun devri","Aidat ve yan gider paylaşımı","Fiilî kullanım ve teslim planı"]},
-  {heading:"Oturum ve yatırım amacı farklıdır",paragraphs:["Oturmak için alınan kiracılı evde zamanında teslim riski ana konudur. Yatırım amacıyla alımda ise tahsilat düzeni, mevcut kira, bakım yükümlülüğü ve kiracı devir süresi önem kazanır.","Tahliye süresi veya sonucu hakkında kesin varsayım üretmeyin. Somut dosyayı güncel mevzuat çerçevesinde alanında uzman hukukçuya inceletin."]}
- ],
- "brut-net-metrekare":[
-  {heading:"Alan tanımlarını eşitlemeden kıyas yapmayın",paragraphs:["Net alan bağımsız bölüm içinde kullanılabilen alanı; brüt alan ise kullanılan tanıma göre duvar, balkon veya ortak alan paylarını içerebilir. İlanlarda aynı 'brüt' ifadesi farklı kapsamlarla kullanılabildiği için metrekare fiyatı kolayca yanıltıcı hale gelir.","Örneğin 5.000.000 TL fiyatlı 100 m² net ev 50.000 TL/net m² iken aynı ev 130 m² brüt ilan edilirse 38.462 TL/brüt m² görünür. Fiyat değişmediği halde yalnız payda seçimi ucuzluk algısı yaratır."]},
-  {heading:"Alanı hangi belgelerle doğrularsınız?",paragraphs:["Tapu belgesi her zaman kullanım alanını ayrıntılı göstermez. Onaylı mimari proje, bağımsız bölüm planı, belediye dosyası ve yerinde ölçüm birlikte değerlendirilmelidir.","Balkon kapatma, çatı arası, depo veya ortak alan kullanımı fiilen alan kazandırabilir; ancak hukuki niteliği ve projeye uygunluğu ayrıca araştırılmalıdır. Kullanılan alan ile yasal alanı tek sayı gibi sunmayın."],bullets:["Net alanı net alanla karşılaştırın.","Projede bağımsız bölüm sınırlarını bulun.","Ortak alan kullanımını ayrıca not edin.","Emsallerde aynı ölçüm yöntemini arayın."]},
-  {heading:"Metrekare fiyatının sınırı",paragraphs:["Aynı net alana sahip evler; plan verimliliği, kat, cephe, gün ışığı, tavan yüksekliği ve kullanılmayan koridor nedeniyle farklı kullanım değeri yaratabilir.","Metrekare hesabını tek başına değerleme olarak kullanmayın. Kira getirisi, toplam alım maliyeti, hukuki durum ve teknik incelemeyle birlikte yorumlayın."]}
- ],
- "ilan-fiyati-pazarlik":[
-  {heading:"İlan fiyatı gerçekleşmiş satış değildir",paragraphs:["Satıcının istediği tutar, alıcının kabul ettiği ve tapuda gerçekleşen piyasa bedelini göstermez. Uzun süredir yayındaki veya sık fiyat değiştiren ilanlar da tek başına emsal oluşturmaz.","Aynı binadaki ilan bile kat, cephe, iç durum, kiracı ve tapu niteliği nedeniyle farklı olabilir. Karşılaştırma kümesini daraltırken bu nitelikleri yazılı olarak eşleştirin."]},
-  {heading:"Teklif sınırını veriden üretin",paragraphs:["Önce benzer ilanların metrekare aralığını, sürdürülebilir kira üzerinden çarpanı ve toplam alım maliyetini hesaplayın. Ardından tadilat, hukuki belirsizlik ve beklenen boşluk için doğrulanabilir tutarları ayrı kalemlere dönüştürün.","'Her evde yüzde on pazarlık olur' gibi sabit oranlar doğru değildir. Teklif üst sınırı, aynı sermayenin alternatif getirisi ve sizin kullanım değerinizle birlikte belirlenmelidir."],bullets:["Yakın ve karşılaştırılabilir emsaller","Yazılı tadilat teklifleri","Tapu ve proje uyumsuzluğu","Net kira ve alternatif getiri","Finansman ve işlem takvimi"]},
-  {heading:"Pazarlıkta hangi bilgi paylaşılır?",paragraphs:["Teklifinizi yalnız kusur listesine değil, toplam maliyet hesabına dayandırın. Emsal, tadilat ve finansman verisini kısa ve doğrulanabilir biçimde sunmak rastgele indirim talebinden daha tutarlıdır.","Kapora koşulu, ödeme günü, kredi onayı, eşya ve teslim tarihi fiyat kadar önemlidir. İndirim karşılığında belirsiz veya geri alınamaz ödeme yükümlülüğü kabul etmeyin."]}
- ],
- "emlak-alim-masraflari":[
-  {heading:"Başlangıç maliyetlerini tek dosyada toplayın",paragraphs:["Satış fiyatı bütçenin yalnız ana kalemidir. Tapu ve döner sermaye, emlak hizmet bedeli, ekspertiz, kredi yan giderleri, sigorta, abonelik, zorunlu tadilat ve taşınma toplam yatırımı büyütür.","Oranlar ve masraf paylaşımı işlem türü ile güncel düzenlemelere göre değişebilir. İnternetteki sabit yüzdeler yerine işlem gününe yakın resmî tahakkuk ve yazılı hizmet tekliflerini kullanın."]},
-  {heading:"Tek seferlik ve yıllık gideri ayırın",paragraphs:["Kiraya vermek için zorunlu ilk tadilat başlangıç maliyetidir. Daha sonraki olağan bakım, malike kalan aidat ve sigorta ise yıllık net kira hesabında yer alır. Aynı tutarı iki grupta göstermek getiriyi iki kez düşürür.","Kredi anaparası masraf değildir; satın alma bedelinin finansmanıdır. Faiz ve krediye bağlı ek maliyetler kredi hesaplama aracında, başlangıçta ödenen ekspertiz veya tahsis gibi tutarlar alım giderinde ayrıca izlenebilir."],bullets:["Resmî işlem tutarları","Hizmet sağlayıcı teklifleri","İlk tadilat ve taşınma","Kredi yan giderleri","Beklenmeyen gider güvenlik payı"]},
-  {heading:"Getiri hesabına etkisi",paragraphs:["Net kira oranında payda toplam başlangıç yatırımı olmalıdır. Beş milyon liralık ilan, üç yüz bin lira ek masrafla 5,3 milyon liralık yatırıma dönüşür; aynı kira daha düşük net getiri üretir.","Güvenlik payı henüz gerçekleşmiş gider değildir. Nakit bütçede ayrılabilir fakat gerçekleşene kadar yatırım maliyetine eklenmesi performansı olduğundan düşük gösterir."]}
- ],
- "konut-endeksi-okuma":[
-  {heading:"Endeks seviye değil değişim ölçüsüdür",paragraphs:["Konut Fiyat Endeksi seçilen bölgedeki kalite etkilerinden arındırılmış genel fiyat hareketini izlemeyi amaçlar. Endeks değeri bir evin TL fiyatı değildir; dönemler arasındaki yön ve değişim oranı yorumlanır.","Türkiye serisi ile bölgesel seri farklı kapsam taşır. Bazı bölgesel seriler birden fazla ili içerdiği için tek şehir veya ilçe fiyatı gibi sunulmamalıdır."]},
-  {heading:"Yıllık değişimi doğru karşılaştırın",paragraphs:["Yıllık değişim son endeks değerinin tam 12 ay önceki aynı seri değerine oranıyla hesaplanmalıdır. Eksik ayı sıfır kabul etmek veya bir önceki mevcut kayıtla karşılaştırmak yanlış sonuç üretir.","Nominal KFE artışı satın alma gücü artışı değildir. Aynı dönem TÜFE ile reel değişim, kira dahil toplam yatırım getirisiyle de nakit akışı ayrı hesaplanmalıdır."],bullets:["Seri kapsamını okuyun.","Aynı ayın 12 ay önceki değerini kullanın.","Yayın dönemi ile çekim saatini ayırın.","Tek konut değeri üretmeyin."]},
-  {heading:"İlan kararında nasıl kullanılır?",paragraphs:["Endeks, satıcının istediği fiyatı doğrulamaz. İlanın önceki fiyatı biliniyorsa bölgesel eğilim bağlam sağlar; ancak bina yaşı, mikro konum, tadilat ve hukuki durum farklı sonucu açıklayabilir.","KonutSeyir veri bulunmadığında örnek canlı değer göstermez; eski veya eksik kayıt durumunu açıkça etiketler. Teklif için endeksi yerel emsal, kira çarpanı ve teknik-hukuki kontrollerle birlikte kullanın."]}
- ]
+  "kira-carpani-nedir": [
+    {
+      "heading": "Aynı ev için iki farklı sonuç",
+      "paragraphs": [
+        "Örnek hesap, piyasa verisi değildir: 5.000.000 TL fiyat ve aylık 30.000 TL kira, yılda 360.000 TL brüt gelir verir. Fiyat / yıllık kira = 13,89 yıl; ay cinsinden 166,67 aydır. Brüt getiri %7,20 olur.",
+        "300.000 TL alım gideri, bir ay boşluk, 35.000 TL yıllık gider ve 20.000 TL örnek vergi bütçesi ekleyin. Yıllık net kira 275.000 TL, toplam yatırım 5.300.000 TL olur. Net getiri %5,19; sabit net gelirle basit geri dönüş 19,27 yıldır."
+      ]
+    },
+    {
+      "heading": "İki ilandan hangisini elemek gerekir?",
+      "paragraphs": [
+        "İki evin çarpanını aynı tarihteki kira ile hesaplayın. Birinde mevcut sözleşme kirasını, diğerinde gelecekte beklenen kirayı kullanırsanız sıralama güvenilir olmaz. İlanı verenin kira tahminini en az üç benzer kiralık ilanla sınayın; bunların da istenen fiyat olduğunu not edin.",
+        "Daha düşük çarpanlı evin bakım borcu veya belirsiz teslimi varsa, fiyat farkını önce TL gider olarak yazın. Belgesi olmayan riske keyfî yüzde indirim uygulamak, hesap hatasını kesin sonuç gibi gösterir."
+      ],
+      "bullets": [
+        "Kira kaynağını ve kontrol tarihini kaydedin.",
+        "Giderlerden sonra net gelir sıfır veya eksi ise geri dönüş yılı üretmeyin.",
+        "Artışlı kira projeksiyonunu sabit kira çarpanından ayrı okuyun; ikisi farklı soruları yanıtlar."
+      ]
+    },
+    {
+      "heading": "Bu sayı ile karar sınırı",
+      "paragraphs": [
+        "Çarpan, benzer ilanları ilk sıraya koymak içindir. Satış değeri artışını, paranın zaman değerini ve binanın teknik durumunu ölçmez. Net kira aracında bir ay daha boşluk eklediğinizde karar değişiyorsa yatırımınız doluluk varsayımına hassastır."
+      ]
+    }
+  ],
+  "ev-pahali-mi": [
+    {
+      "heading": "Alan hatası fiyat farkını tersine çevirebilir",
+      "paragraphs": [
+        "Varsayımsal A evi 5.400.000 TL ve 90 m² net; B evi 5.800.000 TL ve 110 m² nettir. Net birim fiyatlar 60.000 ve yaklaşık 52.727 TL/m² olur. B toplamda daha pahalıyken net metrekarede yaklaşık %12,12 daha düşüktür.",
+        "A için 120 m² brüt, B için 110 m² net kullanırsanız bu kıyas bozulur. Onaylı proje veya ölçümle doğrulanamayan alanı açıkça ilan beyanı olarak işaretleyin."
+      ]
+    },
+    {
+      "heading": "Üç sütunlu teklif dosyası hazırlayın",
+      "paragraphs": [
+        "Birinci sütunda aynı mikro konumdaki ilanları; ikinci sütunda doğrulanmış farkları; üçüncüde farkın size maliyetini yazın. Çatı gideri için yönetim kararı, tadilat için yazılı teklif, kiracılı ev için mevcut sözleşme kullanın.",
+        "TCMB il göstergesinden yüzde fark, yalnız geniş kapsamlı referansa uzaklığı gösterir. KFE endeks puanını TL/m² sanmayın. Kullanılan serinin birimi, dönemi ve alan türü görünmüyorsa o kıyası teklif gerekçesine dönüştürmeyin."
+      ],
+      "bullets": [
+        "Benzer kat, bina niteliği ve aynı alan türüyle en az üç ilan bulun.",
+        "Eksik belgeleri fiyat avantajı varsayarak kapatmayın.",
+        "Alım masrafları sonrası elinizde kalacak nakdi ayrı hesaplayın."
+      ]
+    },
+    {
+      "heading": "Teklif üst sınırı nasıl kullanılır?",
+      "paragraphs": [
+        "Örneğin toplam nakit bütçeniz 5.600.000 TL, belgelenmiş başlangıç gideriniz 250.000 TL ve ayıracağınız nakit rezerv 150.000 TL ise satış bedeline ayırabileceğiniz tutar 5.200.000 TL’dir. Bu, evin piyasa değeri değildir; sizin ödeme sınırınızdır. Değerleme, bütçe ve pazarlığı aynı sayı olarak sunmayın."
+      ]
+    }
+  ],
+  "net-kira-getirisi": [
+    {
+      "heading": "Bir yılın nakit hesabını çıkarın",
+      "paragraphs": [
+        "Örnek: aylık kira 30.000 TL, boşluk bir ay, yıllık malik gideri 35.000 TL ve kullanıcı tarafından hesaplanan yıllık vergi 20.000 TL olsun. Tahsilat 330.000 TL; net kira 275.000 TL; aylık ortalama net nakit yaklaşık 22.917 TL’dir. Bu aylık ortalama, her ay aynı tutarın yatacağı anlamına gelmez.",
+        "5.000.000 TL satış bedeli ve 300.000 TL alım gideri için net oran 275.000 / 5.300.000 = %5,19 olur. İkinci bir ay boş kalırsa net 245.000 TL’ye ve oran %4,62’ye iner. Bir aylık kayıp, net yıllık geliri yaklaşık %10,91 azaltır."
+      ]
+    },
+    {
+      "heading": "Gideri belgeyle sınıflandırın",
+      "paragraphs": [
+        "Yönetimin aidat dökümünde kiracıya ait olağan kalem ile malike kalan yenileme payını ayırın. İlk tadilatı başlangıç maliyetine yazdıysanız aynı faturayı yıllık bakıma eklemeyin. Sigorta, emlak vergisi ve onarım için ödeme tarihlerini kaydedin.",
+        "Gelir vergisi için GİB’in ilgili gelir yılı rehberini kullanın. Rehberin yayın yılı ile verginin ait olduğu yıl farklı olabilir. Araç vergi beyannamesi hazırlamaz; hesapladığınız yıllık TL tutarını tek kez düşer."
+      ],
+      "bullets": [
+        "Brüt aylık sözleşme kirasını girin.",
+        "Vergi sonrası kira tutarını girip ayrıca vergi düşmeyin.",
+        "Kredi taksitini işletme gideriyle karıştırmayın; finansman nakit akışını ayrı izleyin."
+      ]
+    },
+    {
+      "heading": "Pozitif net kira yeterli mi?",
+      "paragraphs": [
+        "Yıllık net kira, satış fiyatındaki değişimi ve satana kadar geçecek zamanı içermez. Kullanımınız için nakit akışı önemliyse önce beklenmeyen onarım ve boşlukta taksitleri karşılayıp karşılayamadığınızı kontrol edin; sonra reel getiri hesabına geçin."
+      ]
+    }
+  ],
+  "reel-konut-getirisi": [
+    {
+      "heading": "Yüzde farkı değil oranların oranı",
+      "paragraphs": [
+        "Örnek konutun başlangıç tutarı 5.000.000 TL, fiyat artışı %20, dönem net kirası 250.000 TL, satış gideri 150.000 TL olsun. Dönem sonu toplamı 6.100.000 TL; nominal kâr 1.100.000 TL ve nominal getiri %22’dir.",
+        "Aynı dönem enflasyonu %30 ise 6.100.000 / 1,30 = yaklaşık 4.692.308 TL başlangıç dönemi alım gücü bulunur. Reel zarar yaklaşık 307.692 TL, reel oran −%6,15’tir. %22 − %30 = −%8 yöntemi bu nedenle yanlıştır."
+      ]
+    },
+    {
+      "heading": "Hesaplayıcının tek tutar varsayımı",
+      "paragraphs": [
+        "Araç, dönem başı konut değerini girilen fiyat değişimiyle büyütür; net kira ve satış giderini dönem sonunda ekler/çıkarır. Başlangıç değerine tapu ve tadilat da eklerseniz bu kalemler de aynı oranda değerlenmiş gibi olur. Alım masrafları ile krediyi içeren yatırım performansı için ayrı nakit akışı tablosu gerekir.",
+        "Yıl içinde gelen kiraların her biri farklı süre enflasyona maruz kalır. Bu araç hepsini dönem sonunda elde edilmiş kabul eder; aylık yeniden yatırım veya iç verim oranı hesabı değildir."
+      ],
+      "bullets": [
+        "Fiyat değişimi, kira ve TÜFE aynı döneme ait olmalı.",
+        "TÜFE kişisel harcama sepetinizin birebir değişimi değildir.",
+        "Satış gerçekleşmediyse sonucu gerçekleşmiş kâr diye adlandırmayın."
+      ]
+    },
+    {
+      "heading": "Sonucun karar değeri",
+      "paragraphs": [
+        "Nominal artış yüksekken reel oran eksi çıkması hesabın bozulduğu anlamına gelmez. Önce dönemi ve giderleri doğrulayın. TÜİK’in araçlar arası geçmiş reel getiri tablosu, konutunuza ait toplam getiri yerine kullanılamaz; kapsamları ayrıdır."
+      ]
+    }
+  ],
+  "ev-mi-mevduat-mi": [
+    {
+      "heading": "Önce sermaye ve dönemi eşitleyin",
+      "paragraphs": [
+        "Tamamen varsayımsal bir yıllık örnekte iki seçenek için 5.300.000 TL başlangıç sermayesi kullanın. Konuta 5.000.000 TL, alım giderine 300.000 TL ayrılıyorsa mevduatı yalnız 5.000.000 TL üzerinden hesaplamayın. Eşit sermaye, başlangıç maliyetinin alternatif getirisini de görünür kılar.",
+        "Konut yıl sonunda 5.800.000 TL’ye satılır, net kira 275.000 TL ve satış gideri 150.000 TL olursa toplam 5.925.000 TL; başlangıca göre yaklaşık %11,79 nominal getiri olur. Satış fiyatı burada senaryodur, piyasa tahmini değildir."
+      ]
+    },
+    {
+      "heading": "Kısa vadeyi yıllık garantiye çevirmeyin",
+      "paragraphs": [
+        "5.300.000 TL, yıllık brüt %39, 45 gün ve yalnız örnek olarak %17,5 stopaj varsayımıyla yaklaşık 210.239 TL net faiz üretir. Bu 45 günlük sonuçtur. Aynı oranla yıl boyu yenileme yapılacağı bilinmediği için yıllık kesin gelir diye sunulamaz.",
+        "Banka teklifinde yıllık brüt oranı, faiz işleyecek anaparayı, gün sayısını, stopajı ve vade bozma koşulunu okuyun. TCMB ağırlıklı ortalaması banka taahhüdü değildir. Konutta da kira tahsilatı ve satışa kadar geçen süreyi hesaba katın."
+      ]
+    },
+    {
+      "heading": "Kullanım amacına göre karar dosyası",
+      "paragraphs": [
+        "Oturum için alınan evde ödenmeyen kendi kiranızı karşı fayda olarak yazın; aynı ev için ayrıca kiracı geliri eklemeyin. Yatırım için alınan evde tahsil edilen net kira kullanılır. Acil nakit ihtiyacında satış süresi, fiyattan bağımsız bir kısıttır."
+      ],
+      "bullets": [
+        "Banka teklifini aynı tarihte yazılı alın.",
+        "Konutun net kira ve satış giderini ayrı belgeleyin.",
+        "Eşit dönem oluşmadan iki yüzdelik oranı sıralamayın."
+      ]
+    }
+  ],
+  "konut-kredisi-maliyeti": [
+    {
+      "heading": "Ödeme planını ilk aydan sınayın",
+      "paragraphs": [
+        "Örnek: 2.000.000 TL kredi, aylık %2,5, 120 ay ve sıfır ek gider için eşit taksit yaklaşık 52.724 TL’dir. İlk ay faiz 50.000 TL, anapara azalması yaklaşık 2.724 TL olur. Uzun vadede ilk taksitlerin büyük bölümü faiz olabilir.",
+        "Toplam taksit yaklaşık 6.326.830 TL; bunun yaklaşık 4.326.830 TL’si faizdir. 25.000 TL başlangıç gideri girerseniz araç toplamına ayrıca eklenir. Bu örnek bir banka teklifi değildir."
+      ]
+    },
+    {
+      "heading": "Aylık oranı yıllık maliyet sanmayın",
+      "paragraphs": [
+        "Aylık %2,5’i 12 ile çarpmak %30 verir; fakat bileşik yıllık karşılığı (1,025 üzeri 12 − 1) yaklaşık %34,49’dur. Bankanın yıllık maliyet oranı ise kapsamındaki ücret ve ödeme tarihlerinden de etkilenir. Bu üç sayıyı aynı kavram olarak okumayın.",
+        "Sigortalı ve sigortasız teklifleri, ekspertiz ve başlangıç giderlerini birlikte karşılaştırın. Aynı gider ödeme planında zaten varsa araca ikinci kez eklemeyin."
+      ],
+      "bullets": [
+        "Faiz alanı aylık yüzde; yıllık oranı doğrudan yazmayın.",
+        "Vade tam ay olmalı; ara ödemeli plan eşit taksit formülüne uymaz.",
+        "İlk taksit tarihi ve varsa ödemesiz dönem banka planında ayrıca kontrol edilir."
+      ]
+    },
+    {
+      "heading": "Vade uzatmanın sınırı",
+      "paragraphs": [
+        "Daha uzun vade aylık ödeme yükünü hafifletebilir; toplam faiz farklılaşır. İki teklifi aynı kredi tutarı ve aynı ek gider kapsamıyla çalıştırın. Matematiksel bütçe sonucu kredi onayı, ekspertiz sonucu veya bankanın vereceği limit değildir."
+      ]
+    }
+  ],
+  "tapu-kontrolu": [
+    {
+      "heading": "Üç kimliği yan yana koyun",
+      "paragraphs": [
+        "İlan adresi ve kapı numarası, tapudaki ada/parsel/bağımsız bölüm bilgisi, onaylı projedeki kat ve bölüm yerini tek tabloda karşılaştırın. Kapıda 8 yazması tapuda da 8 olduğu anlamına gelmeyebilir. Otopark ve depo gibi eklentilerin de hangi bölüme bağlı olduğunu sorun.",
+        "Örnek kontrol: satıcı size dördüncü kattaki ön cephe daireyi gösteriyor; projedeki ilgili bağımsız bölüm üçüncü katta ve arka cephede görünüyorsa fiyat pazarlığına devam etmek sorunu çözmez. Önce numara değişikliği veya kayıt uyumsuzluğu açıklanmalıdır."
+      ]
+    },
+    {
+      "heading": "Hangi belgeyi kimden istemeli?",
+      "paragraphs": [
+        "Malikin yetkili kanaldan paylaşacağı güncel tapu kaydı ve işlem yetkisini inceleyin. İpotek, haciz, şerh ve beyan için tapu müdürlüğündeki işlem kontrolünü esas alın. Vekâleten satışta vekâletin kapsamı ayrıca incelenmelidir.",
+        "TKGM Parsel Sorgu’yu konum kontrolünde kullanın; ekran görüntüsünü güncel mülkiyet veya takyidat belgesi yerine koymayın. Belediye proje dosyası tapunun yerine geçmediği gibi tapu da fiilî durumun projeye uygunluğunu tek başına kanıtlamaz."
+      ],
+      "bullets": [
+        "Belge tarihini yazın; eski ekran görüntüsüyle yetinmeyin.",
+        "Paylı mülkiyette alınan pay ile fiziksel kullanım beklentisini ayırın.",
+        "Borç kapama ve kayıt kaldırma adımlarını ödeme planıyla birlikte netleştirin."
+      ]
+    },
+    {
+      "heading": "Ne zaman işlemi durdurmalı?",
+      "paragraphs": [
+        "Malik/temsil yetkisi, bağımsız bölüm kimliği veya kısıtlamanın kaldırılma yolu doğrulanamıyorsa kapora ve bağlayıcı sözleşme öncesinde tapu müdürlüğü ile hukukçuya başvurun. Bu rehber bir taşınmaza ait kayıt sorgulaması yapmaz."
+      ]
+    }
+  ],
+  "iskan-kat-mulkiyeti": [
+    {
+      "heading": "Aynı bağımsız bölüme ait dosya kurun",
+      "paragraphs": [
+        "Satıcıdan yapı kullanma izin belgesinin örneğini, tapu niteliğini ve onaylı proje bilgisini isteyin. Belediye veya ilgili idarede izin belgesinin hangi bina/blok ve bölümleri kapsadığını doğrulayın. Projede satın alınan bölümün katı, konumu ve eklentileriyle fiilî durumu eşleştirin.",
+        "Örneğin çok bloklu bir projede A bloğu için gösterilen kullanım belgesini B bloğundaki daireye otomatik uygulamayın. Belgenin varlığı kadar kapsamı da önemlidir."
+      ]
+    },
+    {
+      "heading": "Eksik belgeyi maliyet tahminiyle kapatmayın",
+      "paragraphs": [
+        "Kat irtifakından kat mülkiyetine geçiş için gereken işlemleri ilgili tapu müdürlüğünden sorun; eksik işlemin nedenini öğrenmeden sabit bir geçiş masrafı veya tamamlanma tarihi varsaymayın.",
+        "Sonradan kapatılan balkon, birleştirilen bölüm veya ortak alan kullanımı kayıtlarla farklı olabilir. Bankanın kredi verebiliyor olması bu farkların tamamını gidermez."
+      ],
+      "bullets": [
+        "Tapudaki nitelik ve bağımsız bölüm kimliği",
+        "İzin belgesinin tarihi, bina/blok kapsamı",
+        "Onaylı projenin fiilî kullanım ile eşleşmesi",
+        "Varsa eksik işlem ve düzeltme için yetkili kurumun açıklaması"
+      ]
+    },
+    {
+      "heading": "Sonuç dosyanız ne olmalı?",
+      "paragraphs": [
+        "Her belge için “görüldü / kurumdan doğrulandı / eksik” durumu yazın. Eksik olanın yerine satıcının sözünü koymayın. Teknik uygunsuzluk için mühendislik; mülkiyet ve sözleşme uyuşmazlığı için hukuki değerlendirme gerekir."
+      ]
+    }
+  ],
+  "deprem-riski-kontrolu": [
+    {
+      "heading": "AFAD haritasından ne öğrenilir?",
+      "paragraphs": [
+        "AFAD Türkiye Deprem Tehlike Haritası seçilen noktanın deprem tehlikesine ilişkin bilgi verir. Binanın proje, malzeme ve uygulama kalitesini göstermez. Aynı adreste güvenli/güvensiz hükmü çıkarmak için bu harita yeterli değildir.",
+        "Haritada önce adres/koordinatın doğru yerde olduğunu kontrol edin, sorgu tarihini ve baktığınız parametreyi kaydedin. Sayısal değerin düşük görünmesini rapor yerine kullanmayın."
+      ]
+    },
+    {
+      "heading": "Satıcıya yöneltilecek belge soruları",
+      "paragraphs": [
+        "Ruhsat, onaylı mimari/statik proje, zemin etüdü ve varsa önceki teknik inceleme raporunu sorun. Binada güçlendirme, kat ekleme, kullanım değişikliği veya taşıyıcıya müdahale iddiası varsa belge ve fiilî durum uzman tarafından birlikte incelenmelidir.",
+        "Örnek: giriş katında dükkânlar birleştirilmiş ve değişikliğe ait proje gösterilemiyorsa bunu yalnız tadilat masrafı saymayın. Yetkin teknik inceleme tamamlanana kadar yapısal güvence çıkarılamaz."
+      ],
+      "bullets": [
+        "Raporun adres ve bina kimliği doğru mu?",
+        "Rapor tarihi, inceleme yöntemi ve kapsamı belirtilmiş mi?",
+        "Raporu hazırlayan kuruluşun yetkisi doğrulanabiliyor mu?",
+        "Rapordan sonra yapılan değişiklik var mı?"
+      ]
+    },
+    {
+      "heading": "Hangi noktada yetkili inceleme gerekir?",
+      "paragraphs": [
+        "Bina yaşı, DASK poliçesi veya gözle çatlak görülmemesi tek başına performans belgesi değildir. Belirsizlik varsa yetkili mühendislik değerlendirmesi alın. KonutSeyir bu belgeleri görmeden bina puanı, mahalle güvenlik sıralaması veya konuta özel risk skoru üretmez."
+      ]
+    }
+  ],
+  "aidat-borc-kontrolu": [
+    {
+      "heading": "Aylık gider ile tek seferlik katılım payı",
+      "paragraphs": [
+        "Örnek: malike kalan aylık olağan gider 1.500 TL ise yıllık 18.000 TL’dir. Genel kurulda ayrıca 60.000 TL cephe gideri kararlaştırılmışsa ilk yıl nakit ihtiyacı 78.000 TL olur. Sonraki yıllara aynı 60.000 TL’yi otomatik tekrarlamak hatalıdır.",
+        "Bu bir hukuki borç paylaşımı hükmü değil, bütçe örneğidir. Hangi borçtan kimin sorumlu olduğu devir, karar, tahakkuk ve sözleşme belgeleri üzerinden ayrıca incelenmelidir."
+      ]
+    },
+    {
+      "heading": "Yönetimden istenecek dosya",
+      "paragraphs": [
+        "Yönetim planı, son işletme bütçesi, daire borç dökümü ve büyük işlere ait kurul kararlarını isteyin. Borç yazısının hangi tarihe kadar ve hangi kalemleri kapsadığını belirtmesini sağlayın. Sadece “aidat borcu yok” yazısı, planlanan giderin olmadığı anlamına gelmeyebilir.",
+        "Satış sözleşmesinde devir tarihine kadar ve sonrasında ödenecek tutarları kalem kalem konuşun. Satıcının kapattığı gider için ödeme belgesi alın; yönetimde kayıtla eşleştirin."
+      ],
+      "bullets": [
+        "Aidat içindeki kiracı/malik kalemlerini ayırın.",
+        "Çatı, asansör, cephe ve merkezi tesis yenilemesini sorun.",
+        "Net kira hesabında aynı gideri hem aidat hem bakım altında yazmayın."
+      ]
+    },
+    {
+      "heading": "Getiriyi bozan eşiği görün",
+      "paragraphs": [
+        "Yıllık net kiranız 275.000 TL ise örnekteki 60.000 TL ek iş bu tutarın yaklaşık %21,82’sidir. Bu oranı görmeden küçük aidat farkına odaklanmak kararın asıl maliyetini kaçırır. Belgesi olmayan gelecekteki işler için tutar uydurmak yerine teklif ve karar isteyin."
+      ]
+    }
+  ],
+  "kiracili-ev-almak": [
+    {
+      "heading": "Kiracı dosyası olmadan gelir yazmayın",
+      "paragraphs": [
+        "Yazılı sözleşme ve ekleri, başlangıç/yenileme tarihleri, son ödeme kayıtları, depozito ve yan gider paylaşımını görün. Türk Borçlar Kanunu m.310’daki el değiştirme düzenlemesi nedeniyle satışın kira ilişkisini kendiliğinden bitirdiğini varsaymayın.",
+        "Evi oturmak için alıyorsanız gerçekçi teslim koşulları; kiraya vermek için alıyorsanız mevcut sözleşmeyle beklenen tahsilat önemlidir. Tahliye bildirimi veya taahhüt olduğu söyleniyorsa geçerliliğini ve uygulanabilirliğini hukukçu incelemelidir."
+      ]
+    },
+    {
+      "heading": "İlk yıl gelirini yeniden hesaplayın",
+      "paragraphs": [
+        "Örnek: mevcut kira 18.000 TL, çevredeki ilanlarda istenen kira 30.000 TL olsun. Artış ve devir olmadan mevcut sözleşme üzerinden 12 aylık brüt gelir 216.000 TL’dir. 360.000 TL yazmak geliri 144.000 TL, yani mevcut tutara göre %66,67 fazla gösterir.",
+        "Bu farkın ne zaman kapanacağı bilinmiyorsa bugünden piyasa kirasına ulaşılmış gibi fiyatlamayın. Belirli bir tahliye süresi, dava sonucu veya otomatik artış burada hesaplanmaz."
+      ],
+      "bullets": [
+        "Depozitonun tutarı ve devir işlemi yazılı mı?",
+        "Fiilî kullanım, sözleşmedeki kullanım ile aynı mı?",
+        "Gecikmiş tahsilat ve yan gider var mı?",
+        "Teslim şartı satış sözleşmesinde somut mu?"
+      ]
+    },
+    {
+      "heading": "Kararı hangi bilgi değiştirir?",
+      "paragraphs": [
+        "Teslim tarihi zorunluysa, belirsiz teslimi yalnız fiyat indirimiyle telafi edilmiş saymayın. Yatırımda ise kredi taksitini mevcut kira karşılamıyorsa aradaki fark için nakit bütçesi ayırın. Mevcut sözleşme görülmeden net kira aracı da güvenilir sonuç üretemez."
+      ]
+    }
+  ],
+  "brut-net-metrekare": [
+    {
+      "heading": "Aynı ev nasıl iki fiyat gibi görünür?",
+      "paragraphs": [
+        "5.000.000 TL fiyatlı, 100 m² net ve 130 m² brüt bir daire düşünün. Net birim fiyat 50.000 TL/m², brüt birim fiyat yaklaşık 38.462 TL/m²’dir. İki sonuç aynı evindir; yaklaşık %30’luk payda farkını fiyat avantajı sanmayın.",
+        "Diğer daire 4.800.000 TL ve 85 m² netse net fiyatı yaklaşık 56.471 TL/m² olur. Daha düşük satış bedeline rağmen net alan başına daha pahalıdır. Alan doğrulanmadan otomatik ucuz/pahalı etiketi uygun değildir."
+      ]
+    },
+    {
+      "heading": "Alan kaynağını bir sütun daha ekleyerek izleyin",
+      "paragraphs": [
+        "Her ilanın fiyat, net, brüt sütunlarının yanına “alan kaynağı” yazın: ilan beyanı, onaylı proje veya yerinde ölçüm. Kullanılan balkon, teras, depo ve ortak alanı bağımsız bölüm içi alanla birleştirmeyin; projedeki niteliğini ayrıca kaydedin.",
+        "TCMB brüt il göstergesini nete uyarlamak için aracın kullandığı ilanın brüt/net oranı bir varsayımdır; TCMB’nin yayımladığı bağımsız bir net fiyat serisi değildir. Örneğin brüt/net 1,30 ise 40.000 TL/brüt m² yaklaşık 52.000 TL/net m² karşılığına çevrilir."
+      ],
+      "bullets": [
+        "Net/brüt oranı her bina için sabit kabul edilemez.",
+        "Tapu belgesinden tek başına ayrıntılı kullanılabilir alan çıkarmayın.",
+        "Proje üzerindeki bölüm ile gösterilen daireyi eşleştirin."
+      ]
+    },
+    {
+      "heading": "Kullanım değeri ayrıca ölçülür",
+      "paragraphs": [
+        "Aynı net alan iki planda aynı kullanışlılığı vermez. Oda ölçülerini ve sirkülasyon alanını kontrol edin; işlevsiz koridor veya az gün ışığı metrekare hesabında görünmez. Sonuç fiyatı standartlaştırır, plan kalitesini puanlamaz."
+      ]
+    }
+  ],
+  "ilan-fiyati-pazarlik": [
+    {
+      "heading": "İndirim yüzdesinin yanıltıcı örneği",
+      "paragraphs": [
+        "A ilanı 6.000.000 TL’den 5.400.000 TL’ye iniyor: indirim %10. B ilanı benzer nitelikle 5.200.000 TL ve indirim yok. Yalnız indirim oranına bakarsanız A’yı seçebilirsiniz; aynı kapsamda A hâlâ 200.000 TL daha yüksek bedel istiyor.",
+        "Bunlar varsayımsal rakamlardır. Gerçekte yakın tarihli benzer ilanlarda alan, bina, kat, cephe, kiracılı durum ve hukuki nitelik farklarını kaydedin. İlanları gerçekleşmiş satış emsali diye adlandırmayın."
+      ]
+    },
+    {
+      "heading": "Bir sayfalık teklif notu",
+      "paragraphs": [
+        "Teklif notunda önerilen satış bedeli, alıcı gideri, belgelenmiş tadilat, kredi koşulu ve teslim tarihini ayrı satırlara yazın. 5.400.000 TL fiyat ile 250.000 TL tadilat, toplam 5.650.000 TL olur; tadilatın 100.000 TL’si için belgeniz yoksa kesin gider diye sunmayın.",
+        "TCMB göstergesinden farkı pazarlıkta yardımcı bağlam olarak kullanabilirsiniz. İl ortalamasından sapma, satıcının aynı oranda indirim yapması gerektiği sonucunu üretmez."
+      ],
+      "bullets": [
+        "Fiyatı düşüren her gerekçe için belge veya teklif gösterin.",
+        "Kredi ön onayı ile kesin finansmanı ayırın.",
+        "Kapora, iade koşulu ve teslim maddelerini fiyat kadar önemseyin."
+      ]
+    },
+    {
+      "heading": "Teklifin son kontrolü",
+      "paragraphs": [
+        "İndirimden sonra toplam nakit ihtiyacı bütçeyi aşıyorsa pazarlık hedefi gerçekleşmiş sayılmaz. Belirsiz kayıt, yetki veya teknik sorun için yalnız daha düşük fiyat önermek yerine önce inceleme tamamlanmalıdır."
+      ]
+    }
+  ],
+  "emlak-alim-masraflari": [
+    {
+      "heading": "Altı kalemlik bütçe örneği",
+      "paragraphs": [
+        "Tamamen örnek tutarlar: satış 5.000.000 TL, tapu/işlem gideri 105.000 TL, hizmet bedeli 120.000 TL, ilk tadilat 150.000 TL, başlangıç kredi gideri 25.000 TL ve diğer gider 20.000 TL. Ek gider 420.000 TL; toplam başlangıç ihtiyacı 5.420.000 TL olur.",
+        "Bu örnekteki kalemler vergi/komisyon tarife duyurusu değildir. Kendi resmî tahakkukunuzu ve sözleşmeli hizmet tutarınızı girin; oran ve taraf paylaşımını işlem için doğrulayın."
+      ]
+    },
+    {
+      "heading": "Hangi kalem hangi hesaba gider?",
+      "paragraphs": [
+        "Kredi anaparası evin finansmanıdır; satış bedeline ikinci kez gider olarak eklenmez. İlk tadilat başlangıç maliyetidir. Sonraki yılların bakımı net kira hesabına; gelecekteki kredi faizi kredi ödeme planına; satış gideri ise satış senaryosuna aittir.",
+        "Örnekte ayrıca 150.000 TL acil nakit ayırırsanız gerekli nakit 5.570.000 TL’ye çıkar. Rezerv henüz harcanmadığından gerçekleşmiş yatırım maliyeti 5.420.000 TL olarak kalır. Nakit ihtiyacı ile gerçekleşen maliyet farklıdır."
+      ],
+      "bullets": [
+        "TKGM işlem tahakkuku ve döner sermaye tutarı",
+        "Aracılık sözleşmesinde hizmet bedeli ve KDV kapsamı",
+        "Bankanın sözleşme öncesi bilgi formu",
+        "Kalemli tadilat teklifi ve teslim tarihi"
+      ]
+    },
+    {
+      "heading": "Giderlerin getiriye etkisi",
+      "paragraphs": [
+        "Yıllık net kira 275.000 TL ise yalnız satış fiyatına göre %5,50 görünen getiri, 5.420.000 TL toplam maliyet üzerinde yaklaşık %5,07’dir. Küçük görünen masraflar aynı kira için sonucu değiştirir; toplam maliyeti net kira hesabına taşıyın."
+      ]
+    }
+  ],
+  "konut-endeksi-okuma": [
+    {
+      "heading": "120 puan, 120 TL/m² değildir",
+      "paragraphs": [
+        "Örnek endeks bir yıl önce 120, bugün 156 ise yıllık değişim (156 / 120 − 1) × 100 = %30’dur. Her iki değer aynı seriye ve 12 ay aralıklı dönemlere ait olmalıdır. Endeks düzeyi 156, bir dairenin birim fiyatı değildir.",
+        "TCMB KFE yönteminde konutların nitelik farklarının etkisini ayırmaya yönelik yaklaşım kullanılır. Bu yüzden endeks artışını belirli bir dairenin birebir fiyat artışı gibi uygulamak uygun değildir."
+      ]
+    },
+    {
+      "heading": "Bölge, il ve birim fiyat ayrımı",
+      "paragraphs": [
+        "Bazı bölgesel KFE serileri birden fazla ili kapsar; şehir sayfasında gösterilen kapsama bakın. İl bazlı TL/m² göstergesi farklı ölçüdür. Bölgesel endeks puanından mahalle fiyatı veya kira tutarı türetmeyin.",
+        "Dönem Ağustos, yayın Eylül ve veri çekimi Ekim olabilir. Bunlar üç ayrı tarihtir. Kaynak kesintisinde eski verinin yeni çekilmiş olması dönemi güncellemez; ekranda dönem bilgisini esas alın."
+      ],
+      "bullets": [
+        "Aylık artış ile yıllık artışı karıştırmayın.",
+        "Eksik ayı sıfır veya bir önceki kayıt saymayın.",
+        "Revizyon sonrası farklı yöntem veya bazlı serileri doğrudan birleştirmeyin."
+      ]
+    },
+    {
+      "heading": "Endeksten reel yoruma",
+      "paragraphs": [
+        "Aynı örnekte nominal artış %30, aynı dönem TÜFE artışı varsayımsal %35 ise reel değişim 1,30 / 1,35 − 1 = −%3,70 olur. Kira ve işlem gideri bu endeks hesabına dahil değildir. Kişisel konut performansı için gerçek alım/satış bedeli ve net nakit akışını ayrıca kullanın."
+      ]
+    }
+  ]
 };
 
 export const cityEvaluations:Record<string,{title:string;paragraphs:string[];checks:string[]}>= {
- istanbul:{title:"İstanbul için değerlendirme",paragraphs:["İstanbul tek bir konut piyasası değildir. Aynı ilçede dahi raylı sisteme yürüme mesafesi, yapı yaşı, zemin koşulları ve iş merkezlerine ulaşım süresi fiyat ile kirayı farklılaştırır. İl geneli endeks yön gösterir; teklif fiyatını doğrulamaz.","Yatırım hesabında yüksek satış fiyatının yanında kiracı devir hızı, bina bakım bütçesi ve olası dönüşüm süreci ayrıca incelenmelidir. Avrupa ve Anadolu yakası ortalamalarını birbirinin emsali kabul etmek yerine mikro bölge bazında veri toplayın."],checks:["Ulaşım süresi ve planlanan hatlar","Bina/zemin incelemesi ve dönüşüm durumu","Aynı sokakta net kira emsalleri"]},
- ankara:{title:"Ankara için değerlendirme",paragraphs:["Ankara’da kamu kurumları, üniversiteler, savunma sanayii ve yeni gelişim aksları farklı kiracı profilleri oluşturur. Çankaya’daki olgun mahallelerle çevre ilçelerdeki yeni projelerin fiyatlama mantığı aynı değildir.","Metro erişimi, kampüs ve iş alanlarına ulaşım, ısınma gideri ve site aidatı net getiriyi belirgin etkiler. Yeni projelerde ilan fiyatı yanında tamamlanmış çevre altyapısı ve boş konut arzı da kontrol edilmelidir."],checks:["İş ve üniversite merkezlerine erişim","Isınma tipi ve yıllık ortak gider","Yeni proje arzı ve doluluk"]},
- izmir:{title:"İzmir için değerlendirme",paragraphs:["İzmir’de merkez, kuzey-güney gelişim aksları ve kıyı ilçeleri farklı kullanım amaçlarına sahiptir. Sürekli oturum talebi ile yazlık veya sezonluk talebi aynı kira varsayımıyla değerlendirmek hatalıdır.","Kıyıya yakınlık prim yaratabilir; ancak yapı yaşı, nem ve bakım ihtiyacı toplam maliyeti artırabilir. Ulaşım bağlantısı, deprem ve zemin incelemesi ile yıl boyu kiralanabilirlik birlikte ele alınmalıdır."],checks:["Sürekli ve sezonluk talep ayrımı","Yapı yaşı, nem ve bakım bütçesi","Raylı sistem ve ana ulaşım erişimi"]},
- adana:{title:"Adana için değerlendirme",paragraphs:["Adana’da mahalle seçimi, bina niteliği ve iklim koşullarına uygun donanım kira talebini etkiler. Geniş metrekare tek başına değer göstergesi değildir; binanın yaşı, otopark, asansör ve enerji gideri önemlidir.","TCMB bölgesi Mersin’i de kapsadığı için bölgesel endeks Adana’daki tek bir mahallenin fiyatını temsil etmez. İl satış hareketini yerel kira emsalleri ve gerçek bakım maliyetiyle birlikte okuyun."],checks:["Mahalle bazında kira sürekliliği","Soğutma, yalıtım ve bina giderleri","Net alan ve yapı niteliği"]},
- antalya:{title:"Antalya için değerlendirme",paragraphs:["Antalya’da turizm, yabancı talebi ve dönemsel kiralama bazı bölgelerde fiyatları hızlı değiştirebilir. Sezonluk yüksek kira ilanını 12 aya yaymak, yıllık geliri olduğundan fazla gösterebilir.","Merkez, kıyı turizm bölgeleri ve iç ilçeler ayrı pazarlar olarak ele alınmalıdır. Site aidatı, boş sezon, kısa dönem kiralama kuralları ve profesyonel yönetim gideri net hesapta açıkça yer almalıdır."],checks:["12 aylık doluluk varsayımı","Kısa dönem kiralama mevzuatı","Aidat ve yönetim gideri"]},
- bursa:{title:"Bursa için değerlendirme",paragraphs:["Bursa’da sanayi istihdamı, üniversite talebi, merkez ilçeler ve yeni yerleşim alanları farklı fiyat dinamikleri üretir. İşe ulaşım süresi ve toplu taşıma, yalnızca kilometreden daha açıklayıcı olabilir.","Yeni konut arzının yoğun olduğu bölgelerde aynı anda çok sayıda satılık ve kiralık ilan bulunması pazarlık gücünü etkileyebilir. Eski merkez bölgelerde ise bina ve deprem incelemesi daha yüksek öncelik taşımalıdır."],checks:["Sanayi ve iş akslarına ulaşım","Yeni konut arzı ve doluluk","Bina yaşı ve teknik inceleme"]},
- kocaeli:{title:"Kocaeli için değerlendirme",paragraphs:["Kocaeli’de sanayi bölgeleri, liman faaliyetleri ve İstanbul bağlantısı güçlü talep kaynaklarıdır; ancak ilçe ve hatta vardiya güzergâhına göre ulaşım süreleri ciddi değişir. İstanbul’a yakınlık tek başına yeterli emsal değildir.","Kiracı profilini iş alanlarıyla eşleştirirken çevresel etkiler, ulaşım maliyeti ve yeni proje arzı değerlendirilmelidir. Bölgesel TCMB serisinin beş ili kapsadığı unutulmamalıdır."],checks:["İş alanlarına gerçek yolculuk süresi","Çevresel ve altyapısal koşullar","Bölgedeki yeni arz ve kira emsali"]},
- konya:{title:"Konya için değerlendirme",paragraphs:["Konya’nın geniş yerleşim yapısı merkez ilçeler arasında dahi ulaşım ve talep farkı doğurur. Üniversite, hastane, sanayi ve tramvay erişimi kiracı profilini belirleyen ana unsurlardandır.","Yeni sitelerde geniş alan ve otopark avantajı aidat ve çevre altyapısıyla birlikte değerlendirilmelidir. İl geneli satış sayısı hareketliliği gösterir; mahalle bazında fiyat doğrulaması için yeterli değildir."],checks:["Tramvay ve günlük ulaşım","Üniversite/hastane/sanayi talebi","Site aidatı ve çevre altyapısı"]},
- gaziantep:{title:"Gaziantep için değerlendirme",paragraphs:["Gaziantep’te sanayi ve ticaret kaynaklı istihdam konut talebini desteklerken nüfus hareketi ve yeniden yapılaşma bazı bölgelerde arz-talep dengesini hızla değiştirebilir. Geniş bölgesel endeks tek şehir yorumu olarak kullanılmamalıdır.","Kira emsallerinin tahsil edilebilirliği, binanın teknik durumu ve iş alanlarına erişim birlikte ölçülmelidir. Yeni ve eski yapı stokunu aynı metrekare fiyatıyla karşılaştırmak yanıltıcıdır."],checks:["Sanayi ve ticaret alanlarına erişim","Yapı stoku ve teknik durum","Yerel doluluk ve tahsilat emsali"]},
- trabzon:{title:"Trabzon için değerlendirme",paragraphs:["Trabzon’da topoğrafya, yol eğimi, manzara, merkez erişimi ve otopark aynı mahallede bile önemli fiyat farkı yaratabilir. Yabancı talebine dayalı dönemsel fiyatları sürekli yerel talep gibi değerlendirmemek gerekir.","Bölgesel TCMB serisi altı ili kapsar; bu nedenle ilan kararında yerel emsal şarttır. Nem, cephe, drenaj ve bina bakım ihtiyacı toplam sahip olma maliyetinde ayrıca incelenmelidir."],checks:["Yol, eğim ve merkez erişimi","Nem, cephe ve bakım ihtiyacı","Sürekli yerel talep ile dönemsel talep ayrımı"]},
- balikesir:{title:"Balıkesir için değerlendirme",paragraphs:["Balıkesir’de merkez, körfez ve kıyı ilçelerinin kullanım amacı ve talep yapısı farklıdır. TCMB bölgesel KFE serisi Balıkesir ve Çanakkale’yi birlikte kapsar; tek bir ilçenin fiyatı gibi okunmamalıdır.","Kıyı bölgelerinde sezonluk ve ikinci konut talebi ile yıl boyu yerleşik talebi ayırın. Yerel kira emsali, bina niteliği ve ulaşım koşullarını bölgesel fiyat eğilimiyle birlikte değerlendirin."],checks:["Kıyı ve merkez talebini ayırın","Yıl boyu kiralanabilirliği kontrol edin","Yerel emsalleri bölgesel endeksle birlikte okuyun"]},
- mugla:{title:"Muğla için değerlendirme",paragraphs:["Muğla’da Bodrum, Fethiye, Marmaris ve merkez gibi alt pazarlar birbirinden belirgin biçimde ayrılır. TCMB bölgesel KFE serisi Aydın, Denizli ve Muğla’yı birlikte kapsadığı için tek bir ilçenin değerini temsil etmez.","Turizm ve ikinci konut talebi fiyat ve kirada mevsimsellik yaratabilir. Yıllık getiri hesabında sezonluk yüksek kira düzeyini on iki aya otomatik yaymayın."],checks:["Sezonluk ve sürekli talebi ayırın","Yıllık doluluk varsayımını test edin","İlçe bazında yerel kira ve satış emsali kullanın"]}
+  "istanbul": {
+    "title": "İstanbul’da ulaşım vaadini zamanla sınayın",
+    "paragraphs": [
+      "İl düzeyindeki KFE İstanbul kapsamındadır; bu ölçek ilçe ve mahalle farklarını ortadan kaldırmaz. İlanı aynı sokak çevresi, bina niteliği ve alan tanımıyla karşılaştırın. İl fiyat göstergesi değerleme raporu değildir.",
+      "Bir ilanda “metroya yakın” yazıyorsa kullanacağınız istasyon girişine yürüyüşü ve iş saatindeki toplam kapıdan kapıya süreyi ayrı kaydedin. Henüz açılmamış bir ulaşım projesini bugünkü erişim gibi fiyatlamayın. Açılış ve güzergâh iddiasını ilgili işletmecinin duyurusundan doğrulayın."
+    ],
+    "checks": [
+      "Gösterilen dairenin bağımsız bölümünü belediye projesiyle eşleştirin.",
+      "Yönetimden büyük onarım/dönüşüm kararı ve daire borç dökümü isteyin.",
+      "Ulaşımı aynı gün/saat koşuluyla karşılaştırıp kira dosyasına not edin."
+    ]
+  },
+  "ankara": {
+    "title": "Ankara’da toplam aylık barınma giderini karşılaştırın",
+    "paragraphs": [
+      "KFE Ankara kapsamındaki genel değişimi gösterir; yeni proje ile yerleşik mahalle arasındaki fiyat farkını tek başına açıklamaz. İl satış adedi de belirli konutun ne kadar sürede satılacağını söylemez.",
+      "Aynı kira bedelli iki evin ısınma ve ortak gideri farklı olabilir. Örnek olarak aylık malik gideri 1.000 TL yerine 2.500 TL ise yıllık fark 18.000 TL’dir. Bu yerel ortalama değil, bütçe farkını göstermek için örnektir. Gerçek tutar için geçmiş tüketim ve yönetim bütçesi isteyin."
+    ],
+    "checks": [
+      "Isınma sistemi ve mümkünse son tam yıl tüketim/gider dökümü",
+      "Kullanacağınız iş veya kampüs girişine gerçek erişim",
+      "Yeni projede bitmiş altyapı ile satış vaadinin ayrımı"
+    ]
+  },
+  "izmir": {
+    "title": "İzmir’de sürekli kullanım ile dönemsel kullanım bütçesini ayırın",
+    "paragraphs": [
+      "KFE İzmir ölçeğindeki eğilimi verir; merkez veya kıyı ilçesinin emsali yerine geçmez. İlk elemede konutun yıl boyu oturum, uzun dönem kira veya dönemsel kullanım amacını seçin.",
+      "Bir ilanın sezonluk aylık bedelini 12 ile çarpmadan önce hangi ayların kiralanabilir olduğuna ilişkin kayıt isteyin. Mevcut binada cephe, çatı ve ortak tesis için yapılan işleri yönetim kararları ve faturalarla kontrol edin; konumdan otomatik bakım oranı çıkarmayın."
+    ],
+    "checks": [
+      "Uzun dönem sözleşme kirası ve sezonluk ilan tutarını ayrı tutun.",
+      "Belediyeden proje/izin kapsamını ve fiilî bölümü eşleştirin.",
+      "Konuma ilişkin tehlike bilgisi ile binaya özgü mühendislik raporunu ayırın."
+    ]
+  },
+  "adana": {
+    "title": "Adana’da alan ve kullanım giderini birlikte kontrol edin",
+    "paragraphs": [
+      "Şehir ekranındaki bölgesel KFE Adana ve Mersin’i birlikte kapsar. İki ilin ortak eğilimi, Adana’daki seçtiğiniz mahallenin fiyatı değildir; il satış adedi de TL/m² serisi olarak kullanılamaz.",
+      "Önce alan beyanını doğrulayın; daha geniş görünen ev için brüt alanın hangi ortak payları içerdiğini sorun. Soğutma ve yalıtım iddiasını cihaz varlığıyla sınırlı tutmayın: enerji kimlik belgesi, bakım kayıtları ve gerçek tüketim dokümanları karar dosyasını destekler."
+    ],
+    "checks": [
+      "Aynı alan türündeki yakın ilanları tarihleriyle kaydedin.",
+      "Ortak cihaz ve tesis yenileme kararlarını yönetimden isteyin.",
+      "Teknik durum için proje ve binaya ait incelemeyi esas alın."
+    ]
+  },
+  "antalya": {
+    "title": "Antalya’da sezonluk bedelden yıllık gelire geçerken boş ayları yazın",
+    "paragraphs": [
+      "Bölgesel KFE Antalya, Burdur ve Isparta’yı kapsar. Bu seri belirli bir turizm bölgesinin kira veya fiyat tarifesi değildir. İl göstergesiyle farktan yabancı talebi veya gelecek artış tahmini üretilemez.",
+      "Örnek olarak dört ay 50.000 TL ve kalan sekiz ay sıfır gelir, yılda 200.000 TL brüt eder; 50.000 × 12 = 600.000 TL değildir. Bu tutarlar piyasa fiyatı değildir. Dönemsel kiralamada izin, yönetim ve diğer koşulları resmî kurumdan doğrulamadan geliri uygulanabilir kabul etmeyin."
+    ],
+    "checks": [
+      "Kiralanabilir ay, tahsilat ve hizmet giderini ayrı kaydedin.",
+      "Site yönetim planını ve kullanım kısıtlarını inceleyin.",
+      "Yazılı izin/uygunluk olmadan kısa dönem gelir taahhüdüne güvenmeyin."
+    ]
+  },
+  "bursa": {
+    "title": "Bursa’da konut arzını ilan sayısından farklı okuyun",
+    "paragraphs": [
+      "Bölgesel KFE Bursa, Eskişehir ve Bilecik’i kapsar; yalnız Bursa ilçelerinin fiyat hareketi değildir. TÜİK il satış sayısı il genelindeki işlemleri gösterir; seçtiğiniz projede doluluk oranını vermez.",
+      "Aynı projenin farklı aracılardaki ilanlarını ayrı konut saymak arzı büyütür. Blok, kat, alan ve fotoğraf benzerliğini kontrol ederek tekrarı ayıklayın. Teslim edilmiş daire ile henüz tamamlanmamış projeyi aynı emsal kümesine koymayın."
+    ],
+    "checks": [
+      "İlanın teslim ve fiilî kullanım durumunu yerinde/evrakla doğrulayın.",
+      "Günlük işe erişimi kilometre yerine zamanla kaydedin.",
+      "Proje çevresindeki bitmiş hizmetler ile planlanan hizmetleri ayırın."
+    ]
+  },
+  "kocaeli": {
+    "title": "Kocaeli’de bağlantı mesafesini günlük yolculukla doğrulayın",
+    "paragraphs": [
+      "Bölgesel KFE Kocaeli, Sakarya, Düzce, Bolu ve Yalova’yı birlikte kapsar. Beş ilin ortak hareketini tek ilçe veya sanayi aksı için gerçekleşmiş getiri saymayın. İl birim fiyatı gösteriliyorsa bunun ayrı seri ve dönem olduğunu kontrol edin.",
+      "İstanbul’a veya işe yakınlık beyanı için düzenli kullandığınız saatlerde erişimi ölçün. Vardiya/servis güzergâhına ilişkin bilgi bir sözleşme garantisi değilse kalıcı ulaşım avantajı varsaymayın. Yakın bir tesisin etkisi hakkında ölçüm olmadan çevresel kalite puanı üretmeyin."
+    ],
+    "checks": [
+      "Geçiş, ulaşım ve otopark giderini aylık bütçeye ekleyin.",
+      "Servis ve toplu taşıma bilgisini işletmeciden doğrulayın.",
+      "Yerel emsallerde kat, alan ve bina niteliğini eşleştirin."
+    ]
+  },
+  "konya": {
+    "title": "Konya’da büyük metrekareyi kullanılabilir alanla sınayın",
+    "paragraphs": [
+      "Bölgesel KFE Konya ve Karaman’ı kapsar. İki ilin endeks değişimi seçtiğiniz sitenin fiyatı değildir. Fiyat kıyasına önce aynı kullanım amacı ve aynı alan tanımıyla başlayın.",
+      "Daha büyük daireyi yalnız TL/m² düşük diye seçmeyin. Kullanılmayan oda ve koridorun ısınma, bakım ve eşya bütçesine etkisini kendi kullanımınızla hesaplayın. Kampüs veya hastane yakınlığını düzenli kiracı talebi ispatı saymayın; mevcut sözleşme/emsal isteyin."
+    ],
+    "checks": [
+      "Net alanı onaylı proje ve ölçümle kontrol edin.",
+      "Tramvay/durak girişine gerçek erişim ve sefer bilgisini doğrulayın.",
+      "Isınma ile malike kalan aidatı toplam sahip olma maliyetine ekleyin."
+    ]
+  },
+  "gaziantep": {
+    "title": "Gaziantep’te yeni yapı beyanını belgeyle eşleştirin",
+    "paragraphs": [
+      "Bölgesel KFE Gaziantep, Adıyaman ve Kilis’i kapsar. Ortak bölgesel artışı Gaziantep’teki bir binanın değer artışı olarak kullanmayın. Yeni teslim ve mevcut konut için hukuki/teknik belge kapsamını ayrı inceleyin.",
+      "“Yeni”, “yenilenmiş” ve “güçlendirilmiş” aynı şey değildir. İlgili işlemin ruhsat, proje ve teknik raporunu isteyin; yalnız boya ve iç dekorasyonu yapısal inceleme gibi okumayın. Gerçekleşmiş yeniden yapım veya güçlendirme maliyeti için yazılı belge gerekir."
+    ],
+    "checks": [
+      "Yapım/onarım iddiasına ait tarihli belge",
+      "Bağımsız bölüm ve izin kapsamının eşleşmesi",
+      "Mevcut kira sözleşmesi ile ilan kira tahmininin ayrımı"
+    ]
+  },
+  "trabzon": {
+    "title": "Trabzon’da güzergâh ve bina bakımını konum ilanından ayırın",
+    "paragraphs": [
+      "Bölgesel KFE Trabzon, Ordu, Giresun, Rize, Artvin ve Gümüşhane’yi kapsar. Altı ilin ortak endeksini Trabzon’daki mahalle fiyatı gibi okumayın. Mahalle farkı için aynı tarihli ve benzer nitelikli ilanlar gerekir.",
+      "Haritada kısa görünen mesafeyi giriş kapısına kadar yürüyerek veya kullandığınız araçla sınayın. Eğim, merdiven ve otoparka erişim kullanım ihtiyacınıza uymalıdır. Nem veya drenaj sorunu iddiasını konumdan tahmin etmek yerine uzman incelemesi ve geçmiş onarım kayıtlarıyla araştırın."
+    ],
+    "checks": [
+      "Tapu/proje ile eklenti ve otopark hakkı",
+      "Cephe, çatı ve drenaj için bakım faturası/kararı",
+      "Yıl boyu kira ile dönemsel ilan gelirinin ayrımı"
+    ]
+  },
+  "balikesir": {
+    "title": "Balıkesir’de kıyı konutu ile merkez konutunu aynı kirayla sıralamayın",
+    "paragraphs": [
+      "Bölgesel KFE Balıkesir ve Çanakkale’yi kapsar. Bu endeks şehir merkezindeki bir daire ile kıyıdaki ikinci konutun farklı kullanım değerini açıklamaz; ilçe bazlı emsal değildir.",
+      "Kullanım amacı seçtikten sonra iki bütçe kurun: sürekli oturumda yıllık ulaşım ve aidat; dönemsel kullanımda boş aylardaki bakım ve sabit giderler. Evin kullanılmadığı ayları gideri sıfır aylar saymayın. Her gider için son yılın belgesini isteyin."
+    ],
+    "checks": [
+      "Sabit abonelik/aidat ile kullanıma bağlı tüketimi ayırın.",
+      "Sezonluk kira iddiasının kapsadığı ay ve hizmetleri yazın.",
+      "Tapu niteliği, bağımsız bölüm ve yapı kullanım belgesini kontrol edin."
+    ]
+  },
+  "mugla": {
+    "title": "Muğla’da kiralama vaadini uygulanabilir sözleşme ve izinle sınayın",
+    "paragraphs": [
+      "Bölgesel KFE Aydın, Denizli ve Muğla’yı birlikte kapsar. Muğla ilçeleri için ayrı satış bedeli üretmez. İkinci konut kullanımı ve gelir amaçlı kiralama aynı nakit hesabı değildir.",
+      "“Kira garantili” ilanda garantiyi veren tarafı, süreyi, kesintileri ve ödeme koşullarını yazılı sözleşmede görün. Sezon doluluğu ya da günlük ilan fiyatı gelir garantisi değildir. Kiralama biçimine uygun resmî izin gerekliliklerini ilgili kurumdan doğrulayın."
+    ],
+    "checks": [
+      "Hizmet bedeli, temizlik ve malike kalan sabit giderler",
+      "Yönetim planı ve kiralama koşulları",
+      "Belge kapsamına uyan bağımsız bölüm ve kullanım niteliği"
+    ]
+  }
 };

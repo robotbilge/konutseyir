@@ -13,7 +13,7 @@ export function DeedFeeCalculator(){
 }
 export function CommissionCalculator(){
  const[p,s]=useState({price:5000000,vat:20}); const side=p.price*.02,vat=side*p.vat/100,total=side+vat;
- return <Box><h2>Emlak danışmanı hizmet bedeli</h2><div className="fields"><N label="Satış bedeli (TL)" value={p.price} onChange={v=>s({...p,price:v})}/><N label="KDV (%)" value={p.vat} onChange={v=>s({...p,vat:v})}/></div><div className="metric-row"><p>Bir taraf için tavan (%2) <b>{money(side)}</b></p><p>KDV <b>{money(vat)}</b></p><p>Bir taraf KDV dahil <b>{money(total)}</b></p><p>İki taraf toplam tavan <b>{money(total*2)}</b></p></div><small>Satış aracılık hizmet bedeli KDV hariç satış bedelinin %4'ünü aşamaz; aksi kararlaştırılmadıkça taraflar arasında eşit paylaşılır.</small></Box>
+ return <Box><h2>Emlak danışmanı hizmet bedeli</h2><div className="fields"><N label="Satış bedeli (TL)" value={p.price} onChange={v=>s({...p,price:v})}/><N label="KDV (%)" value={p.vat} onChange={v=>s({...p,vat:v})}/></div><div className="metric-row"><p>Eşit paylaşımda bir taraf (%2) <b>{money(side)}</b></p><p>KDV <b>{money(vat)}</b></p><p>Eşit paylaşımda KDV dahil <b>{money(total)}</b></p><p>İki taraf toplam tavan <b>{money(total*2)}</b></p></div><small>Satış aracılık hizmet bedeli KDV hariç satış bedelinin %4'ünü aşamaz; aksi kararlaştırılmadıkça taraflar arasında eşit paylaşılır.</small></Box>
 }
 export function RentIncreaseCalculator(){
  const[p,s]=useState({rent:30000,rate:Number.NaN});

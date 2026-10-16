@@ -1,0 +1,3 @@
+import {editorialUpdatedAt,type EditorialSource} from '@/lib/editorial-quality';
+export function EditorialByline(){return <p className="article-byline">Yayıncı: <a href="/yayin-ilkeleri">KonutSeyir</a> · İçerik güncellemesi: <time dateTime={editorialUpdatedAt}>16 Ekim 2026</time></p>}
+export function EditorialSources({sources}:{sources:EditorialSource[]}){return <section className="editorial-sources"><h2>Kaynaklar ve kullanım sınırları</h2><ul>{sources.map(source=><li key={source.url}><a href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a><p>{source.scope}</p></li>)}</ul><p>Kaynak bağlantıları konuyu doğrulamak içindir. Hesap örnekleri piyasa verisi veya kişisel yatırım, hukuk, vergi ya da mühendislik görüşü değildir.</p><EditorialByline/></section>}

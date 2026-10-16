@@ -1,7 +1,8 @@
+import {ToolEditorial} from '@/components/tool-editorial';
 import {Header,Footer} from '../../components/site-chrome';
 import {ListingAnalyzer} from '../../components/listing-analyzer';
 export default function HomeAnalysis(){return <><Header back/><main className="inner focused-tool-page analysis-page">
  <div className="page-title"><p className="eyebrow">KONUT ANALİZİ · TCMB</p><h1>İlan fiyatını TCMB il göstergesiyle karşılaştırın</h1><p>İlan bilgilerini aktarın veya kendiniz girin. Net ve brüt m² fiyatını, il göstergesinden farkı ve veri bulunursa kira göstergesini kaynak dönemiyle görün.</p></div>
  <ListingAnalyzer/>
  <section className="analysis-editorial"><h2>İl göstergesi ne anlatır?</h2><p>TCMB göstergesi il düzeyindeki değerleme verisini özetler. Mahalle emsali, gerçekleşmiş satış fiyatı veya bu konuta özel ekspertiz değildir. Bina yaşı, kat, hukuki durum ve konutun özellikleri ayrıca incelenmelidir.</p><p>Net ve brüt alan ayrı tutulur. Net karşılık, yalnız ilanın iki alanı da biliniyorsa kendi brüt/net oranıyla türetilir; resmî bir net m² serisi değildir. Kaynak verisi bulunmazsa başka il veya örnek fiyatla sonuç üretilmez.</p><h2>Satın alma maliyetini ve net kirayı ayrıca hesaplayın</h2><p>İlan karşılaştırması tapu, komisyon, finansman ve yıllık işletme giderlerini içermez. Kararınıza yaklaşırken ilgili hesabı açın.</p><nav className="tool-jumps" aria-label="İlanı değerlendirdikten sonra"><a href="/hesaplama/alim-maliyeti">Toplam alım maliyeti</a><a href="/hesaplama/net-kira">Giderlerden sonra net kira</a><a href="/kredi-hesaplama">Kredi ve bütçe</a><a href="/resmi-kontroller">Resmî kontroller</a></nav></section>
- </main><Footer/></>}
+ <ToolEditorial slug="tcmb-ilan"/></main><Footer/></>}
