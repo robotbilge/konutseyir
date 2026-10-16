@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {indexReading,salesReading} from '../lib/market-reading.mjs';
+test('index reading rebases only a supplied comparable annual change and keeps index separate from price',()=>{assert.deepEqual(indexReading(214.21,19.72),{level:214.21,annual:19.72,rebased:119.72});assert.deepEqual(indexReading(80,-20),{level:80,annual:-20,rebased:80});assert.equal(indexReading(100,0).rebased,100)});
+test('index reading never invents a missing annual observation',()=>{for(const x of [null,undefined,NaN,Infinity,'20',-100,-120])assert.deepEqual(indexReading(120,x),{level:120,annual:null,rebased:null});for(const x of [null,undefined,NaN,0,-1,Infinity,'120'])assert.equal(indexReading(x,20),null)});
+test('sales categories are two distributions, not three additive groups',()=>{const r=salesReading(2600,534,765,1835);assert.ok(Math.abs(r.firstShare+r.secondShare-100)<1e-10);assert.ok(Math.abs(r.mortgageShare-20.53846153846154)<1e-10);assert.equal(salesReading(1,0,0,1).secondShare,100)});
+test('invalid or inconsistent sales data cannot generate a narrative',()=>{for(const args of [[0,0,0,0],[10,11,3,7],[10,3,3,6],[10,3,-1,11],[10,3,3.5,6.5],[10,NaN,3,7],['10',3,3,7],[null,0,0,0]])assert.equal(salesReading(...args),null)})
