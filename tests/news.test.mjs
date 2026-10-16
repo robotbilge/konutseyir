@@ -65,3 +65,13 @@ test('KAP scraper imports only Emlak Konut issuer announcements with official de
  assert.equal(items[0].sourceUrl,'https://www.kap.org.tr/tr/Bildirim/1669208');
  assert.equal(items[0].sourceName,'Emlak Konut');
 });
+
+
+test('general finance headlines are not housing news because a summary mentions housing',async()=>{
+ const irrelevant={title:"Akbank ve EBRD’den Sanmar’a 45 milyon euro finansman",summary:"Şirket yatırımları. İlgili haber: konut kredisi faizleri",category:'Ekonomi'};
+ assert.equal(isRelevantNews(irrelevant),false);
+ assert.equal(isRelevantNews({title:'Konut kredilerine yeni finansman',summary:'Banka açıklaması',category:'Ekonomi'}),true);
+ const source=newsFeeds.find(x=>x.id==='bloomberght');
+ const xml=`<rss><channel><item><title>${irrelevant.title}</title><link>https://www.bloomberght.com/finansman</link><description>${irrelevant.summary}</description><category>Konut</category><pubDate>Fri, 16 Oct 2026 10:00:00 GMT</pubDate></item></channel></rss>`;
+ assert.equal((await parseNewsRSS(xml,source)).length,0);
+});

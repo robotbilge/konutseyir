@@ -30,7 +30,7 @@ export async function parseNewsRSS(xml,source=newsFeeds[0]){
  const rows=[];
  for(const block of blocks){
   const title=field(block,'title'),summary=field(block,'description').slice(0,320),rawUrl=rawField(block,'link')||field(block,'guid'),feedCategory=field(block,'category'),category=feedCategory||source.defaultCategory;
-  if(!title||!rawUrl||(source.filter&&!hasKeyword(`${title} ${summary} ${feedCategory}`,title)))continue;
+  if(!title||!rawUrl||(source.filter&&!hasKeyword(title,title)))continue;
   let sourceUrl;try{sourceUrl=canonicalUrl(new URL(entities(rawUrl),source.url).toString())}catch{continue}
   if(!source.hosts.includes(new URL(sourceUrl).hostname))continue;
   const published=new Date(field(block,'pubDate')||field(block,'dc:date')||field(block,'date'));if(Number.isNaN(published.getTime()))continue;
@@ -39,7 +39,8 @@ export async function parseNewsRSS(xml,source=newsFeeds[0]){
  return rows.slice(0,40);
 }
 
-export const isRelevantNews=item=>hasKeyword(`${item?.title||''} ${item?.summary||''} ${item?.category||''}`,item?.title||'');
+// Broad economy feeds must name a housing topic in the headline; descriptions can contain unrelated sidebar/footer links.
+export const isRelevantNews=item=>hasKeyword(item?.title||'',item?.title||'');
 
 const emlakKonutDisclosureSource=newsFeeds.find(source=>source.id==='emlak-konut-kap');
 const cleanHtml=value=>entities(String(value||'').replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi,' '));
