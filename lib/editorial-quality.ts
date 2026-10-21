@@ -1,7 +1,10 @@
+import {urbanGuideEvidence} from './urban-article';
+import {urbanSlug} from './urban-sources';
 export type EditorialSource={label:string;url:string;scope:string};
 export const editorialUpdatedAt='2026-10-16';
 
 export const guideEvidence:Record<string,{takeaways:string[];sources:EditorialSource[]}>= {
+ [urbanSlug]:urbanGuideEvidence,
   "kira-carpani-nedir": {
     "takeaways": [
       "5 milyon TL ve 30 bin TL aylık kira: brüt çarpan 13,89 yıl; gider eklenince aynı evin net sonucu farklıdır.",

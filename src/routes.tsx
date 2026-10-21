@@ -1,3 +1,4 @@
+import {urbanSlug,urbanUpdatedAt} from '../lib/urban-sources';
 import {editorialUpdatedAt} from '../lib/editorial-quality';
 import Home from '../app/page';
 import GoldHousingPage from '../app/altinla-konut/page';
@@ -20,7 +21,6 @@ import DecisionToolsPage from '../app/karar-araclari/page';
 
 import Compare from '../app/karsilastir/page';
 import Guides from '../app/rehber/page';
-import Guide from '../app/rehber/[slug]/page';
 import Cities from '../app/sehirler/page';
 import City from '../app/sehirler/[slug]/page';
 import CityComparison from '../app/sehir-karsilastir/page';
@@ -38,6 +38,7 @@ import NewsAdmin from '../app/yonetim/haberler/page';
 import {guides,cities} from '../lib/content';
 import {Header,Footer} from '../components/site-chrome';
 const fixed:Record<string,{component:any,title:string,description:string}>={
+'/kentsel-donusum':{component:null,title:'Kentsel dönüşüm bütçesi ve destek rehberi | KonutSeyir',description:'Yapım bedeli, geçici kira, doğrulanmış hibe ve kredi takvimiyle aylık nakit açığını hesaplayın. İki müteahhit teklifini aynı kapsamda karşılaştırın.'},
 '/' :{component:Home,title:'Satılık konut ilanı analizi ve m² fiyat karşılaştırması | KonutSeyir',description:'Satılık konut ilanının net ve brüt m² fiyatını hesaplayın. Brüt fiyatı TCMB’nin il göstergesiyle karşılaştırın; kira ve amortisman raporunu inceleyin.'},
 '/altinla-konut':{component:GoldHousingPage,title:'Altının Ne Kadar Konut Alıyor? | Altınla konut alım gücü',description:'Altın birikiminizin İstanbul, Ankara, İzmir ve veri bulunan diğer şehirlerde yaklaşık kaç brüt metrekare konuta karşılık geldiğini TCMB konut birim fiyatlarıyla hesaplayın.'},
 '/hesaplama':{component:Tools,title:'Konut hesaplama araçları | Kira, tapu, m² ve maliyet',description:'Kira çarpanı, net kira, metrekare fiyatı, alım maliyeti, tapu harcı, emlak komisyonu, kira artışı ve diğer konut hesaplama araçlarını seçin.'},
@@ -72,5 +73,5 @@ const fixed:Record<string,{component:any,title:string,description:string}>={
 '/yayin-ilkeleri':{component:Editorial,title:'Yayın ve hesaplama ilkeleri',description:'KonutSeyir kaynak, hesaplama, düzeltme ve editoryal bağımsızlık ilkeleri.'},
 '/kullanim-kosullari':{component:Terms,title:'Kullanım koşulları',description:'Hesaplama varsayımları ve kullanım koşulları.'}};
 export const paths=[...Object.keys(fixed),...guides.map(g=>'/rehber/'+g.slug),...cities.map(c=>'/sehirler/'+c.slug)];
-export function meta(path:string){const f=fixed[path];if(f)return {...f,noindex:path==='/haberler'||path==='/haberler/haber'||path==='/yonetim/haberler'};const g=guides.find(g=>path==='/rehber/'+g.slug);if(g)return {title:g.title,description:g.summary,noindex:false,modifiedAt:editorialUpdatedAt};const c=cities.find(c=>path==='/sehirler/'+c.slug);return {title:c?c.name+' konut piyasası':'Sayfa bulunamadı',description:c?.note||'Aradığınız sayfa bulunamadı.',noindex:!c}}
-export async function page(path:string){path=path.replace(/\/$/,'')||'/';if(fixed[path]){const C=fixed[path].component;return <C/>}if(path.startsWith('/haberler/'))return <NewsDetail/>;if(guides.some(g=>path==='/rehber/'+g.slug))return Guide({params:Promise.resolve({slug:path.split('/')[2]})});if(cities.some(c=>path==='/sehirler/'+c.slug))return City({params:Promise.resolve({slug:path.split('/')[2]})});return <><Header back/><main className="inner"><h1>Sayfa bulunamadı</h1><a href="/">Ana sayfaya dön →</a></main><Footer/></>}
+export function meta(path:string){const f=fixed[path];if(f)return {...f,noindex:path==='/haberler'||path==='/haberler/haber'||path==='/yonetim/haberler'};const g=guides.find(g=>path==='/rehber/'+g.slug);if(g)return {title:g.title,description:g.summary,noindex:false,modifiedAt:g.slug===urbanSlug?urbanUpdatedAt:editorialUpdatedAt};const c=cities.find(c=>path==='/sehirler/'+c.slug);return {title:c?c.name+' konut piyasası':'Sayfa bulunamadı',description:c?.note||'Aradığınız sayfa bulunamadı.',noindex:!c}}
+export async function page(path:string){path=path.replace(/\/$/,'')||'/';if(path==='/kentsel-donusum'){const {default:UrbanRenewal}=await import('../app/kentsel-donusum/page');return <UrbanRenewal/>}if(fixed[path]){const C=fixed[path].component;return <C/>}if(path.startsWith('/haberler/'))return <NewsDetail/>;if(guides.some(g=>path==='/rehber/'+g.slug)){const {default:Guide}=await import('../app/rehber/[slug]/page');return Guide({params:Promise.resolve({slug:path.split('/')[2]})})}if(cities.some(c=>path==='/sehirler/'+c.slug))return City({params:Promise.resolve({slug:path.split('/')[2]})});return <><Header back/><main className="inner"><h1>Sayfa bulunamadı</h1><a href="/">Ana sayfaya dön →</a></main><Footer/></>}

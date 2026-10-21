@@ -1,3 +1,5 @@
+import {urbanGuide,urbanGuideSections} from './urban-article';
+import {urbanSlug} from './urban-sources';
 export const cities=[
  {slug:"istanbul",name:"İstanbul",region:"İstanbul",note:"İstanbul’da ulaşım vaadini zamanla sınayın."},
  {slug:"ankara",name:"Ankara",region:"Ankara",note:"Ankara’da toplam aylık barınma giderini karşılaştırın."},
@@ -133,12 +135,14 @@ export const guides=[
     "body": [
       "KFE fiyat hareketini izler; ilan için otomatik ekspertiz üretmez. Sonuç okumaya başlamadan serinin adını, kapsamını, birimini ve dönemini kontrol edin."
     ]
-  }
+  },
+ urbanGuide
 ] as const;
 
 export type GuideSection={heading:string;paragraphs:string[];bullets?:string[]};
 
 export const guideExpansions:Record<string,GuideSection[]>={
+ [urbanSlug]:urbanGuideSections,
   "kira-carpani-nedir": [
     {
       "heading": "Aynı ev için iki farklı sonuç",
