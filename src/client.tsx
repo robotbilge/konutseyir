@@ -1,3 +1,4 @@
+import '../app/urban-renewal.css';
 import {hydrateRoot} from 'react-dom/client';
 import {page} from './routes';
 import '../app/globals.css';
