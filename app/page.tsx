@@ -2,7 +2,7 @@ import {ArrowUpRight,BadgeCheck,Calculator as CalculatorIcon,Database,Info,Searc
 import {Header,Footer} from '../components/site-chrome';
 import {LatestNews,MarketSnapshot,DistrictSalesRanking} from '../components/live-data';
 
-export default function Home(){return <><Header/><main>
+export default function Home(){return <><Header/><main className="home-page">
   <section className="hero home-hero">
     <div className="hero-copy">
       <div className="trust-label"><BadgeCheck size={16}/> Kamu verileriyle karar desteği</div>
@@ -25,7 +25,7 @@ export default function Home(){return <><Header/><main>
       
     </aside>
   </section>
-  <div className="inner">
+  <div className="inner home-content">
     <section className="home-user-paths" aria-labelledby="home-user-paths-title">
       <header><p className="eyebrow">İHTİYACINIZA GÖRE İLERLEYİN</p><h2 id="home-user-paths-title">Konut için hangi adımı atıyorsunuz?</h2><p>Bir sonraki adımı seçin; her araç kendi karar sorusuna odaklanır.</p></header>
       <div className="home-user-path-grid">
@@ -56,11 +56,11 @@ export default function Home(){return <><Header/><main>
   </div>
   <MarketSnapshot/>
   <LatestNews/>
-  <div className="inner">
+  <div className="inner home-content">
     <section className="home-sales-radar"><div><p className="eyebrow">TÜRKİYE KONUT SATIŞ RADARI</p><h2>En çok konut satılan ilçeleri izleyin</h2><p>Resmî TÜİK kayıtlarında doğrulanmış ilçe kırılımı bulunan şehirlerin satış hareketini inceleyin.</p><DistrictSalesRanking city="istanbul"/></div><a className="primary-link" href="/sehirler">Şehir verilerini incele <ArrowUpRight size={17}/></a></section>
 
     <section className="checklist-banner"><div><p className="eyebrow">HIZLI KONTROL LİSTESİ</p><h2>Rakam doğru olsa da ev yanlış olabilir.</h2></div><a href="/kontrol-listesi">Kontrol listesini aç <ArrowUpRight size={18}/></a></section>
-    <section className="guide-intro"><p className="eyebrow">BİR İLANI OKUMA ÖRNEĞİ</p><h2>Aynı ev, iki farklı m² sonucu</h2><p>Öğretici örnek: 5.000.000 TL fiyatlı, 100 m² net ve 125 m² brüt bir konutun net m² fiyatı 50.000 TL; brüt m² fiyatı 40.000 TL’dir. Fark indirim değil, payda farkıdır. İl göstergesi brüt alana dayanıyorsa 50.000 TL ile karşılaştırmak yanıltır.</p><p><a href="/rehber/brut-net-metrekare">Net ve brüt alanı belgeyle doğrulayın →</a> · <a href="/rehber/ev-pahali-mi">Fiyat değerlendirmesini adım adım okuyun →</a></p></section>
+    <section className="guide-intro home-reading-example"><p className="eyebrow">BİR İLANI OKUMA ÖRNEĞİ</p><h2>Aynı ev, iki farklı m² sonucu</h2><p>Öğretici örnek: 5.000.000 TL fiyatlı, 100 m² net ve 125 m² brüt bir konutun net m² fiyatı 50.000 TL; brüt m² fiyatı 40.000 TL’dir. Fark indirim değil, payda farkıdır. İl göstergesi brüt alana dayanıyorsa 50.000 TL ile karşılaştırmak yanıltır.</p><p><a href="/rehber/brut-net-metrekare">Net ve brüt alanı belgeyle doğrulayın →</a> · <a href="/rehber/ev-pahali-mi">Fiyat değerlendirmesini adım adım okuyun →</a></p></section>
     <section id="kontrol" className="official-section"><div><p className="eyebrow">SATIN ALMADAN ÖNCE</p><h2>Resmî kaynaktan kontrol edin</h2><p>KonutSeyir resmî sorgu ekranlarının yerine geçmez; doğru kaynağa yönlendirir.</p></div><div className="official-links"><a href="https://parselsorgu.tkgm.gov.tr/" target="_blank" rel="noreferrer"><SearchCheck/><span><b>TKGM Parsel Sorgu</b><small>Ada ve parsel bilgisini doğrulayın</small></span><ArrowUpRight/></a><a href="https://tdth.afad.gov.tr/" target="_blank" rel="noreferrer"><ShieldCheck/><span><b>AFAD Tehlike Haritası</b><small>Bölgesel deprem tehlikesini inceleyin</small></span><ArrowUpRight/></a><a href="/kontrol-listesi"><BadgeCheck/><span><b>Alım Kontrol Listesi</b><small>Satın alma adımlarını gözden geçirin</small></span><ArrowUpRight/></a></div></section>
   </div>
 </main><Footer/></>}
