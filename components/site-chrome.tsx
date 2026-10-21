@@ -38,7 +38,7 @@ export function Footer(){return <footer className="site-footer">
   </div>
  </div>
  <div className="network-strip">
-  <div><strong>konutseyir.com</strong><a className="network-gold-link" href="https://altinseyir.com/araclar" target="_blank" rel="noopener noreferrer"><Coins size={16}/> AltınSeyir.com · Altın araçları <ArrowUpRight size={14}/></a></div>
+  <div><strong>konutseyir.com</strong><a className="network-site-link" href="https://altinseyir.com/" target="_blank" rel="noopener noreferrer">altinseyir.com</a></div>
   <p>KonutSeyir ve AltınSeyir aynı bağımsız yayın ağı tarafından sunulur. KonutSeyir konut maliyeti, kira ve yatırım karşılaştırmalarına; AltınSeyir altın verileri ve hesaplamalarına odaklanır.</p>
  </div>
  <div className="footer-bottom"><small>© 2026 KonutSeyir</small><nav aria-label="Alt bağlantılar"><a href="/yayin-ilkeleri">Hesaplama yöntemi</a><a href="/veri">Veri kaynakları</a><a href="/gizlilik">Gizlilik</a><a href="/cerez-politikasi">Çerezler</a><a href="/cerez-politikasi" data-seyir-preferences>Çerez tercihleri</a><a href="/kullanim-kosullari">Kullanım koşulları</a></nav><span>Yatırım tavsiyesi değildir.</span></div>
