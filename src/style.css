@@ -346,3 +346,14 @@ body{background:#f7f7f3}
 /* Plain network domains and a full-width home reading example. */
 .site-footer .network-strip .network-site-link{padding:0;border:0;border-radius:0;background:none;color:#fff;font-size:13px;font-weight:750}.network-strip>div{flex-wrap:wrap}.network-site-link:hover{text-decoration:underline;text-underline-offset:4px}.network-site-link:focus-visible{outline:2px solid currentColor;outline-offset:5px}
 main>.inner>.guide-intro{max-width:none;width:100%;box-sizing:border-box}
+
+/* Home rhythm: one consistent gap instead of stacked legacy margins. */
+.home-page>.home-content{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;margin:0 auto 24px}
+.home-page>.home-content:last-child{margin-bottom:0}
+.home-page>.home-content>section{margin:0;min-width:0}
+.home-page .home-reading-example{width:100%;max-width:none;box-sizing:border-box;justify-self:stretch}
+.home-page>.home-hero{padding-top:24px;padding-bottom:24px}
+.home-page>.market-snapshot{margin-top:0;margin-bottom:24px}
+.home-page>.latest-news{margin-top:0;margin-bottom:24px;padding-bottom:0}
+.home-page+.site-footer{margin-top:24px!important}
+@media(max-width:700px){.home-page>.home-content{gap:20px;margin-bottom:20px}.home-page>.market-snapshot,.home-page>.latest-news{margin-bottom:20px}.home-page>.home-hero{padding-top:22px;padding-bottom:20px}.home-page+.site-footer{margin-top:20px!important}}
