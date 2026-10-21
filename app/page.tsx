@@ -29,9 +29,27 @@ export default function Home(){return <><Header/><main>
     <section className="home-user-paths" aria-labelledby="home-user-paths-title">
       <header><p className="eyebrow">İHTİYACINIZA GÖRE İLERLEYİN</p><h2 id="home-user-paths-title">Konut için hangi adımı atıyorsunuz?</h2><p>Bir sonraki adımı seçin; her araç kendi karar sorusuna odaklanır.</p></header>
       <div className="home-user-path-grid">
-        <article><p className="eyebrow">EV ALACAĞIM</p><h3>Satın alma kararını hazırlayın</h3><p>İlanı inceleyin, toplam maliyeti ve kredi yükünü hesaplayın, tapu öncesi kontrolleri tamamlayın.</p><a className="home-path-primary" href="/ev-analizi">Konut analizini aç <ArrowUpRight size={16}/></a><div><a href="/kredi-hesaplama">Kredi taksiti ve maliyeti</a><a href="/hesaplama/alim-maliyeti">Toplam alım gideri</a><a href="/kontrol-listesi">Satın alma kontrol listesi</a><a href="/kentsel-donusum">Kentsel dönüşüm bütçesi</a><a href="/kredi-hesaplama#maksimum-butce">Bütçeme göre konut tutarı</a></div></article>
+        <article><p className="eyebrow">EV ALACAĞIM</p><h3>Satın alma kararını hazırlayın</h3><p>İlanı inceleyin, toplam maliyeti ve kredi yükünü hesaplayın, tapu öncesi kontrolleri tamamlayın.</p><a className="home-path-primary" href="/ev-analizi">Konut analizini aç <ArrowUpRight size={16}/></a><div><a href="/kredi-hesaplama">Kredi taksiti ve maliyeti</a><a href="/hesaplama/alim-maliyeti">Toplam alım gideri</a><a href="/kontrol-listesi">Satın alma kontrol listesi</a><a href="/kredi-hesaplama#maksimum-butce">Bütçeme göre konut tutarı</a></div></article>
         <article><p className="eyebrow">KONUTA YATIRIM YAPACAĞIM</p><h3>Kira ve alternatifleri karşılaştırın</h3><p>Net kira hesabını, TÜİK geçmiş getirilerini ve şehirlerin fiyat eğilimini inceleyin.</p><a className="home-path-primary" href="/karsilastir">Yatırım karşılaştırmasını aç <ArrowUpRight size={16}/></a><div><a href="/hesaplama/net-kira">Net kira getirisi</a><a href="/sehirler">Şehir verileri</a><a href="/rehber/ev-mi-mevduat-mi">Konut mu mevduat mı?</a><a href="/hesaplama/mevduat">Net mevduat getirisi</a></div></article>
         <article><p className="eyebrow">EVİMİ SATACAĞIM</p><h3>Satışı hazırlayın, tutarı görün</h3><p>Satış fiyatından borç ve giderleri düşün; tapu ve resmî kayıt kontrollerini tamamlayın.</p><a className="home-path-primary" href="/karar-araclari#net-satis">Net satış tutarını hesapla <ArrowUpRight size={16}/></a><div><a href="/hesaplama/tapu-harci">Tapu gideri</a><a href="/resmi-kontroller">Resmî kontroller</a></div></article>
+      </div>
+    </section>
+    <section className="home-renewal" aria-labelledby="home-renewal-title">
+      <div className="home-renewal-copy">
+        <p className="eyebrow">KENTSEL DÖNÜŞÜM</p>
+        <h2 id="home-renewal-title">Yeni evinizi beklerken<br/>bütçeniz hazır mı?</h2>
+        <p>Yapım ödemelerini, geçici kirayı ve destek takvimini birlikte değerlendirin. İki müteahhit teklifinin farklarını görün.</p>
+        <div className="home-renewal-actions"><a className="primary-link" href="/kentsel-donusum">Dönüşüm bütçesini hesapla <ArrowUpRight size={17} aria-hidden="true"/></a><a className="home-renewal-guide" href="/rehber/kentsel-donusum-butcesi-hibe-kredi-nakit-acigi">Örnekli rehberi oku <ArrowUpRight size={15} aria-hidden="true"/></a></div>
+      </div>
+      <div className="home-renewal-plan">
+        <p className="home-renewal-plan-label"><CalculatorIcon size={16} aria-hidden="true"/> DÖNÜŞÜMÜN NAKİT PLANI</p>
+        <ol aria-label="Dönüşüm planının üç aşaması">
+          <li><span aria-hidden="true">01</span><strong>Başlangıç</strong><small>Peşinat ve taşınma</small></li>
+          <li><span aria-hidden="true">02</span><strong>Yapım süreci</strong><small>Ara ödemeler ve kira</small></li>
+          <li><span aria-hidden="true">03</span><strong>Teslim</strong><small>Son ödeme ve gecikme</small></li>
+        </ol>
+        <div className="home-renewal-tags"><span>Yapım bedeli</span><span>Geçici kira</span><span>Destekler</span></div>
+        <p className="home-renewal-note">Sizin tutarlarınızla planlama. Otomatik destek veya hak sahipliği hesabı değildir.</p>
       </div>
     </section>
     <section className="cross-network-card gold-housing-promo" aria-labelledby="gold-housing-promo-title"><div><span className="cross-network-badge">AYNI YAYIN AĞI · DOĞRUDAN ARAÇLAR</span><h2 id="gold-housing-promo-title">Altın birikiminiz konutta ne kadar alım gücü sağlıyor?</h2><p>Altın birikiminizin farklı şehirlerde yaklaşık kaç brüt metrekareye karşılık geldiğini hesaplayın. Canlı gram altın grafiği ve AltınSeyir geçiş hesabı da elinizin altında.</p></div><div><a className="gold-external" href="/altinla-konut">Altınla konut alım gücümü hesapla <ArrowUpRight size={16}/></a><a className="gold-price-link" href="https://altinseyir.com/altindan-konuta" target="_blank" rel="noopener noreferrer">AltınSeyir geçiş hesabını aç <ArrowUpRight size={16}/></a><a className="gold-price-link" href="https://altinseyir.com/gram-altin" target="_blank" rel="noopener noreferrer">Canlı gram altın grafiği <ArrowUpRight size={16}/></a></div></section>
