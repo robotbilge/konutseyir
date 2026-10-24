@@ -42,7 +42,7 @@ const officialUnits = {
  rent:{
   unit:'TL/m²/ay',
   areaBasis:'brüt kullanım alanı',
-   sourceUrl:'https://evds3.tcmb.gov.tr/charts/portlet/Njk5NDEzNTFjNjAxMWY0MDU2MDdmZjJm/tr',
+   sourceUrl:'https://evds3.tcmb.gov.tr/tumSeriler/2003/bie_bk',
   methodologyUrl:'https://www.tcmb.gov.tr/wps/wcm/connect/b4628fa9-11a7-4426-aee6-dae67fc56200/KFE-Metaveri.pdf?CACHEID=ROOTWORKSPACE-b4628fa9-11a7-4426-aee6-dae67fc56200-nwWPcfR&MOD=AJPERES'
  }
 };
@@ -71,7 +71,7 @@ export function resolveProvinceSeries(payload, province, kind) {
  })).filter(row => row.code && row.name);
  const exactName = kind === 'price'
    ? new Set([norm(province+' Konut Birim Fiyatları'), norm(province+' Housing Unit Prices')])
-   : new Set([norm('Değerlemesi Yapılan Konutların Birim Kiraları '+province),norm('Değerlemesi Yapılan Konutların Birim Kiraları - '+province),norm('Valued Residential Property Unit Rents '+province)]);
+   : new Set([norm('Değerlemesi Yapılan Konutların Birim Kiraları '+province),norm('Değerlemesi Yapılan Konutların Birim Kiraları - '+province),norm('Valued Residential Property Unit Rents '+province),norm(province+' Konut Birim Kiraları'),norm('Housing Unit Rents for '+province)]);
  const match = rows.find(row => {
    const name=norm(row.name);
    const exact=exactName.has(name);

@@ -215,7 +215,7 @@ async function tcmbProvinceValue(env,province,kind,groupCode,force=false){
  const key=tcmbKey(env);if(!key)throw new Error('tcmb_not_configured');
  const id=String(province).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/ı/g,'i').replace(/[^a-z0-9]+/g,'-');
  const dbKey=`tcmb:${kind}:${id}`;
- const unavailableState=kind==='rent'?'unavailable_rent_v2':'unavailable';
+ const unavailableState=kind==='rent'?'unavailable_rent_v3':'unavailable';
  const negative=await env.DB.prepare('SELECT state,attempted_at attemptedAt FROM source_status WHERE series=?').bind(dbKey).first();
  if(!force&&negative?.state===unavailableState&&Date.now()-Date.parse(negative.attemptedAt)<(kind==='rent'?6*60*60*1000:7*86400000))return null;
  const metaCacheKey=`${groupCode}:${kind}:${id}`;
@@ -227,7 +227,7 @@ async function tcmbProvinceValue(env,province,kind,groupCode,force=false){
   if(!meta){await status(env,dbKey,unavailableState);return null;}
   tcmbSeriesMetadataCache.set(metaCacheKey,{value:meta,expiresAt:Date.now()+6*60*60*1000});
  }
- const sourceUrl=kind==='price'?'https://evds3.tcmb.gov.tr/tumSeriler/2003/bie_birimfiyat':'https://evds3.tcmb.gov.tr/charts/portlet/Njk5NDEzNTFjNjAxMWY0MDU2MDdmZjJm/tr';
+ const sourceUrl=kind==='price'?'https://evds3.tcmb.gov.tr/tumSeriler/2003/bie_birimfiyat':'https://evds3.tcmb.gov.tr/tumSeriler/2003/bie_bk';
  let cached=await env.DB.prepare('SELECT period,value,retrieved_at retrievedAt FROM observations WHERE series=? ORDER BY period DESC LIMIT 1').bind(dbKey).first();
  if(cached&&Date.now()-Date.parse(cached.retrievedAt)<7*86400000){
   return {value:Number(cached.value),period:quarterDate(cached.period),retrievedAt:cached.retrievedAt,seriesCode:meta.code,seriesName:meta.name,unit:meta.unit,frequency:meta.frequency,areaBasis:meta.areaBasis,sourceUrl,methodologyUrl:meta.methodologyUrl};
