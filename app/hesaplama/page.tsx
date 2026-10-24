@@ -3,7 +3,7 @@ import {Header,Footer} from '../../components/site-chrome';
 import {focusedTools} from '../../components/focused-tool-page';
 
 const groups=[
- {title:'Kira ve getiri',text:'Konutun kira üretme gücünü ve satın alma fiyatına göre geri dönüşünü ölçün.',items:focusedTools.filter(x=>['/hesaplama/kira-carpani','/hesaplama/net-kira','/hesaplama/reel-getiri','/hesaplama/mevduat'].includes(x.href))},
+ {title:'Kira ve getiri',text:'Konutun kira üretme gücünü ve satın alma fiyatına göre geri dönüşünü ölçün.',items:focusedTools.filter(x=>['/hesaplama/kira-carpani','/hesaplama/kira-getirisi','/hesaplama/net-kira','/hesaplama/reel-getiri','/hesaplama/mevduat'].includes(x.href))},
  {title:'Fiyat, alım ve satış maliyeti',text:'İlanı emsallerle aynı ölçekte kıyaslayın ve satın alma sırasında oluşacak maliyetleri görün.',items:focusedTools.filter(x=>['/hesaplama/metrekare','/hesaplama/alim-maliyeti','/hesaplama/tapu-harci','/hesaplama/emlak-komisyonu','/karar-araclari'].includes(x.href))},
  {title:'Kira, tapu ve alternatif ölçüler',text:'Kira artışı, hisseli tapu ve konutun altın karşılığı gibi belirli sorular için tek amaçlı araçları kullanın.',items:focusedTools.filter(x=>['/hesaplama/kira-artis-orani','/hesaplama/hisseli-tapu','/hesaplama/altin-bazli-konut'].includes(x.href))}
 ];
