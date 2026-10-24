@@ -42,7 +42,7 @@ const officialUnits = {
  rent:{
   unit:'TL/m²/ay',
   areaBasis:'brüt kullanım alanı',
-   sourceUrl:'https://evds3.tcmb.gov.tr/charts/portlet/Njk5NDEzNTFjNjAxMWY0MDU2MDdmZjJm/tr',
+   sourceUrl:'https://evds3.tcmb.gov.tr/tumSeriler/2003/bie_bk',
   methodologyUrl:'https://www.tcmb.gov.tr/wps/wcm/connect/b4628fa9-11a7-4426-aee6-dae67fc56200/KFE-Metaveri.pdf?CACHEID=ROOTWORKSPACE-b4628fa9-11a7-4426-aee6-dae67fc56200-nwWPcfR&MOD=AJPERES'
  }
 };
