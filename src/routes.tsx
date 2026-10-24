@@ -7,6 +7,7 @@ import LoanCalculator from '../app/kredi-hesaplama/page';
 import OfficialChecks from '../app/resmi-kontroller/page';
 import RentMultiplier from '../app/hesaplama/kira-carpani/page';
 import NetRent from '../app/hesaplama/net-kira/page';
+import RentalYield from '../app/hesaplama/kira-getirisi/page';
 import SquareMeter from '../app/hesaplama/metrekare/page';
 import RealReturn from '../app/hesaplama/reel-getiri/page';
 import PurchaseCost from '../app/hesaplama/alim-maliyeti/page';
@@ -48,6 +49,7 @@ const fixed:Record<string,{component:any,title:string,description:string}>={
 '/kredi-hesaplama':{component:LoanCalculator,title:'Konut kredisi toplam maliyet hesaplama',description:'Aylık taksit, toplam geri ödeme, faiz ve ek kredi giderlerini hesaplayın.'},
 '/resmi-kontroller':{component:OfficialChecks,title:'Ev almadan önce resmî kontroller',description:'Tapu, parsel, deprem tehlikesi ve satın alma kontrol adımlarına ulaşın.'},
 '/hesaplama/kira-carpani':{component:RentMultiplier,title:'Kira çarpanı hesaplama',description:'Satış fiyatı ve aylık kirayla brüt kira çarpanını ay ve yıl olarak hesaplayın.'},
+'/hesaplama/kira-getirisi':{component:RentalYield,title:'Konut kira getirisi hesaplama | TCMB il kira göstergesi',description:'TCMB il bazlı brüt m² kira göstergesiyle kira tahmini; yıllık brüt ve net kira getirisini, masraf ve boş ay dahil hesaplayın.'},
 '/hesaplama/net-kira':{component:NetRent,title:'Net kira getirisi hesaplama',description:'Boş kalma, gider, vergi ve alım masrafları sonrası net kira tutarını ve oranını hesaplayın.'},
 '/hesaplama/metrekare':{component:SquareMeter,title:'Metrekare fiyatı hesaplama',description:'Satış fiyatı ve alan üzerinden konutun metrekare fiyatını hesaplayın.'},
 '/hesaplama/reel-getiri':{component:RealReturn,title:'Reel konut getirisi hesaplama',description:'Konut artışı ve net kirayı enflasyondan arındırarak reel getiriyi hesaplayın.'},
