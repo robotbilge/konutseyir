@@ -5,6 +5,7 @@ export const focusedTools=[
  {href:'/hesaplama/mevduat',label:'Net mevduat getirisi'},
  {href:'/karar-araclari',label:'Net satış tutarı'},
  {href:'/hesaplama/kira-carpani',label:'Kira çarpanı'},
+ {href:'/hesaplama/kira-getirisi',label:'TCMB kira getirisi'} ,
  {href:'/hesaplama/net-kira',label:'Net kira getirisi'},
  {href:'/hesaplama/metrekare',label:'m² fiyatı'},
  {href:'/hesaplama/reel-getiri',label:'Reel konut getirisi'},
