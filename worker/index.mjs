@@ -215,7 +215,7 @@ async function tcmbProvinceValue(env,province,kind,groupCode,force=false){
  const key=tcmbKey(env);if(!key)throw new Error('tcmb_not_configured');
  const id=String(province).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/ı/g,'i').replace(/[^a-z0-9]+/g,'-');
  const dbKey=`tcmb:${kind}:${id}`;
- const unavailableState=kind==='rent'?'unavailable_rent_v2':'unavailable';
+ const unavailableState=kind==='rent'?'unavailable_rent_v3':'unavailable';
  const negative=await env.DB.prepare('SELECT state,attempted_at attemptedAt FROM source_status WHERE series=?').bind(dbKey).first();
  if(!force&&negative?.state===unavailableState&&Date.now()-Date.parse(negative.attemptedAt)<(kind==='rent'?6*60*60*1000:7*86400000))return null;
  const metaCacheKey=`${groupCode}:${kind}:${id}`;

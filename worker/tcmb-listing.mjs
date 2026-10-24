@@ -71,7 +71,7 @@ export function resolveProvinceSeries(payload, province, kind) {
  })).filter(row => row.code && row.name);
  const exactName = kind === 'price'
    ? new Set([norm(province+' Konut Birim Fiyatları'), norm(province+' Housing Unit Prices')])
-   : new Set([norm('Değerlemesi Yapılan Konutların Birim Kiraları '+province),norm('Değerlemesi Yapılan Konutların Birim Kiraları - '+province),norm('Valued Residential Property Unit Rents '+province)]);
+   : new Set([norm('Değerlemesi Yapılan Konutların Birim Kiraları '+province),norm('Değerlemesi Yapılan Konutların Birim Kiraları - '+province),norm('Valued Residential Property Unit Rents '+province),norm(province+' Konut Birim Kiraları'),norm('Housing Unit Rents for '+province)]);
  const match = rows.find(row => {
    const name=norm(row.name);
    const exact=exactName.has(name);
