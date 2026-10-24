@@ -2,7 +2,7 @@ import {definitions,cityHousingSeries,goldPrice,parseFX,parseEVDS,observation,ye
 import {createD1Guard} from './d1-guard.mjs';
 import {selectorConfig,getProvider,parseListingData,extractHtml,analyzeListing,fetchListing} from './listing-analyzer.mjs';
 import {isRelevantNews,newsFeeds,refreshNews,refreshEmlakKonut} from './news.mjs';
-import {discoverGroups,resolveProvinceSeries,parseQuarterlyObservations,calculateTcmc,validateListingInput,readEvdsJson} from './tcmb-listing.mjs';
+import {discoverGroups,resolveProvinceSeries,parseQuarterlyObservations,calculateTcmc,calculateRentalReference,validateListingInput,readEvdsJson} from './tcmb-listing.mjs';
 import {financialReturnCatalog} from './financial-returns.mjs';
 import {adminNewsRequest} from './admin-news.mjs';
 import {unitPriceSeries,parseUnitPriceRows} from './unit-prices.mjs';
@@ -215,15 +215,16 @@ async function tcmbProvinceValue(env,province,kind,groupCode,force=false){
  const key=tcmbKey(env);if(!key)throw new Error('tcmb_not_configured');
  const id=String(province).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/ı/g,'i').replace(/[^a-z0-9]+/g,'-');
  const dbKey=`tcmb:${kind}:${id}`;
+ const unavailableState=kind==='rent'?'unavailable_rent_v2':'unavailable';
  const negative=await env.DB.prepare('SELECT state,attempted_at attemptedAt FROM source_status WHERE series=?').bind(dbKey).first();
- if(!force&&negative?.state==='unavailable'&&Date.now()-Date.parse(negative.attemptedAt)<7*86400000)return null;
+ if(!force&&negative?.state===unavailableState&&Date.now()-Date.parse(negative.attemptedAt)<(kind==='rent'?6*60*60*1000:7*86400000))return null;
  const metaCacheKey=`${groupCode}:${kind}:${id}`;
  let cachedMeta=tcmbSeriesMetadataCache.get(metaCacheKey);
  let meta=cachedMeta&&Date.now()<cachedMeta.expiresAt?cachedMeta.value:null;
  if(!meta){
   const metadataPayload=await evdsJson(`https://evds3.tcmb.gov.tr/igmevdsms-dis/serieList/type=json&code=${encodeURIComponent(groupCode)}`,key);
-  try{meta=resolveProvinceSeries(metadataPayload,province,kind)}catch(error){if(kind==='rent'&&error?.message==='metadata_mismatch'){await status(env,dbKey,'unavailable');return null}throw error}
-  if(!meta){await status(env,dbKey,'unavailable');return null;}
+  try{meta=resolveProvinceSeries(metadataPayload,province,kind)}catch(error){if(kind==='rent'&&error?.message==='metadata_mismatch'){await status(env,dbKey,unavailableState);return null}throw error}
+  if(!meta){await status(env,dbKey,unavailableState);return null;}
   tcmbSeriesMetadataCache.set(metaCacheKey,{value:meta,expiresAt:Date.now()+6*60*60*1000});
  }
  const sourceUrl=kind==='price'?'https://evds3.tcmb.gov.tr/tumSeriler/2003/bie_birimfiyat':'https://evds3.tcmb.gov.tr/charts/portlet/Njk5NDEzNTFjNjAxMWY0MDU2MDdmZjJm/tr';
@@ -235,11 +236,11 @@ async function tcmbProvinceValue(env,province,kind,groupCode,force=false){
  const format=d=>`${String(d.getUTCDate()).padStart(2,'0')}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${d.getUTCFullYear()}`;
  const dataUrl=`https://evds3.tcmb.gov.tr/igmevdsms-dis/series=${encodeURIComponent(meta.code)}&startDate=${format(start)}&endDate=${format(end)}&type=json`;
  const payload=await evdsJson(dataUrl,key);
- let rows;try{rows=parseQuarterlyObservations(payload,meta.code,dbKey)}catch(error){if(error?.message==='empty_data'){await status(env,dbKey,'unavailable');return null}throw error}
- if(!rows.length){await status(env,dbKey,'unavailable');return null}
+ let rows;try{rows=parseQuarterlyObservations(payload,meta.code,dbKey)}catch(error){if(error?.message==='empty_data'){await status(env,dbKey,unavailableState);return null}throw error}
+ if(!rows.length){await status(env,dbKey,unavailableState);return null}
  const now=new Date().toISOString();
  const latest=[...rows].sort((a,b)=>b.period.localeCompare(a.period))[0];
- if(latest.value==null){await status(env,dbKey,'unavailable');return null}
+ if(latest.value==null){await status(env,dbKey,unavailableState);return null}
  const observations=rows.filter(row=>row.value!=null);
  await env.DB.batch(observations.map(row=>env.DB.prepare('INSERT INTO observations(series,period,value,retrieved_at) VALUES(?,?,?,?) ON CONFLICT(series,period) DO UPDATE SET value=excluded.value,retrieved_at=excluded.retrieved_at').bind(dbKey,row.period,row.value,now)));
  await status(env,dbKey,'available');
@@ -284,6 +285,11 @@ async function tcmbListingRequest(request,env){
  try{
   await env.DB.prepare('SELECT series FROM source_status LIMIT 1').first();
   const groups=await evdsGroups(env);
+  if(body.rentOnly===true){
+   if(!checked.grossArea||!Number.isFinite(checked.price)||!Number.isFinite(checked.grossArea)||checked.grossArea>100000||checked.price>1e12)return json({status:'needs_input',message:'Pozitif satış fiyatı ve brüt alan girin.'},400,'no-store');
+   const rent=await tcmbProvinceValue(env,checked.city,'rent',groups.rent);
+   return json(calculateRentalReference(listing,rent),200,'no-store');
+  }
   const [housePrice,rent]=await Promise.all([
    tcmbProvinceValue(env,checked.city,'price',groups.price),
    tcmbProvinceValue(env,checked.city,'rent',groups.rent).catch(()=>null)

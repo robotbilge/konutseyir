@@ -1,15 +1,20 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {rentMetrics} from '../worker/tcmb-listing.mjs';
-
-test('TCMB monthly unit rent produces annual gross yield and amortization',()=>{
- const actual=rentMetrics(250,100,5000000);
- assert.equal(actual.monthlyGrossRent,25000);
- assert.equal(actual.annualGrossYieldPercent,6);
- assert.ok(Math.abs(actual.paybackYears-16.6666666667)<0.001);
-});
-test('TCMB missing unit rent never produces fabricated estimates',()=>{
- assert.equal(rentMetrics(null,100,5000000),null);
- assert.equal(rentMetrics(250,0,5000000),null);
- assert.equal(rentMetrics(250,100,0),null);
-});
+import {rentalInputs,rentalYield} from '../lib/rental-yield.mjs';
+import {calculateRentalReference,calculateTcmc,resolveProvinceSeries,rentMetrics} from '../worker/tcmb-listing.mjs';
+import worker from '../worker/index.mjs';
+const p={city:'İstanbul',price:'5000000',grossArea:'100',rent:'30000',costs:'200000',expenses:'30000',tax:'20000',vacancy:'1'};
+const series={value:300,period:'2026-Q3',seriesCode:'TEST.RENT.IST',seriesName:'Değerlemesi Yapılan Konutların Birim Kiraları İstanbul',frequency:'ÜÇ AYLIK',unit:'TL/m²/ay',areaBasis:'brüt kullanım alanı',retrievedAt:'2026-10-24T10:00:00Z',sourceUrl:'https://evds3.tcmb.gov.tr/'};
+const approx=(a,b)=>assert.ok(Math.abs(a-b)<1e-8,`${a} != ${b}`);
+test('requested manual example reuses gross and net finance calculations',()=>{const r=rentalYield(p);assert.equal(r.monthly,30000);assert.equal(r.gross,360000);approx(r.grossYield,7.2);assert.equal(r.collected,330000);assert.equal(r.emptyLoss,30000);assert.equal(r.capital,5200000);assert.equal(r.net,280000);approx(r.netYield,5.384615384615385);approx(r.paybackYears,18.571428571428573);assert.equal(r.source,'manual')});
+test('rent-only reference needs no housing price series and preserves listing API behavior',()=>{const input={city:'İstanbul',price:5000000,grossArea:100};const ref=calculateRentalReference(input,series);assert.equal(ref.status,'available');assert.equal(ref.rent.monthlyGrossRent,30000);assert.equal(rentalYield({...p,rent:''},ref.rent).net,280000);assert.equal(calculateTcmc(input,{housePrice:null,rent:series}).status,'no_data');assert.equal(calculateRentalReference(input,null).rent,null)});
+test('manual rent always overrides an available official reference, including deliberate zero',()=>{const ref=calculateRentalReference({city:'İstanbul',price:5000000,grossArea:100},series).rent;assert.equal(rentalYield({...p,rent:10000},ref).monthly,10000);const r=rentalYield({...p,rent:0},ref);assert.equal(r.net,-50000);assert.equal(r.paybackYears,null);assert.equal(r.source,'manual')});
+test('net zero or negative and twelve vacant months never produce a payback year',()=>{for(const q of [{rent:0,expenses:0,tax:0},{vacancy:12,expenses:0,tax:0},{rent:1,expenses:100000}]){const r=rentalYield({...p,...q});assert.equal(r.paybackYears,null);assert.ok(r.net<=0)}});
+test('empty, zero, negative, fractional, malformed and extreme inputs are rejected at their field',()=>{for(const [field,value] of [['price',''],['price',0],['grossArea',''],['grossArea',0],['grossArea',100001],['costs',-1],['expenses',''],['tax',-1],['vacancy',13],['vacancy',1.5],['rent','abc'],['price',Infinity],['price',1e13],['city','']])assert.throws(()=>rentalInputs({...p,[field]:value}),e=>e.field===field,`${field}=${value}`);assert.equal(rentalYield({...p,price:1,grossArea:.01,rent:.01,costs:0,expenses:0,tax:0,vacancy:0}).gross,.12)});
+test('missing, wrong-unit, index, net-area and undated references cannot create an estimated rent',()=>{assert.throws(()=>rentalYield({...p,rent:''}));for(const diff of [{unit:'endeks'},{areaBasis:'net kullanım alanı'},{period:''}]){const reference={unitMonthlyRentPerM2:300,series:{...series,...diff}};assert.throws(()=>rentalYield({...p,rent:''},reference))}assert.equal(rentMetrics(null,100,5000000),null);assert.throws(()=>calculateRentalReference({city:'İstanbul',price:1,grossArea:1},{...series,unit:'Endeks'}))});
+test('catalog rent names with trailing unit text resolve only the selected province',()=>{const catalog={items:[{SERIE_CODE:'TEST.RENT.IST',SERIE_NAME:'Değerlemesi Yapılan Konutların Birim Kiraları İstanbul (TL/m²)',FREQUENCY_STR:'Üç Aylık'}]};assert.equal(resolveProvinceSeries(catalog,'İstanbul','rent').unit,'TL/m²/ay');assert.equal(resolveProvinceSeries(catalog,'Ankara','rent'),null)});
+function mockDb(value=300){return {prepare(sql){let args=[];return {bind(...a){args=a;return this},async first(){if(sql.includes('FROM observations')&&args[0]==='tcmb:rent:istanbul')return value?{value,period:'2026-07-01',retrievedAt:new Date().toISOString()}:null;if(sql.includes('FROM source_status')&&args[0]==='tcmb:rent:istanbul'&&!value)return {state:'unavailable_rent_v2',attemptedAt:new Date().toISOString()};return null},async run(){return {success:true}}}},async batch(){return []}}}
+const request=body=>new Request('https://test/api/tcmb-listing',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({city:'İstanbul',price:5000000,grossArea:100,rentOnly:true,...body})});
+test('Worker rent-only request reads the rent series and never queries the price series',async()=>{const original=globalThis.fetch;const urls=[];globalThis.fetch=async(url,options)=>{urls.push(String(url));assert.equal(options.headers.key,'test-server-key');if(String(url).includes('datagroups'))return Response.json([{DATAGROUP_NAME:'Konut Birim Fiyatları',DATAGROUP_CODE:'test_price'},{DATAGROUP_NAME:'Değerlemesi Yapılan Konutların Birim Kiraları',DATAGROUP_CODE:'test_rent'}]);assert.match(String(url),/code=test_rent/);return Response.json([{SERIE_CODE:'TEST.RENT.IST',SERIE_NAME:series.seriesName,FREQUENCY_STR:'Üç Aylık'}])};try{const response=await worker.fetch(request(),{DB:mockDb(),TCMB_EVDS_API_KEY:'test-server-key'});const result=await response.json();assert.equal(response.status,200);assert.equal(result.rent.monthlyGrossRent,30000);assert.equal(urls.some(url=>url.includes('code=test_price')),false);assert.equal(JSON.stringify(result).includes('test-server-key'),false)}finally{globalThis.fetch=original}});
+test('Worker missing selected-city rent returns no_data, not another city or invented rent',async()=>{const response=await worker.fetch(request(),{DB:mockDb(null),TCMB_EVDS_API_KEY:'test-server-key'});assert.equal(response.status,200);assert.equal((await response.json()).status,'no_data')});
+test('Worker source failure is explicit and manual calculation still works',async()=>{const response=await worker.fetch(request(),{});assert.equal(response.status,503);assert.equal((await response.json()).status,'unavailable');assert.equal(rentalYield(p).net,280000)});

@@ -75,7 +75,7 @@ export function resolveProvinceSeries(payload, province, kind) {
  const match = rows.find(row => {
    const name=norm(row.name);
    const exact=exactName.has(name);
-   const rentMatch=kind === 'rent' && name.includes('degerlemesi yapilan konutlarin birim kiralari') && name.endsWith(expectedProvince);
+   const rentMatch=kind === 'rent' && name.includes('degerlemesi yapilan konutlarin birim kiralari') && name.split(' ').includes(expectedProvince);
    // TCMB catalogue labels vary in token order across provinces; require both the province token and the official series subject.
    const priceMatch=kind === 'price' && (name.includes('konut birim fiyat') || name.includes('housing unit price')) && name.split(' ').includes(expectedProvince);
    return exact || rentMatch || priceMatch;
@@ -190,3 +190,13 @@ export function calculateTcmc(input, series) {
  };
 }
 export function normalizeMetadataRows(payload) { return asCatalogRows(payload).map(row=>({code:field(row,keyNames.code),name:field(row,keyNames.name),unit:field(row,keyNames.unit),frequency:field(row,keyNames.frequency),note:field(row,keyNames.note)})); }
+
+// Rent-only reference keeps the listing comparison contract unchanged.
+export function calculateRentalReference(input,rent){
+ const checked=validateListingInput(input);
+ if(checked.missing.length||!checked.grossArea||!Number.isFinite(checked.price)||!Number.isFinite(checked.grossArea)||checked.grossArea>100000||checked.price>1e12)throw new Error('invalid_input');
+ if(!rent||!Number.isFinite(rent.value)||rent.value<=0)return {status:'no_data',rent:null,message:'Bu il için doğrulanmış TCMB birim kira verisi bulunamadı. Aylık kirayı elle girebilirsiniz.'};
+ validateQuarterlyMetadata({code:rent.seriesCode,name:rent.seriesName,unit:rent.unit,frequency:rent.frequency},'rent');
+ if(rent.areaBasis!=='brüt kullanım alanı'||!/^\d{4}-Q[1-4]$/.test(rent.period||''))throw new Error('metadata_mismatch');
+ return {status:'available',rent:{unitMonthlyRentPerM2:rent.value,...rentMetrics(rent.value,checked.grossArea,checked.price),areaBasis:rent.areaBasis,series:rent}};
+}
