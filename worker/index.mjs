@@ -1,3 +1,4 @@
+import {policyStorageSeries,policyRefreshDue,refreshPolicyRate} from './policy-rate.mjs';
 import {definitions,cityHousingSeries,goldPrice,parseFX,parseEVDS,observation,yearChange} from './data.mjs';
 import {createD1Guard} from './d1-guard.mjs';
 import {selectorConfig,getProvider,parseListingData,extractHtml,analyzeListing,fetchListing} from './listing-analyzer.mjs';
@@ -66,12 +67,12 @@ async function refreshSeries(env,series,code,frequency=5){
 }
 
 export async function refresh(env){
+ await refreshPolicyRate(env,{fetchText,save,status});
  try{await save(env,parseFX(await fetchText(definitions.usd.url)));await status(env,'usd','available');await status(env,'eur','available')}catch{await status(env,'usd','error');await status(env,'eur','error')}
  await refreshSeries(env,'cpi',env.EVDS_CPI_SERIES);
  await refreshSeries(env,'housing',env.EVDS_HOUSING_SERIES);
  await refreshSeries(env,'deposit',env.EVDS_DEPOSIT_SERIES,3);
  await refreshSeries(env,'deposit1m',env.EVDS_DEPOSIT_1M_SERIES,3);
- await refreshSeries(env,'policy',env.EVDS_POLICY_SERIES,1);
  for(const [slug,item] of Object.entries(cityHousingSeries))await refreshSeries(env,`housing:${slug}`,item.code);
  await refreshUnitPrices(env);
 }
@@ -383,7 +384,20 @@ export default {
    if(path==='/api/city-sales'){const item=await citySales(env,url.searchParams.get('slug')||'');return item?json(item):json({error:'Bilinmeyen şehir'},404)}
    if(path==='/api/district-sales'){const item=await districtSalesRanking(env,url.searchParams.get('city')||'',url.searchParams.get('limit')||20);return item?json(item):json({error:'Bilinmeyen şehir'},404)}
    if(path==='/api/history'){const series=url.searchParams.get('series');if(!Object.hasOwn(definitions,series))return json({error:'Unknown series'},400);const {results}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 60').bind(series).all();return json({series,source:definitions[series],observations:results.reverse()})}
-   if(path==='/api/market-data'){const data=[];for(const series of Object.keys(definitions)){let {results}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 400').bind(series).all();if(!results.length&&series==='policy'&&tcmbKey(env)){await refreshSeries(env,'policy',env.EVDS_POLICY_SERIES,1);({results}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 400').bind(series).all())}const s=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind(series).first();data.push(observation(series,results,s))}return json({generatedAt:new Date().toISOString(),data})}
+   if(path==='/api/market-data'){
+    const data=[];
+    for(const series of Object.keys(definitions)){
+     const storageSeries=series==='policy'?policyStorageSeries:series;
+     let sourceStatus=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind(storageSeries).first();
+     if(series==='policy'&&policyRefreshDue(sourceStatus)){
+      await refreshPolicyRate(env,{fetchText,save,status});
+      sourceStatus=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind(storageSeries).first();
+     }
+     const {results}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 400').bind(storageSeries).all();
+     data.push(observation(series,results,sourceStatus));
+    }
+    return json({generatedAt:new Date().toISOString(),data});
+   }
    return json({error:'Not found'},404);
   }catch(error){if(error?.code==='D1_READ_LIMIT')return json({status:'unavailable',error:'Cloudflare D1 günlük okuma kotası doldu; veri sorguları UTC gece yarısına kadar durduruldu.',errorCode:'D1_READ_LIMIT',retryAt:error.retryAt},503,'no-store');return json({status:'unavailable',error:'Data store unavailable'},503,'no-store')}
  }
