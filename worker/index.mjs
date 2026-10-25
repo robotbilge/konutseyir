@@ -383,7 +383,7 @@ export default {
    if(path==='/api/financial-returns')return await financialReturns(env);
    if(path==='/api/city-sales'){const item=await citySales(env,url.searchParams.get('slug')||'');return item?json(item):json({error:'Bilinmeyen şehir'},404)}
    if(path==='/api/district-sales'){const item=await districtSalesRanking(env,url.searchParams.get('city')||'',url.searchParams.get('limit')||20);return item?json(item):json({error:'Bilinmeyen şehir'},404)}
-   if(path==='/api/history'){const series=url.searchParams.get('series');if(!Object.hasOwn(definitions,series))return json({error:'Unknown series'},400);const {results}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 60').bind(series).all();return json({series,source:definitions[series],observations:results.reverse()})}
+   if(path==='/api/history'){const series=url.searchParams.get('series');if(!Object.hasOwn(definitions,series))return json({error:'Unknown series'},400);const {results}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 60').bind(series==='policy'?policyStorageSeries:series).all();return json({series,source:definitions[series],observations:results.reverse()})}
    if(path==='/api/market-data'){
     const data=[];
     for(const series of Object.keys(definitions)){
