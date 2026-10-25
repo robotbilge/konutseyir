@@ -12,10 +12,10 @@ const pct=(value:number|null)=>value==null?'—':`%${value.toLocaleString('tr-TR
 export function MarketSnapshot(){
  const data=useMarketData(),policy=data.find(x=>x.series==='policy'),cpi=data.find(x=>x.series==='cpi');
  const cards=[
-  {icon:Percent,label:'TCMB politika faizi',value:pct(policy?.value??null),detail:policy?.period||'Veri bekleniyor'},
-  {icon:Landmark,label:'TÜFE yıllık değişim',value:pct(cpi?.annualChange??null),detail:cpi?.period||'Veri bekleniyor'}
+  {icon:Percent,label:'TCMB politika faizi',value:pct(policy?.value??null),detail:policy?.period||'Veri bekleniyor',policy:true},
+  {icon:Landmark,label:'TÜFE yıllık değişim',value:pct(cpi?.annualChange??null),detail:cpi?.period||'Veri bekleniyor',policy:false}
  ];
- return <section className="market-snapshot" aria-label="Güncel piyasa göstergeleri"><div><p className="eyebrow">RESMÎ VERİLER</p><h2>Faiz ve enflasyon verileri</h2><a href="/veri">Kaynak ve çekim saatleri →</a></div>{cards.map(({icon:Icon,...item})=><article key={item.label}><Icon/><span>{item.label}</span><strong>{item.value}</strong><small>Dönem: {item.detail}</small></article>)}</section>
+ return <section className="market-snapshot" aria-label="Güncel piyasa göstergeleri"><div><p className="eyebrow">RESMÎ VERİLER</p><h2>Faiz ve enflasyon verileri</h2><a href="/veri">Kaynak ve çekim saatleri →</a></div>{cards.map(({icon:Icon,...item})=><article key={item.label}><Icon/><span>{item.label}</span><strong>{item.value}</strong><small>{item.policy?'Yürürlük tarihi':'Dönem'}: {item.detail}</small>{item.policy&&<><small>Son kontrol: {policy?.retrievedAt?new Date(policy.retrievedAt).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'}):'—'} (TSİ)</small>{policy?.status!=='available'&&<small role="status">{policy?.value!=null?'Güncel kaynak doğrulanamadı; son başarılı kayıt gösteriliyor.':'Politika faizi şu anda doğrulanamıyor.'}</small>}</>}</article>)}</section>
 }
 
 export function LatestNews(){
