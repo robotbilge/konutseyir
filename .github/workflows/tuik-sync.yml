@@ -2,13 +2,14 @@ name: TÜİK konut satışlarını güncelle
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
       - .github/workflows/tuik-sync.yml
       - scripts/sync-tuik.mjs
       - worker/tuik.mjs
       - migrations/0003_city_sales.sql
   schedule:
-    - cron: '15 8 18 * *'
+    - cron: '15 8 16-23 * *'
 permissions:
   contents: read
 concurrency:
@@ -54,7 +55,7 @@ jobs:
             data_http=$(curl --silent --show-error --retry 2 --retry-all-errors --max-time 60 \
               --output "tuik-data/$period.csv" --write-out "%{http_code}" \
               "https://nsiws.tuik.gov.tr/rest/data/TR,DF_SATIS_SEKLI_DURUMU_ILILCE_V3,1.0/?startPeriod=$period&endPeriod=$period" \
-              --header "Authorization: Bearer $token" --header "Accept: text/csv")
+              --header "Authorization: Bearer $token" --header "Accept: text/csv;labels=both")
             if [ "$data_http" != "200" ]; then
               echo "TÜİK $period alınamadı: HTTP $data_http"
               rm -f "tuik-data/$period.csv"
