@@ -4,3 +4,6 @@
 
 .analysis-page .listing-analyzer{max-width:none;margin:0 0 28px;width:100%;padding:0;scroll-margin-top:24px}.analysis-page .tcmb-listing-analyzer{grid-template-columns:minmax(200px,.65fr) minmax(0,1.35fr)}
 @media(max-width:900px){.analysis-page .tcmb-listing-analyzer{grid-template-columns:1fr}.home-user-path-grid{grid-template-columns:1fr}}
+
+.analysis-page .listing-analyzer{padding:24px;gap:22px}.analysis-page .listing-analyzer-copy>small{margin-top:12px}.tcmb-input-heading{margin:10px 0 0;font-size:13px;color:var(--green)}.listing-local-summary{padding:18px;margin-top:18px;border:1px solid #cddfd5;border-radius:14px;background:#f6faf7}.listing-local-summary h3{margin:0 0 6px;font-size:19px}.listing-local-summary>p{font-size:13px;line-height:1.5;color:var(--muted);margin:0 0 12px}.listing-local-summary .tcmb-metric-grid{margin:12px 0}.listing-local-summary small{font-size:12px}.tcmb-form-grid input[aria-invalid="true"]{border:2px solid #a83c2c}
+@media(max-width:600px){.analysis-page .listing-analyzer{padding:16px}.listing-local-summary{padding:14px}}
