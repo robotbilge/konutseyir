@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {goldTransferUrl,readGoldTransfer,formatWholeLira} from '../lib/gold-transfer.mjs';
+import {goldTransferUrl,readGoldTransfer,formatWholeLira,propertyTransferUrl} from '../lib/gold-transfer.mjs';
 import {depositReference} from '../lib/deposit-reference.mjs';
 test('gold amount transfers in fragment with legacy aliases and no financial query data',()=>{
  for(const qty of [0,321,1250.5,1000000]){const u=new URL(goldTransferUrl('gram',qty));assert.equal(u.pathname,'/altindan-konuta');assert.equal(u.search,'?source=konutseyir');const q=new URLSearchParams(u.hash.slice(1));assert.equal(Number(q.get('gold_quantity')),qty);assert.equal(q.get('gold_type'),'gram');assert.equal(Number(q.get('quantity')),qty)}
@@ -24,3 +24,5 @@ test('district API exposes stale periods and last import instead of presenting t
  const db={prepare(sql){return {bind(){return this},async all(){return {results:[{districtName:'Örnek',period:'2026-08',total:20,retrievedAt:'2026-09-18T08:00:00Z'}]}},async first(){return {period:'2026-09'}}}}};
  const r=await worker.fetch(new Request('https://test/api/district-sales?city=istanbul'),{DB:db});const j=await r.json();assert.equal(j.status,'stale');assert.equal(j.latestCityPeriod,'2026-09');assert.equal(j.retrievedAt,'2026-09-18T08:00:00Z');
 });
+
+test('city scenario preserves quantity and valuation when opening the down-payment tool',()=>{const u=new URL(propertyTransferUrl({asset:'ceyrek',quantity:1000,pureGrams:1606.5,reference:7000,value:11245500,priceAt:'2026-10-27T10:00:00Z'}),'https://konutseyir.com');const t=readGoldTransfer(u.search,u.hash);assert.equal(t.pureGrams,1606.5);assert.equal(t.value,11245500);assert.equal(t.reference,7000);});
