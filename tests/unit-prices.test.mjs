@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {unitPriceSeries,parseUnitPriceRows,quarterOf} from '../worker/unit-prices.mjs';
-import {areaFromValue,dateLabel,parseTrNumber,parseQueryNumber,positive,goldAssets,isGoldAsset} from '../lib/gold-housing.mjs';
+import {areaFromValue,dateLabel,parseTrNumber,parseQueryNumber,positive,goldAssets,isGoldAsset,cityUnitPrices} from '../lib/gold-housing.mjs';
 test('TCMB city series are resolved by official province names, not guessed codes',()=>{assert.equal(unitPriceSeries.istanbul.name,'İstanbul');assert.equal(unitPriceSeries.gaziantep.name,'Gaziantep');assert.equal(unitPriceSeries.mugla.name,'Muğla');for(const city of Object.values(unitPriceSeries))assert.equal(city.code,undefined)});
 test('quarterly EVDS values parse to quarter starts and ignore invalid data',()=>{const rows=parseUnitPriceRows({items:[{Tarih:'2026-04',TP_BIRIMFIYAT_IST:'83500.5'},{Tarih:'2026-07',TP_BIRIMFIYAT_IST:'NaN'},{Tarih:'bad',TP_BIRIMFIYAT_IST:'1'}]},'TP.BIRIMFIYAT.IST','istanbul');assert.deepEqual(rows,[{series:'unit-price:istanbul',period:'2026-04-01',value:83500.5}]);assert.equal(quarterOf(rows[0].period),'2026-Q2')});
 test('quarterly EVDS ISO quarter labels parse to quarter starts',()=>{for(const [date,expected] of [['2026-Q1','2026-01-01'],['2026-Q2','2026-04-01'],['2026 Q3','2026-07-01'],['2026/Q4','2026-10-01']]){const rows=parseUnitPriceRows({items:[{Tarih:date,TP_BIRIMFIYAT_IST:'87.153,42'}]},'TP.BIRIMFIYAT.IST','istanbul');assert.deepEqual(rows,[{series:'unit-price:istanbul',period:expected,value:87153.42}])}});
@@ -13,3 +13,5 @@ test('malformed gold snapshot timestamps do not render as dates',()=>{assert.equ
 test('machine query decimals use dot decimals and reject inherited asset names',()=>{assert.equal(parseQueryNumber('1.603'),1.603);assert.equal(parseQueryNumber('1.250'),1.25);assert.equal(parseQueryNumber('1.250.000,50'),1250000.5);assert.equal(parseQueryNumber('NaN'),null);assert.equal(isGoldAsset('bilezik22'),true);assert.equal(isGoldAsset('__proto__'),false);assert.equal(isGoldAsset('constructor'),false)});
 
 test('TCMB unit prices parse Turkish thousands and decimal separators',()=>{const rows=parseUnitPriceRows({items:[{Tarih:'2026-04','TP_BIRIMFIYAT_IST':'87.153,42'},{Tarih:'2026-01','TP_BIRIMFIYAT_IST':'87.153'}]},'TP.BIRIMFIYAT.IST','istanbul');assert.deepEqual(rows,[{series:'unit-price:istanbul',period:'2026-04-01',value:87153.42},{series:'unit-price:istanbul',period:'2026-01-01',value:87153}])});
+
+test('gold housing scope is explicitly 12 cities with Istanbul first',()=>{assert.equal(cityUnitPrices.length,12);assert.equal(cityUnitPrices[0].slug,'istanbul');assert.equal(new Set(cityUnitPrices.map(x=>x.slug)).size,12)});
