@@ -98,7 +98,12 @@ async function citySales(env,slug){
 async function districtSalesRanking(env,city,requestedLimit=20){
  const allowed=new Set(['istanbul','ankara','izmir','adana','antalya','bursa','kocaeli','konya','gaziantep','trabzon','balikesir','mugla']);if(!allowed.has(city))return null;
  const limit=Math.max(1,Math.min(50,Number(requestedLimit)||20));
- try{const {results=[]}=await env.DB.prepare('SELECT district_name districtName,period,total FROM district_sales WHERE city_slug=? AND period=(SELECT MAX(period) FROM district_sales WHERE city_slug=?) ORDER BY total DESC LIMIT ?').bind(city,city,limit).all();return {city,period:results[0]?.period??null,items:results,status:results.length?'available':'unavailable',source:'TÜİK',sourceUrl:'https://veriportali.tuik.gov.tr/'};}catch(error){console.error('district-sales query failed',error);return {city,period:null,items:[],status:'error',message:'İlçe satış verisi sorgulanamadı.',source:'TÜİK',sourceUrl:'https://veriportali.tuik.gov.tr/'};}
+ try{
+  const {results=[]}=await env.DB.prepare('SELECT district_name districtName,period,total,retrieved_at retrievedAt FROM district_sales WHERE city_slug=? AND period=(SELECT MAX(period) FROM district_sales WHERE city_slug=?) ORDER BY total DESC LIMIT ?').bind(city,city,limit).all();
+  const latest=await env.DB.prepare('SELECT MAX(period) period FROM city_sales WHERE city_slug=?').bind(city).first();
+  const period=results[0]?.period??null,behind=!!(period&&latest?.period&&period<latest.period);
+  return {city,period,latestCityPeriod:latest?.period??null,retrievedAt:results[0]?.retrievedAt??null,items:results,status:results.length?(behind?'stale':'available'):'unavailable',message:behind?'İlçe kırılımı il toplamından daha eski; güncel sıralama olarak değerlendirmeyin.':null,source:'TÜİK',sourceUrl:'https://veriportali.tuik.gov.tr/'};
+ }catch(error){if(error?.code==='D1_READ_LIMIT')throw error;console.error('district-sales query failed',error);return {city,period:null,items:[],status:'error',message:'İlçe satış verisi sorgulanamadı.',source:'TÜİK',sourceUrl:'https://veriportali.tuik.gov.tr/'};}
 }
 
 async function financialReturns(env){
