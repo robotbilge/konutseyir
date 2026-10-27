@@ -2,8 +2,8 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {goldTransferUrl,readGoldTransfer,formatWholeLira,propertyTransferUrl} from '../lib/gold-transfer.mjs';
 import {depositReference} from '../lib/deposit-reference.mjs';
 test('gold amount transfers in fragment with legacy aliases and no financial query data',()=>{
- for(const qty of [0,321,1250.5,1000000]){const u=new URL(goldTransferUrl('gram',qty));assert.equal(u.pathname,'/altindan-konuta');assert.equal(u.search,'?source=konutseyir');const q=new URLSearchParams(u.hash.slice(1));assert.equal(Number(q.get('gold_quantity')),qty);assert.equal(q.get('gold_type'),'gram');assert.equal(Number(q.get('quantity')),qty)}
- for(const qty of [-1,Infinity,1000001,NaN])assert.equal(goldTransferUrl('gram',qty),null);
+ for(const qty of [321,1250.5,1000000]){const u=new URL(goldTransferUrl('gram',qty));assert.equal(u.pathname,'/altindan-konuta');assert.equal(u.search,'?source=konutseyir');const q=new URLSearchParams(u.hash.slice(1));assert.equal(Number(q.get('gold_quantity')),qty);assert.equal(q.get('gold_type'),'gram');assert.equal(Number(q.get('quantity')),qty)}
+ for(const qty of [0,-1,Infinity,1000001,NaN])assert.equal(goldTransferUrl('gram',qty),null);
 });
 test('incoming query and fragment preserve pure grams and multi-million TL snapshot without the former one-million TL cap',()=>{
  const input=readGoldTransfer('?source=altinseyir','#asset=ceyrek&quantity=1000&pure_gram=1606.5&gram_ref_try=7000.45&gold_value_try=11246222.93&price_at=2026-10-27');
