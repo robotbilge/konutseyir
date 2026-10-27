@@ -1,3 +1,4 @@
+import {monthlyRefreshDue} from './market-refresh.mjs';
 import {policyStorageSeries,policyRefreshDue,refreshPolicyRate} from './policy-rate.mjs';
 import {definitions,cityHousingSeries,goldPrice,parseFX,parseEVDS,observation,yearChange} from './data.mjs';
 import {createD1Guard} from './d1-guard.mjs';
@@ -396,6 +397,10 @@ export default {
      let sourceStatus=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind(storageSeries).first();
      if(series==='policy'&&policyRefreshDue(sourceStatus)){
       await refreshPolicyRate(env,{fetchText,save,status});
+      sourceStatus=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind(storageSeries).first();
+     }
+     if(series==='cpi'&&tcmbKey(env)&&env.EVDS_CPI_SERIES&&monthlyRefreshDue(sourceStatus)){
+      await refreshSeries(env,'cpi',env.EVDS_CPI_SERIES);
       sourceStatus=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind(storageSeries).first();
      }
      const {results}=await env.DB.prepare('SELECT period,value,retrieved_at FROM observations WHERE series=? ORDER BY period DESC LIMIT 400').bind(storageSeries).all();
