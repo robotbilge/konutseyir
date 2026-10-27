@@ -19,3 +19,8 @@ test('deposit auto reference selects correct term and rejects unavailable or sta
  for(const days of [0,-1,92,NaN])assert.equal(depositReference(items,days),null);
  assert.equal(depositReference([{...items[0],status:'stale'}],32),null);assert.equal(depositReference([{...items[0],value:NaN}],32),null);assert.equal(depositReference([],32),null);
 });
+import worker from '../worker/index.mjs';
+test('district API exposes stale periods and last import instead of presenting them as current',async()=>{
+ const db={prepare(sql){return {bind(){return this},async all(){return {results:[{districtName:'Örnek',period:'2026-08',total:20,retrievedAt:'2026-09-18T08:00:00Z'}]}},async first(){return {period:'2026-09'}}}}};
+ const r=await worker.fetch(new Request('https://test/api/district-sales?city=istanbul'),{DB:db});const j=await r.json();assert.equal(j.status,'stale');assert.equal(j.latestCityPeriod,'2026-09');assert.equal(j.retrievedAt,'2026-09-18T08:00:00Z');
+});
