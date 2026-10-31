@@ -8,7 +8,7 @@ async function liveText(path,fetcher){
  // Workers supports manual/follow, but rejects redirect:'error' before fetching.
  // Manual mode plus the status check fails closed on redirects without following them.
  const response=await fetcher(guideOrigin+path,{redirect:'manual',cache:'no-store',signal:AbortSignal.timeout(15000)});
- if(!response.ok)throw Error('guide_not_live');
+ if(!response.ok){const error=Error('guide_not_live');error.upstreamStatus=response.status;error.upstreamPath=path;throw error;}
  return response.text();
 }
 
@@ -84,6 +84,6 @@ export async function guidePublicationRequest(request,env,deps={}){
  }catch(error){
   const message=String(error?.message||''),known=['invalid_guide_manifest','guide_not_live','guide_deployment_not_live','guide_missing_from_index','guide_page_not_verified'];
   const errorCode=known.includes(message)?message:/D1_READ_LIMIT/.test(message)?'database_read_limit':/no such table/i.test(message)?'guide_schema_unavailable':/vapid/i.test(message)?'push_keys_invalid':/1042|loop/i.test(message)?'guide_fetch_routing_error':'guide_publication_internal_error';
-  console.error('Guide publication failed',message||'unknown');return json({error:'guide_publication_unavailable',errorCode},503);
+  console.error('Guide publication failed',message||'unknown');return json({error:'guide_publication_unavailable',errorCode,...(Number.isInteger(error?.upstreamStatus)?{upstreamStatus:error.upstreamStatus,upstreamPath:error.upstreamPath}:{})},503);
  }
 }
