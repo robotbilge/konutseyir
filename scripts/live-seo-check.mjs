@@ -1,5 +1,7 @@
 // Read-only production/preview smoke checks. No subscriptions or notifications are created.
 import assert from 'node:assert/strict';
+import {fetchReady} from './http-readiness.mjs';
+import {isEdgeInjectedScript} from '../lib/security-headers.mjs';
 const site=process.argv[2];
 assert.ok(['altinseyir','konutseyir'].includes(site),'Choose altinseyir or konutseyir');
 const origin=`https://${site}.com`,base=(process.argv[3]||origin).replace(/\/$/,'');
@@ -10,7 +12,7 @@ const canonical=html=>[...html.matchAll(/<link\b[^>]*>/gi)].map(m=>attrs(m[0])).
 const noindex=value=>/\bnoindex\b/i.test(value||'')&&/\bfollow\b/i.test(value||'')&&!/\bnofollow\b/i.test(value||'');
 async function get(path,{news=false,canonicalUrl,allowPreviewHeader=true}={}){
  const url=path.startsWith('https://')?path:(preview&&path.startsWith('/api/')?origin:base)+path;
- const r=await fetch(url,{redirect:'manual',cache:'no-store',signal:AbortSignal.timeout(30000)});
+ const r=await fetchReady(url);
  assert.equal(r.status,200,`${url}: HTTP ${r.status}; redirects are not accepted`);
  const body=await r.text();
  if(news){assert.ok(noindex(r.headers.get('x-robots-tag')),`${url}: missing HTTP noindex, follow`);assert.ok(noindex(robots(body)),`${url}: missing HTML noindex,follow`)}
@@ -19,7 +21,7 @@ async function get(path,{news=false,canonicalUrl,allowPreviewHeader=true}={}){
 }
 const main=await get('/',{canonicalUrl:origin+'/'});
 assert.match(main.body,/ca-pub-1047230012085801/,'Publisher ID must remain unchanged');
-const nonce=main.headers.get('content-security-policy')?.match(/'nonce-([^']+)'/)?.[1];assert.ok(nonce,'Runtime CSP nonce missing');for(const script of main.body.matchAll(/<script\b[^>]*>/gi))assert.equal(attrs(script[0]).nonce,nonce,'Trusted script has no matching CSP nonce');assert.equal(main.headers.get('cache-control'),'no-store');
+const nonce=main.headers.get('content-security-policy')?.match(/'nonce-([^']+)'/)?.[1];assert.ok(nonce,'Runtime CSP nonce missing');for(const script of main.body.matchAll(/<script\b[^>]*>/gi)){const a=attrs(script[0]);if(!isEdgeInjectedScript(a,base))assert.equal(a.nonce,nonce,'Trusted script has no matching CSP nonce');}assert.equal(main.headers.get('cache-control'),'no-store');
 const ads=await get('/ads.txt');assert.match(ads.body,/^google\.com, pub-1047230012085801, DIRECT, f08c47fec0942fa0\s*$/);
 const map=await get('/sitemap.xml');assert.match(map.body,/<urlset\b/);assert.match(map.body,/<\/urlset>/);
 const urls=[...map.body.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]);assert.ok(urls.length>40);assert.equal(new Set(urls).size,urls.length);
