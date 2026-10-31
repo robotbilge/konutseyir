@@ -366,7 +366,7 @@ export default {
    }
    if(path==='/api/push/config')return json({publicKey:env.VAPID_PUBLIC_KEY||null,configured:!!(env.VAPID_PUBLIC_KEY&&env.VAPID_PRIVATE_KEY)},200,'no-store');
    if(path==='/api/news')return json(await listNews(env,url));
-   if(path.startsWith('/api/news/')){const slug=decodeURIComponent(path.slice('/api/news/'.length));const item=await env.DB.prepare('SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,NULL imageUrl FROM news WHERE slug=?').bind(slug).first();return item?json(item):json({error:'Haber bulunamadı'},404)}
+   if(path.startsWith('/api/news/')){const slug=decodeURIComponent(path.slice('/api/news/'.length));const item=await env.DB.prepare('SELECT slug,title,summary,source_name sourceName,source_url sourceUrl,published_at publishedAt,category,NULL imageUrl FROM news WHERE slug=?').bind(slug).first();const response=item?json(item):json({error:'Haber bulunamadı'},404);response.headers.set('X-Robots-Tag','noindex, follow');return response}
    if(path==='/api/housing-unit-prices'){
     const configured=!!tcmbKey(env),catalog=await env.DB.prepare('SELECT state,attempted_at FROM source_status WHERE series=?').bind('unit-price:catalog').first(),attempted=Date.parse(catalog?.attempted_at||'');
     const {results:previousStates=[]}=await env.DB.prepare("SELECT series,state,attempted_at FROM source_status WHERE series LIKE 'tcmb:price:%'").all();
