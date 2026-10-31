@@ -1,4 +1,5 @@
 import {monthlyRefreshDue} from './market-refresh.mjs';
+import {guidePublicationRequest,drainGuidePush} from './guide-publications.mjs';
 import {policyStorageSeries,policyRefreshDue,refreshPolicyRate} from './policy-rate.mjs';
 import {definitions,cityHousingSeries,goldPrice,parseFX,parseEVDS,observation,yearChange} from './data.mjs';
 import {createD1Guard} from './d1-guard.mjs';
@@ -328,6 +329,7 @@ export default {
  async scheduled(event,env,ctx){
   if(env.DB)env={...env,DB:d1Guard.wrap(env.DB)};
   const tasks=[];
+  if(event.cron==='*/5 * * * *')tasks.push(drainGuidePush(env));
   if(event.cron==='30 13 * * 1-5')tasks.push(refresh(env));
   if(event.cron==='0 5-20 * * *'){
    tasks.push(refreshNewsTracked(env,true));
@@ -339,6 +341,7 @@ export default {
  async fetch(request,env){
   if(env.DB)env={...env,DB:d1Guard.wrap(env.DB)};
   const url=new URL(request.url),path=url.pathname;
+  if(path==='/api/admin/guide-publications')return guidePublicationRequest(request,env);
   if(path==='/api/analyze'||path==='/api/selectors'||path==='/api/tcmb-listing'){
    if(request.method==='OPTIONS')return corsify(new Response(null,{status:204,headers:{'Access-Control-Max-Age':'86400'}}),request);
    if(path==='/api/selectors'&&request.method==='GET')return corsify(json(selectorConfig,200,'public, max-age=300'),request);
@@ -354,7 +357,7 @@ export default {
   if(!env.DB)return json({status:'not_configured',error:'D1 binding missing'},503);
   try{
    if(path==='/api/push/subscribe'&&request.method==='POST')return subscribe(request,env);
-   if(path==='/api/push/subscribe'&&request.method==='DELETE'){let body;try{body=await request.json()}catch{return json({error:'Geçersiz istek'},400,'no-store')}await env.DB.prepare('DELETE FROM push_subscriptions WHERE endpoint=?').bind(String(body?.endpoint||'')).run();return json({ok:true},200,'no-store')}
+   if(path==='/api/push/subscribe'&&request.method==='DELETE'){let body;try{body=await request.json()}catch{return json({error:'Geçersiz istek'},400,'no-store')}const endpoint=String(body?.endpoint||'');await env.DB.batch([env.DB.prepare('DELETE FROM push_subscriptions WHERE endpoint=?').bind(endpoint),env.DB.prepare('DELETE FROM guide_push_deliveries WHERE endpoint=?').bind(endpoint)]);return json({ok:true},200,'no-store')}
    if(path==='/api/health'){await env.DB.prepare('SELECT 1 FROM observations LIMIT 1').first();const {results:newsSources=[]}=await env.DB.prepare("SELECT series,state,attempted_at attemptedAt FROM source_status WHERE series LIKE 'news:%'").all(),newsLatest=await env.DB.prepare('SELECT MAX(published_at) latestPublishedAt,MAX(created_at) lastImportedAt FROM news').first();return json({service:'KonutSeyir',status:'ok',configured:{fx:true,evds:!!tcmbKey(env),tuik:!!env.TUIK_API_KEY,news:true,push:!!(env.VAPID_PUBLIC_KEY&&env.VAPID_PRIVATE_KEY)},news:{sources:newsSources,...newsLatest},note:'Service health does not guarantee source freshness'})}
    if(path==='/api/gold-price'){
     try{
