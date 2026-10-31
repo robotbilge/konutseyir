@@ -8,7 +8,7 @@ import {isRelevantNews,newsFeeds,refreshNews,refreshEmlakKonut} from './news.mjs
 import {discoverGroups,resolveProvinceSeries,parseQuarterlyObservations,calculateTcmc,calculateRentalReference,validateListingInput,readEvdsJson} from './tcmb-listing.mjs';
 import {financialReturnCatalog} from './financial-returns.mjs';
 import {adminNewsRequest} from './admin-news.mjs';
-import {unitPriceSeries,parseUnitPriceRows} from './unit-prices.mjs';
+import {unitPriceSeries,parseUnitPriceRows,quarterOf} from './unit-prices.mjs';
 
 const json=(data,status=200,cache='public, max-age=300')=>Response.json(data,{status,headers:{'Cache-Control':cache,'X-Content-Type-Options':'nosniff'}});
 const d1Guard=createD1Guard();
@@ -384,8 +384,8 @@ export default {
     for(const [slug,item] of Object.entries(unitPriceSeries)){
      const id=String(item.name).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/ı/g,'i').replace(/[^a-z0-9]+/g,'-');
      const series='tcmb:price:'+id,latest=observations.find(row=>row.series===series),sourceState=sourceStates.find(row=>row.series===series),match=String(latest?.period||'').match(/^(\d{4})-Q([1-4])$/),period=match?match[1]+'-'+String((Number(match[2])-1)*3+1).padStart(2,'0')+'-01':latest?.period||null;
-     const stale=latest&&Date.now()-Date.parse(latest.period+'T00:00:00Z')>180*86400000;
-     items.push({slug,name:item.name,pricePerM2:latest?.value??null,period,quarter:match?match[1]+'-Q'+match[2]:null,retrievedAt:latest?.retrievedAt??null,status:latest?(sourceState?.state==='error'?'cached':stale?'stale':'available'):sourceState?.state||(configured?'unavailable':'not_configured'),source:'TCMB EVDS',sourceUrl:'https://evds3.tcmb.gov.tr/'});
+     const stale=latest&&Date.now()-Date.parse(period+'T00:00:00Z')>180*86400000;
+     items.push({slug,name:item.name,pricePerM2:latest?.value??null,period,quarter:match?match[1]+'-Q'+match[2]:quarterOf(period),retrievedAt:latest?.retrievedAt??null,status:latest?(sourceState?.state==='error'?'cached':stale?'stale':'available'):sourceState?.state||(configured?'unavailable':'not_configured'),source:'TCMB EVDS',sourceUrl:'https://evds3.tcmb.gov.tr/'});
     }
     const availableCount=items.filter(item=>item.status==='available'&&Number(item.pricePerM2)>0).length,anyAvailable=availableCount>0,catalogStatus=currentCatalog?.state||(configured?'not_fetched':'not_configured');
     return json({items,availableCount,totalCount:items.length,configured,catalogStatus:catalogStatus==='available'&&!anyAvailable?'unavailable':catalogStatus,catalogAttemptedAt:currentCatalog?.attempted_at||null,source:'TCMB EVDS · Konut Birim Fiyatları',unit:'TL/brüt m²'});
