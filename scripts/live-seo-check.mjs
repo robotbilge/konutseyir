@@ -9,7 +9,7 @@ const robots=html=>[...html.matchAll(/<meta\b[^>]*>/gi)].map(m=>attrs(m[0])).fil
 const canonical=html=>[...html.matchAll(/<link\b[^>]*>/gi)].map(m=>attrs(m[0])).find(a=>a.rel==='canonical')?.href;
 const noindex=value=>/\bnoindex\b/i.test(value||'')&&/\bfollow\b/i.test(value||'')&&!/\bnofollow\b/i.test(value||'');
 async function get(path,{news=false,canonicalUrl,allowPreviewHeader=true}={}){
- const url=path.startsWith('https://')?path:base+path;
+ const url=path.startsWith('https://')?path:(preview&&path.startsWith('/api/')?origin:base)+path;
  const r=await fetch(url,{redirect:'manual',cache:'no-store',signal:AbortSignal.timeout(30000)});
  assert.equal(r.status,200,`${url}: HTTP ${r.status}; redirects are not accepted`);
  const body=await r.text();
@@ -19,6 +19,7 @@ async function get(path,{news=false,canonicalUrl,allowPreviewHeader=true}={}){
 }
 const main=await get('/',{canonicalUrl:origin+'/'});
 assert.match(main.body,/ca-pub-1047230012085801/,'Publisher ID must remain unchanged');
+const nonce=main.headers.get('content-security-policy')?.match(/'nonce-([^']+)'/)?.[1];assert.ok(nonce,'Runtime CSP nonce missing');for(const script of main.body.matchAll(/<script\b[^>]*>/gi))assert.equal(attrs(script[0]).nonce,nonce,'Trusted script has no matching CSP nonce');assert.equal(main.headers.get('cache-control'),'no-store');
 const ads=await get('/ads.txt');assert.match(ads.body,/^google\.com, pub-1047230012085801, DIRECT, f08c47fec0942fa0\s*$/);
 const map=await get('/sitemap.xml');assert.match(map.body,/<urlset\b/);assert.match(map.body,/<\/urlset>/);
 const urls=[...map.body.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]);assert.ok(urls.length>40);assert.equal(new Set(urls).size,urls.length);

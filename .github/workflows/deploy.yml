@@ -64,3 +64,26 @@ jobs:
         run: node scripts/notify-guide-publications.mjs
       - name: Verify live news indexing and critical pages
         run: node scripts/live-seo-check.mjs konutseyir
+
+  preview:
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: verify
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ea5e08f7044d873900c9c8b6b4cfdb8f
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Deploy isolated Pages preview
+        run: pnpm exec wrangler pages deploy dist --project-name konutseyir --branch "${{ github.head_ref }}" | tee /tmp/konutseyir-preview.log
+      - name: Verify preview HTML and current production API contracts
+        run: |
+          PREVIEW_URL=$(node --input-type=module -e 'import{readFileSync}from"node:fs";const s=readFileSync("/tmp/konutseyir-preview.log","utf8");const u=s.match(/https:\/\/[a-z0-9]+\.konutseyir\.pages\.dev/);if(!u)throw Error("Preview URL missing");console.log(u[0])')
+          node scripts/live-seo-check.mjs konutseyir "$PREVIEW_URL"
