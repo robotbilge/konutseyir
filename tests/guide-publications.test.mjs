@@ -119,6 +119,7 @@ test('built publication manifest matches real guide routes and deployment notifi
 });
 test('guide retries reuse an existing cron slot and preserve the original hourly feed window',async()=>{
  const config=JSON.parse(readFileSync('worker/wrangler.jsonc','utf8'));
+ assert.ok(config.compatibility_flags.includes('global_fetch_strictly_public'));
  assert.deepEqual(config.triggers.crons,['30 13 * * 1-5','*/5 * * * *']);
  const {default:worker}=await import('../worker/index.mjs');
  // Empty D1 tables allow the guide drain; feed attempts are visible via source status writes.
