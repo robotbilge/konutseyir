@@ -71,9 +71,20 @@ export async function drainGuidePush(env,{now=new Date().toISOString(),send=webp
 export async function guidePublicationRequest(request,env,deps={}){
  if(request.method!=='POST')return json({error:'Method not allowed'},405);
  if(!env.NEWS_ADMIN_PASSWORD||!env.DB)return json({error:'guide_publication_not_configured'},503);
- const supplied=request.headers.get('X-Admin-Password')||'';
- if(!equal(supplied,String(env.NEWS_ADMIN_PASSWORD)))return json({error:'unauthorized'},401);
  try{
+  // Share the news admin's existing attempt ledger so this endpoint cannot
+  // bypass its password-guessing limit. No new credentials are introduced.
+  const ip=request.headers.get('CF-Connecting-IP')||'unknown',now=Date.now(),windowMs=15*60000;
+  await env.DB.prepare('DELETE FROM admin_login_attempts WHERE window_started_at < ?').bind(now-windowMs).run();
+  const attempts=await env.DB.prepare('SELECT attempts,window_started_at windowStartedAt FROM admin_login_attempts WHERE ip=?').bind(ip).first();
+  if(attempts&&now-Number(attempts.windowStartedAt)<windowMs&&Number(attempts.attempts)>=8)return json({error:'too_many_attempts'},429);
+  const supplied=request.headers.get('X-Admin-Password')||'';
+  if(!equal(supplied,String(env.NEWS_ADMIN_PASSWORD))){
+   if(attempts&&now-Number(attempts.windowStartedAt)<windowMs)await env.DB.prepare('UPDATE admin_login_attempts SET attempts=attempts+1 WHERE ip=?').bind(ip).run();
+   else await env.DB.prepare('INSERT INTO admin_login_attempts(ip,attempts,window_started_at) VALUES(?,1,?) ON CONFLICT(ip) DO UPDATE SET attempts=1,window_started_at=excluded.window_started_at').bind(ip,now).run();
+   return json({error:'unauthorized'},401);
+  }
+  await env.DB.prepare('DELETE FROM admin_login_attempts WHERE ip=?').bind(ip).run();
   if(Number(request.headers.get('Content-Length'))>1024)return json({error:'invalid_request'},400);
   const text=await request.text();if(text.length>1024)return json({error:'invalid_request'},400);
   let body;try{body=JSON.parse(text)}catch{return json({error:'invalid_request'},400)}

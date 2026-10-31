@@ -11,6 +11,7 @@ const now='2026-11-01T10:00:00.000Z',old={path:'/rehber/eski-yazi/',title:'Eski 
 function database(){
  const sqlite=new DatabaseSync(':memory:');
  sqlite.exec(readFileSync('migrations/0002_news_push.sql','utf8'));
+ sqlite.exec(readFileSync('migrations/0003_admin_auth.sql','utf8'));
  sqlite.exec(readFileSync('migrations/0007_guide_publications.sql','utf8'));
  const DB={prepare(sql){const statement=sqlite.prepare(sql);let params=[];const wrap={bind(...args){params=args;return wrap},async first(){return statement.get(...params)||null},async all(){return {results:statement.all(...params)}},async run(){const r=statement.run(...params);return {meta:{changes:r.changes}}}};return wrap},async batch(statements){sqlite.exec('BEGIN');try{const results=[];for(const s of statements)results.push(await s.run());sqlite.exec('COMMIT');return results}catch(e){sqlite.exec('ROLLBACK');throw e}}};
  return {DB,sqlite};
@@ -102,6 +103,15 @@ test('publication endpoint requires authentication, POST and a matching deployme
  assert.equal((await guidePublicationRequest(req('POST','password',{}),env)).status,400);
  const response=await guidePublicationRequest(req('POST','password',{buildId:now}),env,{now,fetcher:live([old,fresh]),send:async()=>{}});
  assert.equal(response.status,200);assert.equal((await response.json()).push.sent,1);
+});
+test('guide endpoint shares the admin attempt limit and never performs live checks after lockout',async()=>{
+ const {env,sqlite}=await setup();
+ const req=password=>new Request(guideOrigin+'/api/admin/guide-publications',{method:'POST',headers:{'X-Admin-Password':password,'CF-Connecting-IP':'127.0.0.1'},body:JSON.stringify({buildId:now})});
+ const deps={fetcher:async()=>assert.fail('unauthorized network access')};
+ for(let i=0;i<8;i++)assert.equal((await guidePublicationRequest(req('wrong'),env,deps)).status,401);
+ assert.equal((await guidePublicationRequest(req('wrong'),env,deps)).status,429);
+ assert.equal((await guidePublicationRequest(req('password'),env,deps)).status,429);
+ assert.equal(sqlite.prepare('SELECT attempts FROM admin_login_attempts').get().attempts,8);
 });
 test('random publication minute covers 09:00–17:59 Istanbul including day/year boundaries',()=>{
  assert.equal(randomGuidePublicationAt('2026-12-31',()=>0),'2026-12-31T06:00:00.000Z');
