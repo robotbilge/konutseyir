@@ -112,3 +112,19 @@ test('built publication manifest matches real guide routes and deployment notifi
  for(const g of manifest.guides){const html=readFileSync('dist'+g.path+'index.html','utf8');assert.ok(html.includes(`<title>${g.title.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;')}</title>`))}
  const workflow=readFileSync('.github/workflows/deploy.yml','utf8');assert.ok(workflow.indexOf('node scripts/notify-guide-publications.mjs')>workflow.indexOf('wrangler pages deploy'));
 });
+test('guide retries reuse an existing cron slot and preserve the original hourly feed window',async()=>{
+ const config=JSON.parse(readFileSync('worker/wrangler.jsonc','utf8'));
+ assert.deepEqual(config.triggers.crons,['30 13 * * 1-5','*/5 * * * *']);
+ const {default:worker}=await import('../worker/index.mjs');
+ // Empty D1 tables allow the guide drain; feed attempts are visible via source status writes.
+ const env={DB:{prepare(){const statement={bind(){return statement},first:async()=>null,all:async()=>({results:[]}),run:async()=>({meta:{changes:0}})};return statement}}};
+ // Five-minute ticks outside the original hourly news times must not fetch any sources.
+ const originalFetch=globalThis.fetch;let fetches=0;
+ globalThis.fetch=async()=>{fetches++;throw Error('Unexpected feed request')};
+ try{
+  for(const time of ['2026-11-01T05:05:00Z','2026-11-01T21:00:00Z']){
+   const tasks=[];await worker.scheduled({cron:'*/5 * * * *',scheduledTime:Date.parse(time)},env,{waitUntil:p=>tasks.push(p)});await Promise.all(tasks);
+  }
+  assert.equal(fetches,0);
+ }finally{globalThis.fetch=originalFetch}
+});

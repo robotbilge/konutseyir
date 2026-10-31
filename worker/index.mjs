@@ -331,9 +331,11 @@ export default {
   const tasks=[];
   if(event.cron==='*/5 * * * *')tasks.push(drainGuidePush(env));
   if(event.cron==='30 13 * * 1-5')tasks.push(refresh(env));
-  if(event.cron==='0 5-20 * * *'){
+  const scheduledDate=new Date(event.scheduledTime),scheduledHour=scheduledDate.getUTCHours();
+  // Reuse the hourly news trigger: guide retries every five minutes, feeds only at their original hours.
+  // Accept the old cron while Cloudflare propagates the schedule change.
+  if(event.cron==='0 5-20 * * *'||(event.cron==='*/5 * * * *'&&scheduledDate.getUTCMinutes()===0&&scheduledHour>=5&&scheduledHour<=20)){
    tasks.push(refreshNewsTracked(env,true));
-   const scheduledHour=new Date(event.scheduledTime).getUTCHours();
    if(scheduledHour===8||scheduledHour===13)tasks.push(refreshEmlakKonut(env,{notify:true}));
   }
   ctx.waitUntil(Promise.allSettled(tasks));
