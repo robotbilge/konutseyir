@@ -1,0 +1,35 @@
+name: Live mobile and desktop Lighthouse
+on:
+  pull_request:
+    paths:
+      - .github/workflows/lighthouse-audit.yml
+      - scripts/lighthouse-audit.mjs
+  workflow_run:
+    workflows: [Test and deploy KonutSeyir]
+    types: [completed]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        site: [altinseyir, konutseyir]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install pinned Lighthouse
+        run: npm install --prefix /tmp/seo-lighthouse --no-audit --no-fund lighthouse@13.6.0
+      - name: Run mobile and desktop audits
+        run: node scripts/lighthouse-audit.mjs ${{ matrix.site }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-${{ matrix.site }}-${{ github.run_id }}
+          path: artifacts/lighthouse
+          retention-days: 14

@@ -62,3 +62,5 @@ jobs:
       - run: pnpm exec wrangler pages deploy dist --project-name konutseyir --branch main
       - name: Verify live guides and notify subscribers
         run: node scripts/notify-guide-publications.mjs
+      - name: Verify live news indexing and critical pages
+        run: node scripts/live-seo-check.mjs konutseyir

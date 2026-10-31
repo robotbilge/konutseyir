@@ -18,3 +18,7 @@
   X-Robots-Tag: noindex, follow
 /haberler/
   X-Robots-Tag: noindex, follow
+/haberler.html
+  X-Robots-Tag: noindex, follow
+/haberler/*
+  X-Robots-Tag: noindex, follow
