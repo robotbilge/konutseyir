@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {assetRequest,secureHtml} from '../lib/security-headers.mjs';
+import {assetRequest,secureHtml,isEdgeInjectedScript} from '../lib/security-headers.mjs';
 // Test double checks the handler contract; deployed HTMLRewriter is additionally
 // exercised by the preview and live HTTP smoke checks.
 globalThis.HTMLRewriter=class{
@@ -15,3 +15,5 @@ test('fresh CSP nonce is paired with every trusted script and never cached or re
  const request=assetRequest(new Request('https://example.com/haber.html?slug=1',{headers:{'If-None-Match':'old','If-Modified-Since':'yesterday','Accept':'text/html'}}));assert.equal(request.headers.get('if-none-match'),null);assert.equal(request.headers.get('if-modified-since'),null);assert.equal(request.headers.get('accept'),'text/html');assert.equal(new URL(request.url).search,'?slug=1');
  const json=Response.json({ok:true});assert.equal(secureHtml(json),json);
 });
+
+test('only exact Cloudflare edge-injected script locations are exempt from the nonce assertion',()=>{const origin='https://konutseyir.com';assert.equal(isEdgeInjectedScript({src:'/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js'},origin),true);assert.equal(isEdgeInjectedScript({src:'https://static.cloudflareinsights.com/beacon.min.js/abc'},origin),true);for(const src of ['/assets/app.js','https://evil.example/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js','https://static.cloudflareinsights.com.evil.example/beacon.min.js','https://static.cloudflareinsights.com/other.js',''])assert.equal(isEdgeInjectedScript({src},origin),false);assert.equal(isEdgeInjectedScript({},origin),false)});
