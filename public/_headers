@@ -6,3 +6,10 @@
   Content-Security-Policy: default-src 'self'; script-src 'self' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://fundingchoicesmessages.google.com https://*.google.com https://*.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.google.com https://*.doubleclick.net; frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://fundingchoicesmessages.google.com https://*.google.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+/haberler/haber
+  X-Robots-Tag: noindex, follow
+/haberler/haber/*
+  X-Robots-Tag: noindex, follow
+/haberler/haber.html
+  X-Robots-Tag: noindex, follow
