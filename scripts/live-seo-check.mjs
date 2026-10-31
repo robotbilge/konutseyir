@@ -1,5 +1,6 @@
 // Read-only production/preview smoke checks. No subscriptions or notifications are created.
 import assert from 'node:assert/strict';
+import {fetchReady} from './http-readiness.mjs';
 import {isEdgeInjectedScript} from '../lib/security-headers.mjs';
 const site=process.argv[2];
 assert.ok(['altinseyir','konutseyir'].includes(site),'Choose altinseyir or konutseyir');
@@ -11,7 +12,7 @@ const canonical=html=>[...html.matchAll(/<link\b[^>]*>/gi)].map(m=>attrs(m[0])).
 const noindex=value=>/\bnoindex\b/i.test(value||'')&&/\bfollow\b/i.test(value||'')&&!/\bnofollow\b/i.test(value||'');
 async function get(path,{news=false,canonicalUrl,allowPreviewHeader=true}={}){
  const url=path.startsWith('https://')?path:(preview&&path.startsWith('/api/')?origin:base)+path;
- const r=await fetch(url,{redirect:'manual',cache:'no-store',signal:AbortSignal.timeout(30000)});
+ const r=await fetchReady(url);
  assert.equal(r.status,200,`${url}: HTTP ${r.status}; redirects are not accepted`);
  const body=await r.text();
  if(news){assert.ok(noindex(r.headers.get('x-robots-tag')),`${url}: missing HTTP noindex, follow`);assert.ok(noindex(robots(body)),`${url}: missing HTML noindex,follow`)}
