@@ -2,74 +2,46 @@ import {urbanSlug,urbanUpdatedAt} from '../lib/urban-sources';
 import {isNewsListPath,isNewsDetailPath} from '../lib/news-policy.mjs';
 import {editorialUpdatedAt} from '../lib/editorial-quality';
 import Home from '../app/page';
-import GoldHousingPage from '../app/altinla-konut/page';
-import HomeAnalysis from '../app/ev-analizi/page';
-import LoanCalculator from '../app/kredi-hesaplama/page';
-import OfficialChecks from '../app/resmi-kontroller/page';
-import RentMultiplier from '../app/hesaplama/kira-carpani/page';
-import NetRent from '../app/hesaplama/net-kira/page';
-import SquareMeter from '../app/hesaplama/metrekare/page';
-import RealReturn from '../app/hesaplama/reel-getiri/page';
-import PurchaseCost from '../app/hesaplama/alim-maliyeti/page';
-import DeedFee from '../app/hesaplama/tapu-harci/page';
-import Commission from '../app/hesaplama/emlak-komisyonu/page';
-import RentIncrease from '../app/hesaplama/kira-artis-orani/page';
-import GoldProperty from '../app/hesaplama/altin-bazli-konut/page';
-import ShareTool from '../app/hesaplama/hisseli-tapu/page';
-import DepositPage from '../app/hesaplama/mevduat/page';
-import DecisionToolsPage from '../app/karar-araclari/page';
 
-import Guides from '../app/rehber/page';
-import City from '../app/sehirler/[slug]/page';
-import CityComparison from '../app/sehir-karsilastir/page';
-import Checklist from '../app/kontrol-listesi/page';
-import Contact from '../app/iletisim/page';
-import Privacy from '../app/gizlilik/page';
-import Terms from '../app/kullanim-kosullari/page';
-import CookiePolicy from '../app/cerez-politikasi/page';
-import Editorial from '../app/yayin-ilkeleri/page';
-import News from '../app/haberler/page';
-import NewsDetail from '../app/haberler/haber/page';
-import NewsAdmin from '../app/yonetim/haberler/page';
 import {guides,cities} from '../lib/content';
 import {Header,Footer} from '../components/site-chrome';
 const fixed:Record<string,{component:any,title:string,description:string}>={
 '/kentsel-donusum':{component:null,title:'Kentsel dönüşüm bütçesi ve destek rehberi | KonutSeyir',description:'Yapım bedeli, geçici kira, doğrulanmış hibe ve kredi takvimiyle aylık nakit açığını hesaplayın. İki müteahhit teklifini aynı kapsamda karşılaştırın.'},
 '/' :{component:Home,title:'Satılık konut ilanı analizi ve m² fiyat karşılaştırması | KonutSeyir',description:'Satılık konut ilanının net ve brüt m² fiyatını hesaplayın. Brüt fiyatı TCMB’nin il göstergesiyle karşılaştırın; kira ve amortisman raporunu inceleyin.'},
-'/altinla-konut':{component:GoldHousingPage,title:'Altının Ne Kadar Konut Alıyor? | Altınla konut alım gücü',description:'Altın birikiminizin İstanbul, Ankara, İzmir ve veri bulunan diğer şehirlerde yaklaşık kaç brüt metrekare konuta karşılık geldiğini TCMB konut birim fiyatlarıyla hesaplayın.'},
+'/altinla-konut':{component:null,title:'Altının Ne Kadar Konut Alıyor? | Altınla konut alım gücü',description:'Altın birikiminizin İstanbul, Ankara, İzmir ve veri bulunan diğer şehirlerde yaklaşık kaç brüt metrekare konuta karşılık geldiğini TCMB konut birim fiyatlarıyla hesaplayın.'},
 '/hesaplama':{component:null,title:'Konut hesaplama araçları | Kira, tapu, m² ve maliyet',description:'Kira çarpanı, net kira, metrekare fiyatı, alım maliyeti, tapu harcı, emlak komisyonu, kira artışı ve diğer konut hesaplama araçlarını seçin.'},
-'/karar-araclari':{component:DecisionToolsPage,title:'Net satış tutarı hesaplama | Satış giderleri',description:'Satış fiyatından kalan borç, emlak hizmet bedeli, tadilat, taşınma ve diğer giderleri düşerek yaklaşık net satış tutarını hesaplayın.'},
-'/hesaplama/mevduat':{component:DepositPage,title:'Net Mevduat Faizi Hesaplama | Stopaj ve Vade',description:'Anapara, yıllık brüt faiz, vade günü ve stopaj oranıyla net mevduat getirisini hesaplayın.'},
-'/ev-analizi':{component:HomeAnalysis,title:'Konut ilanı analizi | TCMB il m² ve kira göstergeleri',description:'İlanın net ve brüt m² fiyatını hesaplayın; TCMB il konut birim fiyatı ve kira göstergesiyle kaynak dönemini belirterek karşılaştırın.'},
-'/kredi-hesaplama':{component:LoanCalculator,title:'Konut kredisi toplam maliyet hesaplama',description:'Aylık taksit, toplam geri ödeme, faiz ve ek kredi giderlerini hesaplayın.'},
-'/resmi-kontroller':{component:OfficialChecks,title:'Ev almadan önce resmî kontroller',description:'Tapu, parsel, deprem tehlikesi ve satın alma kontrol adımlarına ulaşın.'},
-'/hesaplama/kira-carpani':{component:RentMultiplier,title:'Kira çarpanı hesaplama',description:'Satış fiyatı ve aylık kirayla brüt kira çarpanını ay ve yıl olarak hesaplayın.'},
+'/karar-araclari':{component:null,title:'Net satış tutarı hesaplama | Satış giderleri',description:'Satış fiyatından kalan borç, emlak hizmet bedeli, tadilat, taşınma ve diğer giderleri düşerek yaklaşık net satış tutarını hesaplayın.'},
+'/hesaplama/mevduat':{component:null,title:'Net Mevduat Faizi Hesaplama | Stopaj ve Vade',description:'Anapara, yıllık brüt faiz, vade günü ve stopaj oranıyla net mevduat getirisini hesaplayın.'},
+'/ev-analizi':{component:null,title:'Konut ilanı analizi | TCMB il m² ve kira göstergeleri',description:'İlanın net ve brüt m² fiyatını hesaplayın; TCMB il konut birim fiyatı ve kira göstergesiyle kaynak dönemini belirterek karşılaştırın.'},
+'/kredi-hesaplama':{component:null,title:'Konut kredisi toplam maliyet hesaplama',description:'Aylık taksit, toplam geri ödeme, faiz ve ek kredi giderlerini hesaplayın.'},
+'/resmi-kontroller':{component:null,title:'Ev almadan önce resmî kontroller',description:'Tapu, parsel, deprem tehlikesi ve satın alma kontrol adımlarına ulaşın.'},
+'/hesaplama/kira-carpani':{component:null,title:'Kira çarpanı hesaplama',description:'Satış fiyatı ve aylık kirayla brüt kira çarpanını ay ve yıl olarak hesaplayın.'},
 '/hesaplama/kira-getirisi':{component:null,title:'Konut kira getirisi hesaplama | TCMB il kira göstergesi',description:'TCMB il bazlı brüt m² kira göstergesiyle kira tahmini; yıllık brüt ve net kira getirisini, masraf ve boş ay dahil hesaplayın.'},
-'/hesaplama/net-kira':{component:NetRent,title:'Net kira getirisi hesaplama',description:'Boş kalma, gider, vergi ve alım masrafları sonrası net kira tutarını ve oranını hesaplayın.'},
-'/hesaplama/metrekare':{component:SquareMeter,title:'Metrekare fiyatı hesaplama',description:'Satış fiyatı ve alan üzerinden konutun metrekare fiyatını hesaplayın.'},
-'/hesaplama/reel-getiri':{component:RealReturn,title:'Reel konut getirisi hesaplama',description:'Konut artışı ve net kirayı enflasyondan arındırarak reel getiriyi hesaplayın.'},
-'/hesaplama/alim-maliyeti':{component:PurchaseCost,title:'Konut alım maliyeti hesaplama',description:'Tapu, komisyon, tadilat ve kredi giderleri dahil toplam konut alım maliyetini hesaplayın.'},
-'/hesaplama/tapu-harci':{component:DeedFee,title:'Tapu Harcı Hesaplama 2026 | Alıcı-Satıcı Masrafı',description:'Konut satışında alıcı ve satıcı için %2 tapu harcını ve döner sermaye bedelini hesaplayın.'},
-'/hesaplama/emlak-komisyonu':{component:Commission,title:'Emlakçı Komisyonu Hesaplama 2026 | Alıcı ve Satıcı',description:'Taşınmaz satışında yasal emlak danışmanı hizmet bedeli tavanını ve KDV dahil komisyonu hesaplayın.'},
-'/hesaplama/kira-artis-orani':{component:RentIncrease,title:'Kira Zammı Hesaplama 2026 | TÜFE Artış Oranı',description:'TÜFE 12 aylık ortalamaya göre konut kira artış tutarını ve yeni aylık kirayı hesaplayın.'},
-'/hesaplama/altin-bazli-konut':{component:GoldProperty,title:'Konut kaç gram altın? Ev ve peşinat hesaplama | KonutSeyir',description:'Konut fiyatı, gram altın referansı ve birikiminizle ev için gereken altını, peşinat karşılığını ve kalan tutarı hesaplayın. Kaynak zamanını ve varsayımları görün.'},
-'/hesaplama/hisseli-tapu':{component:ShareTool,title:'Hisseli tapu ve miras payı hesaplama',description:'Tapudaki veya veraset ilamındaki pay/payda oranına göre matematiksel metrekare ve değer karşılığını hesaplayın.'},
+'/hesaplama/net-kira':{component:null,title:'Net kira getirisi hesaplama',description:'Boş kalma, gider, vergi ve alım masrafları sonrası net kira tutarını ve oranını hesaplayın.'},
+'/hesaplama/metrekare':{component:null,title:'Metrekare fiyatı hesaplama',description:'Satış fiyatı ve alan üzerinden konutun metrekare fiyatını hesaplayın.'},
+'/hesaplama/reel-getiri':{component:null,title:'Reel konut getirisi hesaplama',description:'Konut artışı ve net kirayı enflasyondan arındırarak reel getiriyi hesaplayın.'},
+'/hesaplama/alim-maliyeti':{component:null,title:'Konut alım maliyeti hesaplama',description:'Tapu, komisyon, tadilat ve kredi giderleri dahil toplam konut alım maliyetini hesaplayın.'},
+'/hesaplama/tapu-harci':{component:null,title:'Tapu Harcı Hesaplama 2026 | Alıcı-Satıcı Masrafı',description:'Konut satışında alıcı ve satıcı için %2 tapu harcını ve döner sermaye bedelini hesaplayın.'},
+'/hesaplama/emlak-komisyonu':{component:null,title:'Emlakçı Komisyonu Hesaplama 2026 | Alıcı ve Satıcı',description:'Taşınmaz satışında yasal emlak danışmanı hizmet bedeli tavanını ve KDV dahil komisyonu hesaplayın.'},
+'/hesaplama/kira-artis-orani':{component:null,title:'Kira Zammı Hesaplama 2026 | TÜFE Artış Oranı',description:'TÜFE 12 aylık ortalamaya göre konut kira artış tutarını ve yeni aylık kirayı hesaplayın.'},
+'/hesaplama/altin-bazli-konut':{component:null,title:'Konut kaç gram altın? Ev ve peşinat hesaplama | KonutSeyir',description:'Konut fiyatı, gram altın referansı ve birikiminizle ev için gereken altını, peşinat karşılığını ve kalan tutarı hesaplayın. Kaynak zamanını ve varsayımları görün.'},
+'/hesaplama/hisseli-tapu':{component:null,title:'Hisseli tapu ve miras payı hesaplama',description:'Tapudaki veya veraset ilamındaki pay/payda oranına göre matematiksel metrekare ve değer karşılığını hesaplayın.'},
 '/karsilastir':{component:null,title:'Yatırım araçları karşılaştırması | TÜİK reel getirileri',description:'Tutar girip TÜİK’in 1, 3, 6 ve 12 aylık nominal ve TÜFE/Yİ-ÜFE reel getirilerini inceleyin. Altın, mevduat, döviz, BIST 100 ve DİBS geçmiş dönem verileri.'},
-'/rehber':{component:Guides,title:'Konut satın alma ve yatırım rehberleri',description:'Kira çarpanı, net getiri, tapu ve maliyet konularında açıklamalar.'},
+'/rehber':{component:null,title:'Konut satın alma ve yatırım rehberleri',description:'Kira çarpanı, net getiri, tapu ve maliyet konularında açıklamalar.'},
 '/sehirler':{component:null,title:'Şehir konut piyasaları',description:'Bölgesel konut verilerinin kapsamı ve resmî kaynakları.'},
-'/sehir-karsilastir':{component:CityComparison,title:'Şehirler arası konut fiyat eğilimi karşılaştırması',description:'İstanbul, Ankara ve İzmir dahil şehirlerin TCMB bölgesel konut fiyat endekslerini 1, 3 veya 5 yılda karşılaştırın.'},
-'/kontrol-listesi':{component:Checklist,title:'Ev satın alma kontrol listesi',description:'Tapu, iskân, teknik inceleme ve kiracı kontrollerinizi takip edin.'},
+'/sehir-karsilastir':{component:null,title:'Şehirler arası konut fiyat eğilimi karşılaştırması',description:'İstanbul, Ankara ve İzmir dahil şehirlerin TCMB bölgesel konut fiyat endekslerini 1, 3 veya 5 yılda karşılaştırın.'},
+'/kontrol-listesi':{component:null,title:'Ev satın alma kontrol listesi',description:'Tapu, iskân, teknik inceleme ve kiracı kontrollerinizi takip edin.'},
 '/veri':{component:null,title:'Veri kaynakları ve servis durumu',description:'KonutSeyir verilerinin kaynağı, dönemi ve bağlantı durumu.'},
-'/haberler':{component:News,title:'Emlak ve konut haberleri',description:'Konut, kira, tapu ve gayrimenkul gündemini tarihe göre izleyin.'},
-'/yonetim/haberler':{component:NewsAdmin,title:'Haber yönetimi | KonutSeyir',description:'KonutSeyir haberlerini listeleyin ve yönetin.'},
-'/haberler/haber':{component:NewsDetail,title:'Emlak haberi',description:'Haber özeti ve özgün kaynak bağlantısı.'},
+'/haberler':{component:null,title:'Emlak ve konut haberleri',description:'Konut, kira, tapu ve gayrimenkul gündemini tarihe göre izleyin.'},
+'/yonetim/haberler':{component:null,title:'Haber yönetimi | KonutSeyir',description:'KonutSeyir haberlerini listeleyin ve yönetin.'},
+'/haberler/haber':{component:null,title:'Emlak haberi',description:'Haber özeti ve özgün kaynak bağlantısı.'},
 '/hakkimizda':{component:null,title:'KonutSeyir hakkında',description:'KonutSeyir hesaplama yöntemi ve amacı.'},
-'/iletisim':{component:Contact,title:'İletişim',description:'KonutSeyir iletişim bilgileri.'},
-'/gizlilik':{component:Privacy,title:'Gizlilik',description:'KonutSeyir veri işleme ve gizlilik açıklaması.'},
-'/cerez-politikasi':{component:CookiePolicy,title:'Çerez politikası',description:'KonutSeyir çerezleri, reklam tercihleri ve tarayıcı ayarları.'},
-'/yayin-ilkeleri':{component:Editorial,title:'Yayın ve hesaplama ilkeleri',description:'KonutSeyir kaynak, hesaplama, düzeltme ve editoryal bağımsızlık ilkeleri.'},
-'/kullanim-kosullari':{component:Terms,title:'Kullanım koşulları',description:'Hesaplama varsayımları ve kullanım koşulları.'}};
+'/iletisim':{component:null,title:'İletişim',description:'KonutSeyir iletişim bilgileri.'},
+'/gizlilik':{component:null,title:'Gizlilik',description:'KonutSeyir veri işleme ve gizlilik açıklaması.'},
+'/cerez-politikasi':{component:null,title:'Çerez politikası',description:'KonutSeyir çerezleri, reklam tercihleri ve tarayıcı ayarları.'},
+'/yayin-ilkeleri':{component:null,title:'Yayın ve hesaplama ilkeleri',description:'KonutSeyir kaynak, hesaplama, düzeltme ve editoryal bağımsızlık ilkeleri.'},
+'/kullanim-kosullari':{component:null,title:'Kullanım koşulları',description:'Hesaplama varsayımları ve kullanım koşulları.'}};
 export const paths=[...Object.keys(fixed),...guides.map(g=>'/rehber/'+g.slug),...cities.map(c=>'/sehirler/'+c.slug)];
 export function meta(path:string){const f=fixed[path];if(f)return {...f,noindex:path==='/haberler'||path==='/haberler/haber'||path==='/yonetim/haberler',adFree:path==='/haberler'||path==='/haberler/haber'||path==='/yonetim/haberler'};const g=guides.find(g=>path==='/rehber/'+g.slug);if(g)return {title:g.title,description:g.summary,noindex:false,modifiedAt:g.slug===urbanSlug?urbanUpdatedAt:editorialUpdatedAt};const c=cities.find(c=>path==='/sehirler/'+c.slug);return {title:c?c.name+' konut piyasası':'Sayfa bulunamadı',description:c?.note||'Aradığınız sayfa bulunamadı.',noindex:!c}}
-const corePages:Record<string,()=>Promise<{default:any}>>={'/hesaplama':()=>import('../app/hesaplama/page'),'/karsilastir':()=>import('../app/karsilastir/page'),'/sehirler':()=>import('../app/sehirler/page'),'/veri':()=>import('../app/veri/page'),'/hakkimizda':()=>import('../app/hakkimizda/page')};
-export async function page(path:string){path=path.replace(/\/$/,'')||'/';if(isNewsListPath(path))return <News/>;if(isNewsDetailPath(path))return <NewsDetail/>;if(corePages[path]){const {default:CorePage}=await corePages[path]();return <CorePage/>}if(path==='/hesaplama/kira-getirisi'){const {default:RentalYield}=await import('../app/hesaplama/kira-getirisi/page');return <RentalYield/>}if(path==='/kentsel-donusum'){const {default:UrbanRenewal}=await import('../app/kentsel-donusum/page');return <UrbanRenewal/>}if(fixed[path]){const C=fixed[path].component;return <C/>}if(path.startsWith('/haberler/'))return <NewsDetail/>;if(guides.some(g=>path==='/rehber/'+g.slug)){const {default:Guide}=await import('../app/rehber/[slug]/page');return Guide({params:Promise.resolve({slug:path.split('/')[2]})})}if(cities.some(c=>path==='/sehirler/'+c.slug))return City({params:Promise.resolve({slug:path.split('/')[2]})});return <><Header back/><main className="inner"><h1>Sayfa bulunamadı</h1><a href="/">Ana sayfaya dön →</a></main><Footer/></>}
+const corePages:Record<string,()=>Promise<{default:any}>>={'/altinla-konut':()=>import('../app/altinla-konut/page'),'/ev-analizi':()=>import('../app/ev-analizi/page'),'/kredi-hesaplama':()=>import('../app/kredi-hesaplama/page'),'/resmi-kontroller':()=>import('../app/resmi-kontroller/page'),'/hesaplama/kira-carpani':()=>import('../app/hesaplama/kira-carpani/page'),'/hesaplama/net-kira':()=>import('../app/hesaplama/net-kira/page'),'/hesaplama/metrekare':()=>import('../app/hesaplama/metrekare/page'),'/hesaplama/reel-getiri':()=>import('../app/hesaplama/reel-getiri/page'),'/hesaplama/alim-maliyeti':()=>import('../app/hesaplama/alim-maliyeti/page'),'/hesaplama/tapu-harci':()=>import('../app/hesaplama/tapu-harci/page'),'/hesaplama/emlak-komisyonu':()=>import('../app/hesaplama/emlak-komisyonu/page'),'/hesaplama/kira-artis-orani':()=>import('../app/hesaplama/kira-artis-orani/page'),'/hesaplama/altin-bazli-konut':()=>import('../app/hesaplama/altin-bazli-konut/page'),'/hesaplama/hisseli-tapu':()=>import('../app/hesaplama/hisseli-tapu/page'),'/hesaplama/mevduat':()=>import('../app/hesaplama/mevduat/page'),'/karar-araclari':()=>import('../app/karar-araclari/page'),'/rehber':()=>import('../app/rehber/page'),'/sehir-karsilastir':()=>import('../app/sehir-karsilastir/page'),'/kontrol-listesi':()=>import('../app/kontrol-listesi/page'),'/iletisim':()=>import('../app/iletisim/page'),'/gizlilik':()=>import('../app/gizlilik/page'),'/kullanim-kosullari':()=>import('../app/kullanim-kosullari/page'),'/cerez-politikasi':()=>import('../app/cerez-politikasi/page'),'/yayin-ilkeleri':()=>import('../app/yayin-ilkeleri/page'),'/haberler':()=>import('../app/haberler/page'),'/haberler/haber':()=>import('../app/haberler/haber/page'),'/yonetim/haberler':()=>import('../app/yonetim/haberler/page'),'/hesaplama':()=>import('../app/hesaplama/page'),'/karsilastir':()=>import('../app/karsilastir/page'),'/sehirler':()=>import('../app/sehirler/page'),'/veri':()=>import('../app/veri/page'),'/hakkimizda':()=>import('../app/hakkimizda/page')};
+export async function page(path:string){path=path.replace(/\/$/,'')||'/';if(isNewsListPath(path))path='/haberler';else if(isNewsDetailPath(path))path='/haberler/haber';if(corePages[path]){const {default:CorePage}=await corePages[path]();return <CorePage/>}if(path==='/hesaplama/kira-getirisi'){const {default:RentalYield}=await import('../app/hesaplama/kira-getirisi/page');return <RentalYield/>}if(path==='/kentsel-donusum'){const {default:UrbanRenewal}=await import('../app/kentsel-donusum/page');return <UrbanRenewal/>}if(fixed[path]){const C=fixed[path].component;return <C/>}if(guides.some(g=>path==='/rehber/'+g.slug)){const {default:Guide}=await import('../app/rehber/[slug]/page');return Guide({params:Promise.resolve({slug:path.split('/')[2]})})}if(cities.some(c=>path==='/sehirler/'+c.slug)){const {default:City}=await import('../app/sehirler/[slug]/page');return City({params:Promise.resolve({slug:path.split('/')[2]})});}return <><Header back/><main className="inner"><h1>Sayfa bulunamadı</h1><a href="/">Ana sayfaya dön →</a></main><Footer/></>}

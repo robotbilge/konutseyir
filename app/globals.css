@@ -11,3 +11,5 @@
 @media(max-width:700px){.home-user-path-grid{grid-template-columns:1fr}.city-comparison{padding:18px}.city-comparison-heading{align-items:stretch;flex-direction:column}.city-range{width:100%}.city-picker{gap:7px}.home-user-path-grid article{padding:20px}}
 
 .gold-housing-promo{margin:26px 0 40px;padding:22px 26px;gap:24px}.gold-housing-promo>div:first-child{flex:1}.gold-housing-promo h2{font-size:clamp(23px,2.6vw,32px)}.gold-housing-promo p{max-width:620px;margin-bottom:0}.gold-housing-promo>div:last-child{min-width:270px;max-width:340px;width:100%}.gold-housing-promo .gold-price-link{font-size:13px;color:#d8e4df}@media(max-width:700px){.gold-housing-promo{margin:22px 0 36px;padding:22px 20px;gap:16px}.gold-housing-promo>div:last-child{min-width:0;max-width:none}}
+/* Preserve the palette while meeting text contrast on tinted panels. */
+.market-snapshot>div:first-child .eyebrow{color:#bce986}.official-section>div>p:not(.eyebrow){color:#52645c}
