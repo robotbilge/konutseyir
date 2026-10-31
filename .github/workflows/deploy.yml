@@ -60,3 +60,5 @@ jobs:
         continue-on-error: true
         run: pnpm exec wrangler pages project create konutseyir --production-branch main
       - run: pnpm exec wrangler pages deploy dist --project-name konutseyir --branch main
+      - name: Verify live guides and notify subscribers
+        run: node scripts/notify-guide-publications.mjs
