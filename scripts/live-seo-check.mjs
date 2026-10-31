@@ -37,10 +37,11 @@ if(site==='altinseyir'){
  await get('https://api.altinseyir.com/api/alerts/public-key');
 }else{
  for(const path of ['/haberler','/haberler/','/haberler.html','/haberler/index.html','/haberler/haber','/haberler/haber/','/haberler/haber/index.html','/haberler/haber.html','/haberler/legacy-path?slug=test'])await get(path,{news:true});
- for(const path of ['/ev-analizi/','/hesaplama/emlak-komisyonu/','/hesaplama/kira-artis-orani/','/hesaplama/tapu-harci/','/hesaplama/kira-getirisi/','/hesaplama/mevduat/','/hesaplama/altin-bazli-konut/','/sehir-karsilastir/','/rehber/'])await get(path,{canonicalUrl:origin+path});
+ for(const path of ['/ev-analizi/','/hesaplama/emlak-komisyonu/','/hesaplama/kira-artis-orani/','/hesaplama/tapu-harci/','/hesaplama/kira-getirisi/','/hesaplama/mevduat/','/hesaplama/altin-bazli-konut/','/sehir-karsilastir/','/rehber/']){const page=await get(path,{canonicalUrl:origin+path});if(path==='/hesaplama/emlak-komisyonu/')assert.match(page.body,/<link\b[^>]*rel="modulepreload"/,'Current route module must preload in the delivered HTML');}
  const news=JSON.parse((await get('/api/news?limit=1')).body);assert.ok(news.items?.[0]?.slug,'News feed must remain available');
  await get('/haberler/haber?slug='+encodeURIComponent(news.items[0].slug),{news:true});
  const push=JSON.parse((await get('/api/push/config')).body);assert.equal(push.configured,true,'Push configuration must stay active');
  const market=JSON.parse((await get('/api/market-data')).body);assert.ok(Array.isArray(market.data),'Market data shape must stay intact');
+ if(!preview){const housing=JSON.parse((await get('/api/housing-unit-prices')).body);for(const row of housing.items||[])if(row.pricePerM2>0&&/^\d{4}-\d{2}-\d{2}$/.test(row.period||''))assert.equal(row.quarter,row.period.slice(0,4)+'-Q'+Math.ceil(Number(row.period.slice(5,7))/3),'Housing quarter must match the actual observation period');}
 }
 console.log(JSON.stringify({site,preview,status:'passed',sitemapUrls:urls.length}));
