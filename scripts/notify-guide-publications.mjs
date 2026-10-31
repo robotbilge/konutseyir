@@ -10,7 +10,8 @@ for(let attempt=0;attempt<6;attempt++){
  try{
   const response=await fetch(guideOrigin+'/api/admin/guide-publications',{method:'POST',headers:{'Content-Type':'application/json','X-Admin-Password':process.env.NEWS_ADMIN_PASSWORD},body:JSON.stringify({buildId:manifest.buildId}),signal:AbortSignal.timeout(90000)});
   if(response.ok){const result=await response.json();console.log(JSON.stringify({guidePublications:result}));success=true;break}
-  console.error(`Guide publication verification attempt ${attempt+1}: HTTP ${response.status}`);
+  let errorCode='unknown';try{const data=await response.json();if(typeof data.errorCode==='string'&&/^[a-z_]{1,80}$/.test(data.errorCode))errorCode=data.errorCode}catch{}
+  console.error(`Guide publication verification attempt ${attempt+1}: HTTP ${response.status} (${errorCode})`);
  }catch{console.error(`Guide publication verification attempt ${attempt+1}: request failed`)}
  if(attempt<5)await delay(5000);
 }

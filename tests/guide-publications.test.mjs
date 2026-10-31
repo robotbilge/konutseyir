@@ -64,6 +64,11 @@ test('missing live article or list card prevents enqueue',async()=>{
 test('stale deployment manifest cannot trigger push',async()=>{
  const {env}=await setup();await assert.rejects(syncGuidePublications(env,{now,expectedBuildId:'2026-11-02T00:00:00.000Z',fetcher:live([old,fresh])}),/deployment_not_live/);
 });
+test('Worker-compatible manual redirect mode never follows a redirected manifest',async()=>{
+ const {env}=await setup();let calls=0;
+ await assert.rejects(syncGuidePublications(env,{now,fetcher:async(url,init)=>{calls++;assert.equal(init.redirect,'manual');return new Response(null,{status:302,headers:{Location:'https://other.test'}})}}),/guide_not_live/);
+ assert.equal(calls,1);
+});
 test('invalid manifests reject duplicate paths, off-site URLs and empty collections',()=>{
  for(const guides of [[],[old,old],[{...fresh,path:'https://evil.test/rehber/a/'}],[{...fresh,path:'/rehber/../a/'}]])assert.throws(()=>validateGuideManifest({version:1,buildId:now,guides}));
 });

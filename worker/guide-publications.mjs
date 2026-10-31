@@ -5,7 +5,9 @@ const json=(data,status=200)=>Response.json(data,{status,headers:{'Cache-Control
 const esc=text=>text.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
 const equal=(a,b)=>{if(a.length!==b.length)return false;let diff=0;for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);return diff===0};
 async function liveText(path,fetcher){
- const response=await fetcher(guideOrigin+path,{redirect:'error',cache:'no-store',signal:AbortSignal.timeout(15000)});
+ // Workers supports manual/follow, but rejects redirect:'error' before fetching.
+ // Manual mode plus the status check fails closed on redirects without following them.
+ const response=await fetcher(guideOrigin+path,{redirect:'manual',cache:'no-store',signal:AbortSignal.timeout(15000)});
  if(!response.ok)throw Error('guide_not_live');
  return response.text();
 }
@@ -79,5 +81,9 @@ export async function guidePublicationRequest(request,env,deps={}){
   const publication=await syncGuidePublications(env,{...deps,expectedBuildId:body.buildId});
   const push=await drainGuidePush(env,deps);
   return json({ok:true,...publication,push},push.configured&&push.failed===0&&push.pending===0&&push.undelivered===0?200:503);
- }catch(error){console.error('Guide publication failed',error?.message||'unknown');return json({error:'guide_publication_unavailable'},503)}
+ }catch(error){
+  const message=String(error?.message||''),known=['invalid_guide_manifest','guide_not_live','guide_deployment_not_live','guide_missing_from_index','guide_page_not_verified'];
+  const errorCode=known.includes(message)?message:/D1_READ_LIMIT/.test(message)?'database_read_limit':/no such table/i.test(message)?'guide_schema_unavailable':/vapid/i.test(message)?'push_keys_invalid':/1042|loop/i.test(message)?'guide_fetch_routing_error':'guide_publication_internal_error';
+  console.error('Guide publication failed',message||'unknown');return json({error:'guide_publication_unavailable',errorCode},503);
+ }
 }
