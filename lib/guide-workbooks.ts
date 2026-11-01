@@ -1,7 +1,9 @@
+import {energyGuide,energyGuideWorkbook} from './energy-guide';
 import {urbanGuideWorkbook} from './urban-article';
 import {urbanSlug} from './urban-sources';
 export type GuideWorkbook={question:string;deliverable:string;rows:{finding:string;evidence:string;action:string}[]};
 export const guideWorkbooks:Record<string,GuideWorkbook>={
+ [energyGuide.slug]:energyGuideWorkbook,
  [urbanSlug]:urbanGuideWorkbook,
  'kira-carpani-nedir':{question:'Düşük çarpanlı ilanın kirası gerçekten tahsil edilebilir mi?',deliverable:'İki ilan için aynı tarihli fiyat, sözleşme/emsal kira, yıllık tahsilat, belgeli gider ve net oran sütunları olan bir karşılaştırma dosyası.',rows:[
  {finding:'İlandaki kira beklentisi mevcut sözleşmeden yüksek.',evidence:'Mevcut kira sözleşmesi ve son ödeme kayıtları; aynı tarihte kontrol edilmiş benzer kiralık ilanlar.',action:'İlk yıl hesabını sözleşme kirasıyla kurun; beklenen yeni kirayı ayrı senaryo olarak tutun.'},
