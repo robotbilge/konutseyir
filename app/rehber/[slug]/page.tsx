@@ -4,6 +4,7 @@ import {guideEvidence} from '@/lib/editorial-quality';
 import {EditorialSources,EditorialByline} from '@/components/editorial-evidence';
 import{notFound}from"next/navigation";import{Header,Footer}from"@/components/site-chrome";import{guideExpansions,guides}from"@/lib/content";
 const actions:Record<string,{title:string,text:string,href:string,label:string}>={
+ "sabit-taksit-konut-kampanyasi-ara-odeme":{title:"Satış bedeli dışındaki giderleri tamamlayın",text:"Taksitli ödeme takviminize ekleyeceğiniz başlangıç giderlerini ayrı hesaplayın; ara ödemeleri ikinci kez masraf saymayın.",href:"/hesaplama/alim-maliyeti",label:"Alım maliyeti hesabını aç →"},
  [urbanSlug]:{title:"Dönüşümde aylık nakit ihtiyacınızı görün",text:"Yazılı bedel, kira ve doğrulanmış destek takvimini aynı hesapta çalıştırın.",href:"/kentsel-donusum#donusum-butcesi",label:"Dönüşüm bütçesini aç →"},
  "kira-carpani-nedir":{title:"Kira çarpanını hesaplayın",text:"Satış fiyatı ve aylık kirayı girerek brüt amortisman süresini görün.",href:"/hesaplama/kira-carpani",label:"Kira çarpanı hesabını aç →"},
  "ev-pahali-mi":{title:"İlan fiyatını test edin",text:"İlanın net ve brüt metrekare fiyatını TCMB il göstergesiyle kaynak dönemi içinde karşılaştırın.",href:"/ev-analizi",label:"Ev Analizi’ni aç →"},

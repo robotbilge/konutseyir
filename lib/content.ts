@@ -1,3 +1,4 @@
+import {installmentGuide,installmentGuideSections} from './installment-guide';
 import {energyGuide,energyGuideSections} from './energy-guide';
 import {urbanGuide,urbanGuideSections} from './urban-article';
 import {urbanSlug} from './urban-sources';
@@ -137,12 +138,13 @@ export const guides=[
       "KFE fiyat hareketini izler; ilan için otomatik ekspertiz üretmez. Sonuç okumaya başlamadan serinin adını, kapsamını, birimini ve dönemini kontrol edin."
     ]
   },
- urbanGuide, energyGuide
+ urbanGuide, energyGuide, installmentGuide
 ] as const;
 
 export type GuideSection={heading:string;paragraphs:string[];bullets?:string[]};
 
 export const guideExpansions:Record<string,GuideSection[]>={
+ [installmentGuide.slug]:installmentGuideSections,
  [energyGuide.slug]:energyGuideSections,
  [urbanSlug]:urbanGuideSections,
   "kira-carpani-nedir": [
