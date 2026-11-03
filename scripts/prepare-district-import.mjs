@@ -31,7 +31,7 @@ export function prepareDistrictSql(raw){
   const [city, district, period, totalRaw,source]=record.map(x=>x.trim());
   if(!allowedCities.has(city))throw Error('Desteklenmeyen şehir: '+city);
   if(!district||district.length>100||/[<>\x00-\x1f]/.test(district))throw Error('Geçersiz ilçe adı (satır '+(index+2)+')');
-  if(!/^20\d{2}-(0[1-9]|1[0-2])$/.test(period)||period>'2026-11'||period<'2015-01')throw Error('Geçersiz dönem: '+period);
+  if(!/^20\d{2}-(0[1-9]|1[0-2])$/.test(period)||period>new Date().toISOString().slice(0,7)||period<'2015-01')throw Error('Geçersiz dönem: '+period);
   if(!/^(0|[1-9]\d*)$/.test(totalRaw)||Number(totalRaw)>1000000)throw Error('Geçersiz satış adedi: '+totalRaw);
   const url=new URL(source);
   if(url.protocol!=='https:'||!['veriportali.tuik.gov.tr','data.tuik.gov.tr','veriistanbul.ito.org.tr'].includes(url.hostname))throw Error('Resmî/onaylı kaynak adresi gerekli (satır '+(index+2)+')');
