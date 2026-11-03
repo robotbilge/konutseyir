@@ -1,9 +1,11 @@
+import {saleChainGuide,saleChainGuideWorkbook} from './sale-chain-guide';
 import {installmentGuide,installmentGuideWorkbook} from './installment-guide';
 import {energyGuide,energyGuideWorkbook} from './energy-guide';
 import {urbanGuideWorkbook} from './urban-article';
 import {urbanSlug} from './urban-sources';
 export type GuideWorkbook={question:string;deliverable:string;rows:{finding:string;evidence:string;action:string}[]};
 export const guideWorkbooks:Record<string,GuideWorkbook>={
+ [saleChainGuide.slug]:saleChainGuideWorkbook,
  [installmentGuide.slug]:installmentGuideWorkbook,
  [energyGuide.slug]:energyGuideWorkbook,
  [urbanSlug]:urbanGuideWorkbook,
