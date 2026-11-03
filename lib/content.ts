@@ -1,3 +1,4 @@
+import {saleChainGuide,saleChainGuideSections} from './sale-chain-guide';
 import {installmentGuide,installmentGuideSections} from './installment-guide';
 import {energyGuide,energyGuideSections} from './energy-guide';
 import {urbanGuide,urbanGuideSections} from './urban-article';
@@ -138,12 +139,13 @@ export const guides=[
       "KFE fiyat hareketini izler; ilan için otomatik ekspertiz üretmez. Sonuç okumaya başlamadan serinin adını, kapsamını, birimini ve dönemini kontrol edin."
     ]
   },
- urbanGuide, energyGuide, installmentGuide
+ urbanGuide, energyGuide, installmentGuide, saleChainGuide
 ] as const;
 
 export type GuideSection={heading:string;paragraphs:string[];bullets?:string[]};
 
 export const guideExpansions:Record<string,GuideSection[]>={
+ [saleChainGuide.slug]:saleChainGuideSections,
  [installmentGuide.slug]:installmentGuideSections,
  [energyGuide.slug]:energyGuideSections,
  [urbanSlug]:urbanGuideSections,
