@@ -1,17 +1,17 @@
-import {ArrowUpRight,BadgeCheck,Calculator as CalculatorIcon,Database,Info,SearchCheck,ShieldCheck} from 'lucide-react';
+import {ArrowUpRight,Calculator as CalculatorIcon,Database,Info,SearchCheck,ShieldCheck} from 'lucide-react';
 import {Header,Footer} from '../components/site-chrome';
 import {LatestNews,MarketSnapshot} from '../components/live-data';
 
-export default function Home(){return <><Header/><main className="home-page">
+export default function Home(){return <><Header tagline/><main className="home-page">
   <section className="hero home-hero">
+    <div className="hero-proof hero-proof-top" aria-label="KonutSeyir kullanım avantajları"><span><ShieldCheck/> Hesaplamaya üyelik olmadan başlayın</span><span><CalculatorIcon/> Verilerin hangi döneme ait olduğunu görün</span><span><Database/> Hesaplama varsayımlarını kendiniz belirleyin</span></div>
     <div className="hero-copy">
-      <div className="trust-label"><BadgeCheck size={16}/> Kamu verileriyle finansal karar desteği</div>
       <p className="eyebrow">SATILIK KONUT İLANI ANALİZİ</p>
       <h1>Satılık konut ilanını m² fiyatı ve <em>kira göstergeleriyle</em> karşılaştırın.</h1>
       <p className="hero-tagline">Bir evin fiyatını değil, <strong>yatırım mantığını</strong> ölçün.</p>
       <p className="lead">İlan bilgilerini bağlantıdan aktarın. Brüt m² fiyatını TCMB’nin il göstergesiyle; kira, getiri ve amortismanı ayrı ayrı inceleyin.</p>
       <div className="hero-actions"><a className="primary-link" href="/ev-analizi">İlanı analiz et <ArrowUpRight size={17}/></a><a className="text-link" href="/veri">Veri kaynakları <ArrowUpRight size={16}/></a></div>
-      <div className="hero-proof"><span><ShieldCheck/> Hesaplamaya üyelik olmadan başlayın</span><span><CalculatorIcon/> Verilerin hangi döneme ait olduğunu görün</span><span><Database/> Hesaplama varsayımlarını kendiniz belirleyin</span></div>
+      
     </div>
     <aside className="hero-analysis-preview" aria-labelledby="hero-analysis-title">
       <p className="eyebrow">RAPOR ÖNİZLEMESİ</p>
