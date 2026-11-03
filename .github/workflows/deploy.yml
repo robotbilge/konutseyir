@@ -57,7 +57,7 @@ jobs:
         run: node scripts/live-seo-check.mjs konutseyir
   deploy-worker:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    needs: verify
+    needs: [verify, deploy-pages]
     runs-on: ubuntu-latest
     environment: production
     env:
@@ -87,6 +87,8 @@ jobs:
         run: printf '%s' "$NEWS_ADMIN_PASSWORD" | pnpm exec wrangler secret put NEWS_ADMIN_PASSWORD --config worker/wrangler.jsonc
       - name: Verify district APIs after Worker rollout
         run: node scripts/verify-ux-and-districts.mjs --api-only
+      - name: Build guide publication manifest
+        run: pnpm build
       - name: Verify live guides and notify subscribers
         run: node scripts/notify-guide-publications.mjs
 
