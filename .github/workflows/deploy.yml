@@ -24,7 +24,38 @@ jobs:
       - run: pnpm build
       - run: pnpm test
       - run: node scripts/verify-ux-and-districts.mjs --local
-  deploy:
+  deploy-pages:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ea5e08f7044d873900c9c8b6b4cfdb8f
+      VITE_CONTACT_EMAIL: ${{ vars.VITE_CONTACT_EMAIL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - name: Check Cloudflare Pages credentials
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Ensure Pages project exists
+        continue-on-error: true
+        run: pnpm exec wrangler pages project create konutseyir --production-branch main
+      - name: Deploy Pages (independent of Worker release)
+        run: pnpm exec wrangler pages deploy dist --project-name konutseyir --branch main
+      - name: Verify live UX and district API coverage
+        run: node scripts/verify-ux-and-districts.mjs
+      - name: Verify live news indexing and critical pages
+        run: node scripts/live-seo-check.mjs konutseyir
+  deploy-worker:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: verify
     runs-on: ubuntu-latest
@@ -36,7 +67,6 @@ jobs:
       EVDS_CPI_SERIES: ${{ vars.EVDS_CPI_SERIES }}
       EVDS_HOUSING_SERIES: ${{ vars.EVDS_HOUSING_SERIES }}
       EVDS_DEPOSIT_SERIES: ${{ vars.EVDS_DEPOSIT_SERIES }}
-      VITE_CONTACT_EMAIL: ${{ vars.VITE_CONTACT_EMAIL }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -44,29 +74,19 @@ jobs:
         with:
           node-version: '24'
           cache: pnpm
-      - name: Check deployment configuration
+      - name: Check Worker deployment credentials
         run: |
           test -n "$CLOUDFLARE_API_TOKEN"
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$NEWS_ADMIN_PASSWORD"
       - run: pnpm install --frozen-lockfile
       - name: Apply D1 schema
-        continue-on-error: true
         run: pnpm exec wrangler d1 migrations apply konutseyir-data --remote --config worker/wrangler.jsonc
       - run: pnpm exec wrangler deploy --config worker/wrangler.jsonc
       - name: Set news admin password secret
         run: printf '%s' "$NEWS_ADMIN_PASSWORD" | pnpm exec wrangler secret put NEWS_ADMIN_PASSWORD --config worker/wrangler.jsonc
-      - run: pnpm build
-      - name: Ensure Pages project exists
-        continue-on-error: true
-        run: pnpm exec wrangler pages project create konutseyir --production-branch main
-      - run: pnpm exec wrangler pages deploy dist --project-name konutseyir --branch main
-      - name: Verify live UX and district API coverage
-        run: node scripts/verify-ux-and-districts.mjs
       - name: Verify live guides and notify subscribers
         run: node scripts/notify-guide-publications.mjs
-      - name: Verify live news indexing and critical pages
-        run: node scripts/live-seo-check.mjs konutseyir
 
   preview:
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
