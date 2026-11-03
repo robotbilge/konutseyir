@@ -2,7 +2,7 @@ import {ArrowUpRight,BadgeCheck,Calculator as CalculatorIcon,Database,Info,Searc
 import {Header,Footer} from '../components/site-chrome';
 import {LatestNews,MarketSnapshot} from '../components/live-data';
 
-export default function Home(){return <><Header tagline/><main className="home-page">
+export default function Home(){return <><Header/><main className="home-page">
   <section className="hero home-hero">
     <div className="hero-proof hero-proof-top" aria-label="KonutSeyir kullanım avantajları"><span><ShieldCheck/> Hesaplamaya üyelik olmadan başlayın</span><span><CalculatorIcon/> Verilerin hangi döneme ait olduğunu görün</span><span><Database/> Hesaplama varsayımlarını kendiniz belirleyin</span></div>
     <div className="hero-copy">

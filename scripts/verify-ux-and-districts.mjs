@@ -10,7 +10,7 @@ const verify = (name, ok) => {checks.push({name, ok}); console.log((ok ? 'PASS '
 const home = readFileSync('app/page.tsx','utf8');
 const footer = readFileSync('components/site-chrome.tsx','utf8');
 const css = readFileSync('src/style.css','utf8');
-verify('logo altında finansal karar desteği',footer.includes('header-brand-tagline') && footer.includes('Kamu verileriyle finansal karar desteği') && home.includes('<Header tagline/>'));
+verify('logo altında finansal karar desteği',footer.includes('header-brand-tagline') && footer.includes('Kamu verileriyle finansal karar desteği') && home.includes('<Header/>') && !footer.includes('tagline&&'));
 verify('ana sayfada ilçe liste bileşeni kaldırılmış',!home.includes('<DistrictSalesRanking'));
 verify('ana sayfada önceki dönem uyarısı yok',!home.includes('İlçe verisi 2026-08'));
 verify('rehberler buton görünümünde',home.includes('reading-action-buttons')&&css.includes('.reading-action-buttons a'));
@@ -23,6 +23,12 @@ if (!local){
   verify('canlı kullanıcı avantajları üst sırada',page.includes('hero-proof-top')&&page.includes('Hesaplamaya üyelik olmadan başlayın'));
   verify('canlı ana sayfada eski ilçe uyarısı yok',!page.includes('İlçe verisi 2026-08'));
   verify('canlı footer alan adı bağlantısı',/<a[^>]+href="https:\/\/konutseyir\.com\/"[^>]*>konutseyir\.com<\/a>/.test(page));
+  }
+  if(pagesOnly){
+    for(const path of ['/rehber/','/ev-analizi/','/sehirler/ankara/']){
+      const response=await fetch(base+path,{signal:AbortSignal.timeout(15000)});
+      verify(path+' logo altında finansal karar desteği',response.ok&&/<span class="header-brand-tagline">Kamu verileriyle finansal karar desteği<\/span>/.test(await response.text()));
+    }
   }
   if(!pagesOnly){
   const cities=['istanbul','ankara','izmir','adana','antalya','bursa','kocaeli','konya','gaziantep','trabzon','balikesir','mugla'];
