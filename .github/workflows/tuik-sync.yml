@@ -72,3 +72,7 @@ jobs:
           else
             echo "TÜİK yanıtında ilçe kaydı bulunmadı; mevcut ilçe verileri korunuyor."
           fi
+      - name: İlçe satış kapsamını doğrula
+        if: always()
+        run: |
+          pnpm exec wrangler d1 execute konutseyir-data --remote --config worker/wrangler.jsonc --command "SELECT city_slug, MAX(period) AS latest_period, COUNT(*) AS row_count FROM district_sales GROUP BY city_slug ORDER BY city_slug"
