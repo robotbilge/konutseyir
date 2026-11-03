@@ -18,6 +18,12 @@ export function CommissionCalculator(){
  const[p,s]=useState({price:5000000,vat:20}); const calc=standardResult(commission,p),r=calc.value;
  return <Box><h2>Emlak danışmanı hizmet bedeli</h2><div className="fields"><N min={1} label="Satış bedeli (TL)" value={p.price} onChange={v=>s({...p,price:v})}/><N min={0} max={100} label="KDV (%)" value={p.vat} onChange={v=>s({...p,vat:v})}/></div>{!r?<p className="error" role="status">{calc.error}</p>:<div className="metric-row"><p>Eşit paylaşımda bir taraf (%2) <b>{money(r.side)}</b></p><p>KDV <b>{money(r.vat)}</b></p><p>Eşit paylaşımda KDV dahil <b>{money(r.total)}</b></p><p>İki taraf toplam tavan <b>{money(r.all)}</b></p></div>}<small>Satış aracılık hizmet bedeli KDV hariç satış bedelinin %4'ünü aşamaz; aksi kararlaştırılmadıkça taraflar arasında eşit paylaşılır.</small></Box>
 }
+const rentMoney = new Intl.NumberFormat('tr-TR', {
+ style:'currency', currency:'TRY', minimumFractionDigits:2, maximumFractionDigits:2, 
+});
+// Remove floating-point noise before rounding up to a kuruş.
+const formatRentMoney = (amount:number) => rentMoney.format(Math.ceil(Number((amount * 100).toPrecision(15))) / 100);
+
 export function RentIncreaseCalculator(){
  const[p,s]=useState({rent:30000,rate:Number.NaN});
  const cpi=useMarketData().find(item=>item.series==='cpi');
@@ -25,7 +31,7 @@ export function RentIncreaseCalculator(){
  const period=liveRate!==null&&Number.isFinite(liveRate)?(cpi?.twelveMonthAveragePeriod??cpi?.period??''):'';
  useEffect(()=>{if(liveRate!==null&&Number.isFinite(liveRate))s(x=>({...x,rate:liveRate}))},[liveRate]);
  const calc=standardResult(rentIncrease,p),r=calc.value;
- return <Box><h2>Kira artış oranı hesaplama</h2><div className="fields"><N min={1} label="Mevcut aylık kira (TL)" value={p.rent} onChange={v=>s({...p,rent:v})}/><N label="TÜFE 12 aylık ortalama (%)" value={p.rate} onChange={v=>s({...p,rate:v})} hint={period?'Resmî TÜFE 12 aylık ortalama verisi: '+period+'. İsterseniz oranı değiştirebilirsiniz.':'Resmî veri yüklenemezse sözleşmenin yenilendiği aya ait TÜİK oranını girin.'}/></div>{!r?<p className="error" role="status">{calc.error}</p>:<div className="metric-row"><p>Azami artış tutarı <b>{money(r.increase)}</b></p><p>Artış sonrası kira <b>{money(r.next)}</b></p></div>}<small>Kaynak: <a href="https://veriportali.tuik.gov.tr/" target="_blank" rel="noreferrer">TÜİK TÜFE</a> / TCMB EVDS. Oran, son 12 aylık TÜFE endeksi ortalamasının önceki 12 aylık ortalamaya göre değişimidir. Dönem: {period||'henüz alınamadı'}. Konut kiraları için sözleşme ve mevzuat durumunu ayrıca kontrol edin.</small></Box>
+ return <Box><h2>Kira artış oranı hesaplama</h2><div className="fields"><N min={1} label="Mevcut aylık kira (TL)" value={p.rent} onChange={v=>s({...p,rent:v})}/><N label="TÜFE 12 aylık ortalama (%)" value={p.rate} onChange={v=>s({...p,rate:v})} hint={period?'Resmî TÜFE 12 aylık ortalama verisi: '+period+'. İsterseniz oranı değiştirebilirsiniz.':'Resmî veri yüklenemezse sözleşmenin yenilendiği aya ait TÜİK oranını girin.'}/></div>{!r?<p className="error" role="status">{calc.error}</p>:<div className="metric-row"><p>Azami artış tutarı <b>{formatRentMoney(r.increase)}</b></p><p>Artış sonrası kira <b>{formatRentMoney(r.next)}</b></p></div>}<small>Kaynak: <a href="https://veriportali.tuik.gov.tr/" target="_blank" rel="noreferrer">TÜİK TÜFE</a> / TCMB EVDS. Oran, son 12 aylık TÜFE endeksi ortalamasının önceki 12 aylık ortalamaya göre değişimidir. Dönem: {period||'henüz alınamadı'}. Konut kiraları için sözleşme ve mevzuat durumunu ayrıca kontrol edin.</small></Box>
 }
 export function GoldPropertyCalculator(){
  const[p,s]=useState({price:5000000,gram:0,ownedGrams:250,downPaymentRate:20}); const[auto,setAuto]=useState<number|null>(null); const[loading,setLoading]=useState(true);const[transferred,setTransferred]=useState<{reference:number,priceAt:string|null}|null>(null);const referenceEdited=useRef(false);
