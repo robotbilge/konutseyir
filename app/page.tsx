@@ -1,4 +1,4 @@
-import {ArrowUpRight,Calculator as CalculatorIcon,Database,Info,SearchCheck,ShieldCheck} from 'lucide-react';
+import {ArrowUpRight,BadgeCheck,Calculator as CalculatorIcon,Database,Info,SearchCheck,ShieldCheck} from 'lucide-react';
 import {Header,Footer} from '../components/site-chrome';
 import {LatestNews,MarketSnapshot} from '../components/live-data';
 
