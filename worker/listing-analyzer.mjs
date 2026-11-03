@@ -232,8 +232,7 @@ export async function fetchListing(url) {
   const response = await fetch(url, {
     redirect: "manual",
     headers: {
-      Accept: "text/html,application/xhtml+xml",
-      "User-Agent": "KonutSeyir/1.0 (+https://konutseyir.com/veri)"
+      Accept: "text/html,application/xhtml+xml"
     },
     signal: AbortSignal.timeout(8000)
   });
