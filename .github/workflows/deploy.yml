@@ -23,6 +23,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm build
       - run: pnpm test
+      - run: node scripts/verify-ux-and-districts.mjs --local
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: verify
@@ -60,6 +61,8 @@ jobs:
         continue-on-error: true
         run: pnpm exec wrangler pages project create konutseyir --production-branch main
       - run: pnpm exec wrangler pages deploy dist --project-name konutseyir --branch main
+      - name: Verify live UX and district API coverage
+        run: node scripts/verify-ux-and-districts.mjs
       - name: Verify live guides and notify subscribers
         run: node scripts/notify-guide-publications.mjs
       - name: Verify live news indexing and critical pages
