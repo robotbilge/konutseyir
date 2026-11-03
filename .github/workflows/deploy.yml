@@ -51,6 +51,12 @@ jobs:
         run: pnpm exec wrangler pages project create konutseyir --production-branch main
       - name: Deploy Pages (independent of Worker release)
         run: pnpm exec wrangler pages deploy dist --project-name konutseyir --branch main
+      - name: Save deployed guide manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployed-guide-manifest
+          path: dist/guide-publications.json
+          if-no-files-found: error
       - name: Verify live homepage layout
         run: node scripts/verify-ux-and-districts.mjs --pages-only
       - name: Verify live news indexing and critical pages
@@ -87,8 +93,11 @@ jobs:
         run: printf '%s' "$NEWS_ADMIN_PASSWORD" | pnpm exec wrangler secret put NEWS_ADMIN_PASSWORD --config worker/wrangler.jsonc
       - name: Verify district APIs after Worker rollout
         run: node scripts/verify-ux-and-districts.mjs --api-only
-      - name: Build guide publication manifest
-        run: pnpm build
+      - name: Download deployed guide manifest
+        uses: actions/download-artifact@v4
+        with:
+          name: deployed-guide-manifest
+          path: dist
       - name: Verify live guides and notify subscribers
         run: node scripts/notify-guide-publications.mjs
 
