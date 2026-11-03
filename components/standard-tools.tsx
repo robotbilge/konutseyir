@@ -7,7 +7,7 @@ import {parseTrNumber} from '../lib/gold-housing.mjs';
 import {useMarketData} from './live-data';
 
 const pct=(n:number)=>`%${n.toLocaleString('tr-TR',{maximumFractionDigits:2})}`;
-function N({label,value,onChange,hint,min=0,max=1e12,whole=false}:{label:string,value:number,onChange:(v:number)=>void,hint?:string,min?:number,max?:number,whole?:boolean}){return <label className="calc-field"><span>{label}</span><input aria-invalid={!Number.isFinite(value)||value<min||value>max} required type={whole?"text":"number"} inputMode={whole?"numeric":"decimal"} step={whole?"1":"any"} min={min} max={max} value={Number.isNaN(value)?'':whole?formatWholeLira(value):value} onChange={e=>onChange(e.target.value===''?NaN:whole?wholeLira(parseTrNumber(e.target.value)??NaN):Number(e.target.value))}/>{hint&&<small>{hint}</small>}</label>}
+function N({label,value,onChange,hint,min=0,max=1e12,whole=false,displayValue}:{label:string,value:number,onChange:(v:number)=>void,hint?:string,min?:number,max?:number,whole?:boolean,displayValue?:string}){return <label className="calc-field"><span>{label}</span><input aria-invalid={!Number.isFinite(value)||value<min||value>max} required type={whole?"text":"number"} inputMode={whole?"numeric":"decimal"} step={whole?"1":"any"} min={min} max={max} value={Number.isNaN(value)?'':whole?formatWholeLira(value):displayValue??value} onChange={e=>onChange(e.target.value===''?NaN:whole?wholeLira(parseTrNumber(e.target.value)??NaN):Number(e.target.value))}/>{hint&&<small>{hint}</small>}</label>}
 function Box({children}:{children:React.ReactNode}){return <section className="focused-calculator"><div className="focused-form">{children}</div></section>}
 
 export function DeedFeeCalculator(){
@@ -22,16 +22,19 @@ const rentMoney = new Intl.NumberFormat('tr-TR', {
  style:'currency', currency:'TRY', minimumFractionDigits:2, maximumFractionDigits:2, 
 });
 // Remove floating-point noise before rounding up to a kuruş.
-const formatRentMoney = (amount:number) => rentMoney.format(Math.ceil(Number((amount * 100).toPrecision(15))) / 100);
+const ceilToHundredth = (value:number) => Math.ceil(Number((value * 100).toPrecision(15))) / 100;
+const formatRentMoney = (amount:number) => rentMoney.format(ceilToHundredth(amount));
 
 export function RentIncreaseCalculator(){
  const[p,s]=useState({rent:30000,rate:Number.NaN});
  const cpi=useMarketData().find(item=>item.series==='cpi');
  const liveRate=cpi?.twelveMonthAverage??null;
+ const [rateEdited,setRateEdited]=useState(false);
+ const roundedLiveRate=liveRate===null?null:ceilToHundredth(liveRate);
  const period=liveRate!==null&&Number.isFinite(liveRate)?(cpi?.twelveMonthAveragePeriod??cpi?.period??''):'';
- useEffect(()=>{if(liveRate!==null&&Number.isFinite(liveRate))s(x=>({...x,rate:liveRate}))},[liveRate]);
+ useEffect(()=>{if(!rateEdited&&roundedLiveRate!==null&&Number.isFinite(roundedLiveRate))s(x=>({...x,rate:roundedLiveRate}))},[rateEdited,roundedLiveRate]);
  const calc=standardResult(rentIncrease,p),r=calc.value;
- return <Box><h2>Kira artış oranı hesaplama</h2><div className="fields"><N min={1} label="Mevcut aylık kira (TL)" value={p.rent} onChange={v=>s({...p,rent:v})}/><N label="TÜFE 12 aylık ortalama (%)" value={p.rate} onChange={v=>s({...p,rate:v})} hint={period?'Resmî TÜFE 12 aylık ortalama verisi: '+period+'. İsterseniz oranı değiştirebilirsiniz.':'Resmî veri yüklenemezse sözleşmenin yenilendiği aya ait TÜİK oranını girin.'}/></div>{!r?<p className="error" role="status">{calc.error}</p>:<div className="metric-row"><p>Azami artış tutarı <b>{formatRentMoney(r.increase)}</b></p><p>Artış sonrası kira <b>{formatRentMoney(r.next)}</b></p></div>}<small>Kaynak: <a href="https://veriportali.tuik.gov.tr/" target="_blank" rel="noreferrer">TÜİK TÜFE</a> / TCMB EVDS. Oran, son 12 aylık TÜFE endeksi ortalamasının önceki 12 aylık ortalamaya göre değişimidir. Dönem: {period||'henüz alınamadı'}. Konut kiraları için sözleşme ve mevzuat durumunu ayrıca kontrol edin.</small></Box>
+ return <Box><h2>Kira artış oranı hesaplama</h2><div className="fields"><N min={1} label="Mevcut aylık kira (TL)" value={p.rent} onChange={v=>s({...p,rent:v})}/><N label="TÜFE 12 aylık ortalama (%)" value={p.rate} displayValue={!rateEdited&&Number.isFinite(p.rate)?p.rate.toFixed(2):undefined} onChange={v=>{setRateEdited(true);s({...p,rate:v})}} hint={period?'Resmî TÜFE 12 aylık ortalama verisi: '+period+'. Hesapta yüzde puanın yüzde birine yukarı yuvarlanmış oran kullanılır. Oranı değiştirebilirsiniz.':'Resmî veri yüklenemezse sözleşmenin yenilendiği aya ait TÜİK oranını girin.'}/></div>{!r?<p className="error" role="status">{calc.error}</p>:<div className="metric-row"><p>Azami artış tutarı <b>{formatRentMoney(r.increase)}</b></p><p>Artış sonrası kira <b>{formatRentMoney(r.next)}</b></p></div>}<small>Kaynak: <a href="https://veriportali.tuik.gov.tr/" target="_blank" rel="noreferrer">TÜİK TÜFE</a> / TCMB EVDS. Oran, son 12 aylık TÜFE endeksi ortalamasının önceki 12 aylık ortalamaya göre değişimidir. Dönem: {period||'henüz alınamadı'}. Konut kiraları için sözleşme ve mevzuat durumunu ayrıca kontrol edin.</small></Box>
 }
 export function GoldPropertyCalculator(){
  const[p,s]=useState({price:5000000,gram:0,ownedGrams:250,downPaymentRate:20}); const[auto,setAuto]=useState<number|null>(null); const[loading,setLoading]=useState(true);const[transferred,setTransferred]=useState<{reference:number,priceAt:string|null}|null>(null);const referenceEdited=useRef(false);
