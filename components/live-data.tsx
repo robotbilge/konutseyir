@@ -1,4 +1,5 @@
 import {IndexReading,SalesReading} from './market-reading';
+import {ceilToHundredth} from '../lib/standard-math.mjs';
 import {useEffect,useState} from 'react';
 import {ArrowUpRight,Landmark,Newspaper,Percent} from 'lucide-react';
 
@@ -11,12 +12,14 @@ export function useMarketData(){
 const pct=(value:number|null)=>value==null?'—':`%${value.toLocaleString('tr-TR',{maximumFractionDigits:2})}`;
 export function MarketSnapshot(){
  const data=useMarketData(),policy=data.find(x=>x.series==='policy'),cpi=data.find(x=>x.series==='cpi');
+ const average=cpi?.twelveMonthAverage??null;
  const cards=[
   {icon:Percent,label:'TCMB politika faizi',value:pct(policy?.value??null),detail:policy?.period||'Veri bekleniyor',policy:true},
-  {icon:Landmark,label:'TÜFE yıllık değişim',value:pct(cpi?.annualChange??null),detail:cpi?.period||'Veri bekleniyor',policy:false}
+  {icon:Landmark,label:'TÜFE yıllık değişim',value:pct(cpi?.annualChange??null),detail:cpi?.period,policy:false},
+  {icon:Landmark,label:'TÜFE 12 aylık ortalama (%)',value:average===null?'—':`%${ceilToHundredth(average).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})}`,detail:average===null?null:cpi?.twelveMonthAveragePeriod??cpi?.period,policy:false}
  ];
- const cpiPeriod=cpi?.period&&Number.isFinite(Date.parse(cpi.period+'T00:00:00Z'))?new Intl.DateTimeFormat('tr-TR',{month:'long',year:'numeric',timeZone:'Europe/Istanbul'}).format(new Date(cpi.period+'T00:00:00Z')):'Veri bekleniyor';
- return <section className="market-snapshot" aria-label="Güncel piyasa göstergeleri"><div><p className="eyebrow">RESMÎ VERİLER</p><h2>Faiz ve enflasyon verileri</h2><a href="/veri">Kaynak ve çekim saatleri →</a></div>{cards.map(({icon:Icon,...item})=><article key={item.label}><Icon/><span>{item.label}</span><strong>{item.value}</strong><small>{item.policy?'Yürürlük tarihi':'Dönem'}: {item.policy?item.detail:cpiPeriod}</small>{!item.policy&&<><small>Aylık yayımlanır · TÜİK / TCMB EVDS</small><small>Son kontrol: {cpi?.retrievedAt?new Date(cpi.retrievedAt).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'}):'—'} (TSİ)</small>{cpi&&cpi.status!=='available'&&<small role="status">Güncel kaynak doğrulanamadı; son başarılı dönem gösteriliyor.</small>}</>}{item.policy&&<><small>Son kontrol: {policy?.retrievedAt?new Date(policy.retrievedAt).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'}):'—'} (TSİ)</small>{policy?.status!=='available'&&<small role="status">{policy?.value!=null?'Güncel kaynak doğrulanamadı; son başarılı kayıt gösteriliyor.':'Politika faizi şu anda doğrulanamıyor.'}</small>}</>}</article>)}</section>
+ const cpiPeriod=(period?:string|null)=>period&&Number.isFinite(Date.parse(period+'T00:00:00Z'))?new Intl.DateTimeFormat('tr-TR',{month:'long',year:'numeric',timeZone:'Europe/Istanbul'}).format(new Date(period+'T00:00:00Z')):'Veri bekleniyor';
+ return <section className="market-snapshot" aria-label="Güncel piyasa göstergeleri"><div><p className="eyebrow">RESMÎ VERİLER</p><h2>Faiz ve enflasyon verileri</h2><a href="/veri">Kaynak ve çekim saatleri →</a></div>{cards.map(({icon:Icon,...item})=><article key={item.label}><Icon/><span>{item.label}</span><strong>{item.value}</strong><small>{item.policy?'Yürürlük tarihi':'Dönem'}: {item.policy?item.detail:cpiPeriod(item.detail)}</small>{!item.policy&&<><small>Aylık yayımlanır · TÜİK / TCMB EVDS</small><small>Son kontrol: {cpi?.retrievedAt?new Date(cpi.retrievedAt).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'}):'—'} (TSİ)</small>{cpi&&cpi.status!=='available'&&<small role="status">Güncel kaynak doğrulanamadı; son başarılı dönem gösteriliyor.</small>}</>}{item.policy&&<><small>Son kontrol: {policy?.retrievedAt?new Date(policy.retrievedAt).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'}):'—'} (TSİ)</small>{policy?.status!=='available'&&<small role="status">{policy?.value!=null?'Güncel kaynak doğrulanamadı; son başarılı kayıt gösteriliyor.':'Politika faizi şu anda doğrulanamıyor.'}</small>}</>}</article>)}</section>
 }
 
 export function LatestNews(){

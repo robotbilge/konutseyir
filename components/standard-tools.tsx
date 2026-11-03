@@ -1,4 +1,4 @@
-import {deedFee,commission,rentIncrease,propertyShare,standardResult} from '../lib/standard-math.mjs';
+import {ceilToHundredth,deedFee,commission,rentIncrease,propertyShare,standardResult} from '../lib/standard-math.mjs';
 import {useEffect,useRef,useState} from 'react';
 import {money} from './calculator';
 import {goldPropertyScenario} from '../lib/gold-housing.mjs';
@@ -21,8 +21,6 @@ export function CommissionCalculator(){
 const rentMoney = new Intl.NumberFormat('tr-TR', {
  style:'currency', currency:'TRY', minimumFractionDigits:2, maximumFractionDigits:2, 
 });
-// Remove floating-point noise before rounding up to a kuruş.
-const ceilToHundredth = (value:number) => Math.ceil(Number((value * 100).toPrecision(15))) / 100;
 const formatRentMoney = (amount:number) => rentMoney.format(ceilToHundredth(amount));
 
 export function RentIncreaseCalculator(){
