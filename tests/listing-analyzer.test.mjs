@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {getProvider,parseListingData,analyzeListing,valuation,parseJsonLd,parseListingPage} from '../worker/listing-analyzer.mjs';
+import {getProvider,parseListingData,analyzeListing,valuation,parseJsonLd,parseListingPage,fetchListing} from '../worker/listing-analyzer.mjs';
 
 test('only HTTPS listing pages on supported hosts are accepted',()=>{
  assert.equal(getProvider('https://www.sahibinden.com/ilan/emlak-konut-satilik-ev-123'), 'sahibinden');
@@ -59,4 +59,27 @@ test('Hepsiemlak page text extracts price, both area types, rent and URL locatio
  assert.equal(result.district,'Kadıköy');
  assert.equal(result.neighborhood,'Erenköy');
  assert.equal(result.monthlyRent,60000);
+});
+
+
+test('listing fetch follows only same-provider redirects and returns safe metadata',async()=>{
+ const responses=[
+  new Response(null,{status:302,headers:{location:'https://www.hepsiemlak.com/istanbul-sisli-satilik/daire/1'}}),
+  new Response('<html><body>10.250.000 TL Brüt 120 m2 Net 100 m2</body></html>',{status:200,headers:{'content-type':'text/html; charset=utf-8'}})
+ ];
+ const result=await fetchListing('https://www.hepsiemlak.com/istanbul-sisli-satilik/daire/1',{fetchImpl:async()=>responses.shift()});
+ assert.match(result.html,/10\.250\.000/);
+ assert.equal(result.meta.status,200);
+ assert.equal(result.meta.redirects,1);
+});
+
+test('listing fetch distinguishes access denial and rejects cross-provider redirects',async()=>{
+ await assert.rejects(
+  ()=>fetchListing('https://www.hepsiemlak.com/istanbul-sisli-satilik/daire/1',{fetchImpl:async()=>new Response('Forbidden',{status:403,headers:{'content-type':'text/html'}})}),
+  error=>error.code==='upstream_access_denied'&&error.details.status===403
+ );
+ await assert.rejects(
+  ()=>fetchListing('https://www.hepsiemlak.com/istanbul-sisli-satilik/daire/1',{fetchImpl:async()=>new Response(null,{status:302,headers:{location:'https://evil.example/ilan'}})}),
+  error=>error.code==='invalid_redirect'
+ );
 });
