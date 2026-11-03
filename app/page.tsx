@@ -1,17 +1,17 @@
 import {ArrowUpRight,BadgeCheck,Calculator as CalculatorIcon,Database,Info,SearchCheck,ShieldCheck} from 'lucide-react';
 import {Header,Footer} from '../components/site-chrome';
-import {LatestNews,MarketSnapshot,DistrictSalesRanking} from '../components/live-data';
+import {LatestNews,MarketSnapshot} from '../components/live-data';
 
 export default function Home(){return <><Header/><main className="home-page">
   <section className="hero home-hero">
     <div className="hero-copy">
-      <div className="trust-label"><BadgeCheck size={16}/> Kamu verileriyle karar desteği</div>
+      <div className="trust-label"><BadgeCheck size={16}/> Kamu verileriyle finansal karar desteği</div>
       <p className="eyebrow">SATILIK KONUT İLANI ANALİZİ</p>
       <h1>Satılık konut ilanını m² fiyatı ve <em>kira göstergeleriyle</em> karşılaştırın.</h1>
       <p className="hero-tagline">Bir evin fiyatını değil, <strong>yatırım mantığını</strong> ölçün.</p>
       <p className="lead">İlan bilgilerini bağlantıdan aktarın. Brüt m² fiyatını TCMB’nin il göstergesiyle; kira, getiri ve amortismanı ayrı ayrı inceleyin.</p>
       <div className="hero-actions"><a className="primary-link" href="/ev-analizi">İlanı analiz et <ArrowUpRight size={17}/></a><a className="text-link" href="/veri">Veri kaynakları <ArrowUpRight size={16}/></a></div>
-      <div className="hero-proof"><span><ShieldCheck/> Üyelik gerekmez</span><span><CalculatorIcon/> Kaynak dönemi görünür</span><span><Database/> Varsayımlar size ait</span></div>
+      <div className="hero-proof"><span><ShieldCheck/> Hesaplamaya üyelik olmadan başlayın</span><span><CalculatorIcon/> Verilerin hangi döneme ait olduğunu görün</span><span><Database/> Hesaplama varsayımlarını kendiniz belirleyin</span></div>
     </div>
     <aside className="hero-analysis-preview" aria-labelledby="hero-analysis-title">
       <p className="eyebrow">RAPOR ÖNİZLEMESİ</p>
@@ -57,10 +57,10 @@ export default function Home(){return <><Header/><main className="home-page">
   <MarketSnapshot/>
   <LatestNews/>
   <div className="inner home-content">
-    <section className="home-sales-radar"><div><p className="eyebrow">TÜRKİYE KONUT SATIŞ RADARI</p><h2>En çok konut satılan ilçeleri izleyin</h2><p>Resmî TÜİK kayıtlarında doğrulanmış ilçe kırılımı bulunan şehirlerin satış hareketini inceleyin.</p><DistrictSalesRanking city="istanbul"/></div><a className="primary-link" href="/sehirler">Şehir verilerini incele <ArrowUpRight size={17}/></a></section>
+    <section className="home-sales-radar home-sales-radar-compact"><div><p className="eyebrow">TÜRKİYE KONUT SATIŞ RADARI</p><h2>En çok konut satılan ilçeleri izleyin</h2><p>Şehir bazında konut satışlarını karşılaştırın. Doğrulanmış ilçe verisi bulunan şehirlerde ilçe sıralamasını da inceleyin.</p></div><a className="primary-link" href="/sehirler">Şehir verilerini incele <ArrowUpRight size={17}/></a></section>
 
     <section className="checklist-banner"><div><p className="eyebrow">HIZLI KONTROL LİSTESİ</p><h2>Rakam doğru olsa da ev yanlış olabilir.</h2></div><a href="/kontrol-listesi">Kontrol listesini aç <ArrowUpRight size={18}/></a></section>
-    <section className="guide-intro home-reading-example"><p className="eyebrow">BİR İLANI OKUMA ÖRNEĞİ</p><h2>Aynı ev, iki farklı m² sonucu</h2><p>Öğretici örnek: 5.000.000 TL fiyatlı, 100 m² net ve 125 m² brüt bir konutun net m² fiyatı 50.000 TL; brüt m² fiyatı 40.000 TL’dir. Fark indirim değil, payda farkıdır. İl göstergesi brüt alana dayanıyorsa 50.000 TL ile karşılaştırmak yanıltır.</p><p><a href="/rehber/brut-net-metrekare">Net ve brüt alanı belgeyle doğrulayın →</a> · <a href="/rehber/ev-pahali-mi">Fiyat değerlendirmesini adım adım okuyun →</a></p></section>
+    <section className="guide-intro home-reading-example"><p className="eyebrow">BİR İLANI OKUMA ÖRNEĞİ</p><h2>Aynı ev, iki farklı m² sonucu</h2><p>Öğretici örnek: 5.000.000 TL fiyatlı, 100 m² net ve 125 m² brüt bir konutun net m² fiyatı 50.000 TL; brüt m² fiyatı 40.000 TL’dir. Fark indirim değil, payda farkıdır. İl göstergesi brüt alana dayanıyorsa 50.000 TL ile karşılaştırmak yanıltır.</p><div className="reading-action-buttons"><a href="/rehber/brut-net-metrekare">Net ve brüt alanı doğrulayın <ArrowUpRight size={16}/></a><a href="/rehber/ev-pahali-mi">Fiyat değerlendirme rehberi <ArrowUpRight size={16}/></a></div></section>
     <section id="kontrol" className="official-section"><div><p className="eyebrow">SATIN ALMADAN ÖNCE</p><h2>Resmî kaynaktan kontrol edin</h2><p>KonutSeyir resmî sorgu ekranlarının yerine geçmez; doğru kaynağa yönlendirir.</p></div><div className="official-links"><a href="https://parselsorgu.tkgm.gov.tr/" target="_blank" rel="noreferrer"><SearchCheck/><span><b>TKGM Parsel Sorgu</b><small>Ada ve parsel bilgisini doğrulayın</small></span><ArrowUpRight/></a><a href="https://tdth.afad.gov.tr/" target="_blank" rel="noreferrer"><ShieldCheck/><span><b>AFAD Tehlike Haritası</b><small>Bölgesel deprem tehlikesini inceleyin</small></span><ArrowUpRight/></a><a href="/kontrol-listesi"><BadgeCheck/><span><b>Alım Kontrol Listesi</b><small>Satın alma adımlarını gözden geçirin</small></span><ArrowUpRight/></a></div></section>
   </div>
 </main><Footer/></>}
