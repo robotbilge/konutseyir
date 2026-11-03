@@ -2,6 +2,7 @@ import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 
 const local = process.argv.includes('--local');
+const pagesOnly = process.argv.includes('--pages-only');
 const base = process.env.KONUTSEYIR_URL || 'https://konutseyir.com';
 const checks = [];
 const verify = (name, ok) => {checks.push({name, ok}); console.log((ok ? 'PASS ' : 'FAIL ')+name);};
@@ -20,6 +21,7 @@ if (!local){
   verify('canlı kullanıcı avantajları üst sırada',page.includes('hero-proof-top')&&page.includes('Hesaplamaya üyelik olmadan başlayın'));
   verify('canlı ana sayfada eski ilçe uyarısı yok',!page.includes('İlçe verisi 2026-08'));
   verify('canlı footer alan adı bağlantısı',/<a[^>]+href="https:\/\/konutseyir\.com\/"[^>]*>konutseyir\.com<\/a>/.test(page));
+  if(!pagesOnly){
   const cities=['istanbul','ankara','izmir','adana','antalya','bursa','kocaeli','konya','gaziantep','trabzon','balikesir','mugla'];
   const coverage=[];
   for(const city of cities){
@@ -34,5 +36,6 @@ if (!local){
   }
   console.log('District coverage:',JSON.stringify(coverage));
   console.log('NOT: unavailable olan şehirlerde otomatik ilçe verisi uydurulmaz. Kaynak ve D1 aktarımı ayrıca doğrulanmalıdır.');
+  }
 }
 assert.equal(checks.every(x=>x.ok),true,'Denetim başarısız: '+checks.filter(x=>!x.ok).map(x=>x.name).join(', '));
