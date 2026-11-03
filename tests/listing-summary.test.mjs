@@ -1,3 +1,4 @@
+import {readFileSync} from 'node:fs';
 import test from 'node:test';import assert from 'node:assert/strict';
 import {listingSummary,listingRequestBody} from '../lib/listing-summary.mjs';
 import {monthlyRefreshDue} from '../worker/market-refresh.mjs';
@@ -29,3 +30,12 @@ test('market API refreshes missed CPI observations and reuses them on the next v
 });
 
 test('importing another listing does not send the previous listing fields as overrides',()=>{const form={city:'İstanbul',price:5000000,netArea:100,grossArea:125,monthlyRent:30000};assert.deepEqual(listingRequestBody(form,{url:'https://www.hepsiemlak.com/example',extractOnly:true,listingFetched:true}),{url:'https://www.hepsiemlak.com/example',extractOnly:true});const body=listingRequestBody(form,{url:'https://www.hepsiemlak.com/example',listingFetched:true});assert.equal(body.url,'');assert.equal(body.price,5000000);assert.equal(body.city,'İstanbul');});
+
+test('public listing analysis uses manual input and makes no scraping promise',()=>{
+ const component=readFileSync(new URL('../components/listing-analyzer.tsx',import.meta.url),'utf8');
+ const page=readFileSync(new URL('../app/ev-analizi/page.tsx',import.meta.url),'utf8');
+ assert.doesNotMatch(component,/İlandan bilgileri al|onClick=\{\(\)=>void request\(true\)\}/);
+ assert.doesNotMatch(page,/İlan bilgilerini aktarın/);
+ assert.match(component,/İlan sitelerinden otomatik veri alınmaz/);
+ assert.match(component,/listingRequestBody\(form\)/);
+});
