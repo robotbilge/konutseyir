@@ -11,11 +11,11 @@ const navItems=[
  ["Haberler","/haberler"]
 ];
 
-export function Header({back=false}:{back?:boolean}){
+export function Header({back=false,tagline=false}:{back?:boolean;tagline?:boolean}){
  const[open,setOpen]=useState(false);
  return <header className="site-header">
   <div className="topbar">
-   <a className="brand" href="/" aria-label="KonutSeyir ana sayfa"><span><Building2 size={20}/></span><span>Konut<b>Seyir</b></span></a>
+   <div className="header-brand-block"><a className="brand" href="/" aria-label="KonutSeyir ana sayfa"><span><Building2 size={20}/></span><span>Konut<b>Seyir</b></span></a>{tagline&&<span className="header-brand-tagline">Kamu verileriyle finansal karar desteği</span>}</div>
    <button className="menu-button" type="button" aria-label={open?"Menüyü kapat":"Menüyü aç"} aria-expanded={open} onClick={()=>setOpen(v=>!v)}>{open?<X/>:<Menu/>}</button>
    <nav className={open?"open":""} aria-label="Ana menü">{navItems.map(([label,href])=><a key={href} href={href} onClick={()=>setOpen(false)}>{label}</a>)}</nav>
    <a className="network-link" href="https://altinseyir.com/hesaplama#araclar" target="_blank" rel="noopener noreferrer" title="Altın fiyatları ve altın hesaplama araçları"><Coins size={16}/> Altın araçları <ArrowUpRight size={14}/></a><a className="header-cta" href="/ev-analizi/">Konutunu analiz et <ArrowUpRight size={16}/></a>
