@@ -257,13 +257,31 @@ async function tcmbProvinceValue(env,province,kind,groupCode,force=false){
 async function tcmbListingRequest(request,env){
  if(Number(request.headers.get('Content-Length')||0)>20000)return json({error:'İstek boyutu çok büyük.'},413,'no-store');
  let body;try{body=await request.json()}catch{return json({error:'Geçersiz JSON isteği.'},400,'no-store')}
- let scraped={},fetchState='not_requested';
+ let scraped={},fetchState='not_requested',fetchErrorCode=null,fetchMeta=null;
  const target=typeof body?.url==='string'?body.url.trim():'';
  if(target){
   const provider=getProvider(target);
   if(!provider)return json({error:'Yalnızca Sahibinden, Hepsiemlak veya Emlakjet ilan bağlantıları kullanılabilir.'},400,'no-store');
-   try{scraped=await extractHtml(await fetchListing(target),provider,target);fetchState='fetched'}
-  catch(error){fetchState=error?.name==='TimeoutError'?'timeout':'unavailable'}
+  try{
+   const fetched=await fetchListing(target);
+   fetchMeta=fetched.meta;
+   scraped=await extractHtml(fetched.html,provider,target);
+   fetchState='fetched';
+  }catch(error){
+   fetchErrorCode=typeof error?.code==='string'?error.code:'upstream_network';
+   fetchState=fetchErrorCode==='upstream_timeout'?'timeout':fetchErrorCode==='upstream_access_denied'?'access_denied':'unavailable';
+   const details=error?.details&&typeof error.details==='object'?error.details:{};
+   console.error('Listing source fetch failed',{
+    provider,
+    code:fetchErrorCode,
+    stage:details.stage||'unknown',
+    status:Number(details.status)||null,
+    redirects:Number(details.redirects)||0,
+    contentType:typeof details.contentType==='string'?details.contentType.slice(0,80):null,
+    sizeBucket:Number(details.size)>1_000_000?'over_1mb':Number(details.size)>100_000?'100kb_1mb':Number(details.size)>0?'under_100kb':null,
+    durationBucket:Number(details.durationMs)>10000?'over_10s':Number(details.durationMs)>3000?'3s_10s':Number(details.durationMs)>=0?'under_3s':null
+   });
+  }
  }
  const netArea=body.netArea||scraped.netArea||null;
  const grossArea=body.grossArea||scraped.grossArea||null;
@@ -281,9 +299,14 @@ async function tcmbListingRequest(request,env){
  };
  const checked=validateListingInput(listing);
  const listingParsed=Boolean(scraped.price&&(scraped.grossArea||scraped.netArea));
- const extraction={serverFetch:fetchState,listingParsed};
+ const extraction={serverFetch:fetchState,listingParsed,errorCode:fetchErrorCode,sourceStatus:fetchMeta?.status||null};
+ const fetchMessages={
+  access_denied:'İlan sağlayıcısı sunucu erişimini reddetti. Bağlantıdan otomatik aktarım şu anda bu kaynakta kullanılamıyor; mevcut form değerleriniz korunuyor.',
+  timeout:'İlan sağlayıcısı zamanında yanıt vermedi. Mevcut form değerleriniz korunuyor; yeniden deneyebilir veya bilgileri elle girebilirsiniz.',
+  unavailable:'İlan sağlayıcısına ulaşılamadı. Mevcut form değerleriniz korunuyor; yeniden deneyebilir veya bilgileri elle girebilirsiniz.'
+ };
  const extractionMessage=target&&fetchState!=='fetched'
-  ?'İlan bilgileri alınamadı. Lütfen bilgileri manuel doldurun.'
+  ?fetchMessages[fetchState]||fetchMessages.unavailable
   :target&&!listingParsed
    ?'İlan sayfasından fiyat ve alan bilgileri birlikte alınamadı. Alınabilenleri kontrol edin, eksikleri manuel doldurun.'
    :'Sayfada bulunabilen bilgiler forma aktarıldı. Net ve brüt alanları ayrı ayrı kontrol edin.';

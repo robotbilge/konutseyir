@@ -228,28 +228,91 @@ export async function extractHtml(html, providerKey, sourceUrl='') {
   return parseListingData(values);
 }
 
-export async function fetchListing(url) {
-  const response = await fetch(url, {
-    redirect: "manual",
-    headers: {
-      Accept: "text/html,application/xhtml+xml"
-    },
-    signal: AbortSignal.timeout(8000)
-  });
-  if (response.status >= 300 && response.status < 400) throw new Error("redirect_blocked");
-  if (!response.ok) throw new Error("upstream_unavailable");
-  const type = response.headers.get("content-type") || "";
-  if (!type.includes("text/html")) throw new Error("invalid_content_type");
-  const reader = response.body?.getReader();
-  if (!reader) throw new Error("empty_response");
-  const chunks = [];
-  let size = 0;
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    size += value.byteLength;
-    if (size > 1_500_000) { await reader.cancel(); throw new Error("response_too_large"); }
-    chunks.push(value);
+export class ListingFetchError extends Error {
+  constructor(code, details = {}) {
+    super(code);
+    this.name = "ListingFetchError";
+    this.code = code;
+    this.details = details;
   }
-  return new TextDecoder().decode(Buffer.concat(chunks));
+}
+
+function safeListingTarget(input, expectedProvider) {
+  let parsed;
+  try { parsed = new URL(input); } catch { throw new ListingFetchError("invalid_redirect"); }
+  if (parsed.protocol !== "https:" || getProvider(parsed.href) !== expectedProvider) {
+    throw new ListingFetchError("invalid_redirect");
+  }
+  return parsed.href;
+}
+
+export async function fetchListing(url, options = {}) {
+  const fetchImpl = options.fetchImpl || fetch;
+  const provider = getProvider(url);
+  if (!provider) throw new ListingFetchError("unsupported_provider");
+  let target = safeListingTarget(url, provider);
+  let redirects = 0;
+  const startedAt = Date.now();
+  while (true) {
+    let response;
+    try {
+      response = await fetchImpl(target, {
+        redirect: "manual",
+        headers: {
+          Accept: "text/html,application/xhtml+xml",
+          "Accept-Language": "tr-TR,tr;q=0.9"
+        },
+        signal: AbortSignal.timeout(12000)
+      });
+    } catch (error) {
+      const timedOut = error?.name === "TimeoutError" || error?.name === "AbortError";
+      throw new ListingFetchError(timedOut ? "upstream_timeout" : "upstream_network", {
+        stage: "request", redirects, durationMs: Date.now() - startedAt
+      });
+    }
+    const status = response.status;
+    if (status >= 300 && status < 400) {
+      const location = response.headers.get("location");
+      if (!location || redirects >= 2) {
+        throw new ListingFetchError("redirect_blocked", { stage: "redirect", status, redirects });
+      }
+      target = safeListingTarget(new URL(location, target).href, provider);
+      redirects += 1;
+      continue;
+    }
+    if (!response.ok) {
+      throw new ListingFetchError(status === 401 || status === 403 ? "upstream_access_denied" : "upstream_http_error", {
+        stage: "response", status, redirects, durationMs: Date.now() - startedAt
+      });
+    }
+    const contentType = response.headers.get("content-type") || "";
+    if (!/text\/html|application\/xhtml\+xml/i.test(contentType)) {
+      throw new ListingFetchError("invalid_content_type", {
+        stage: "headers", status, contentType: contentType.slice(0, 80), redirects
+      });
+    }
+    const reader = response.body?.getReader();
+    if (!reader) throw new ListingFetchError("empty_response", { stage: "body", status, redirects });
+    const chunks = [];
+    let size = 0;
+    while (true) {
+      let item;
+      try { item = await reader.read(); }
+      catch {
+        throw new ListingFetchError("upstream_network", { stage: "body", status, redirects, size });
+      }
+      if (item.done) break;
+      size += item.value.byteLength;
+      if (size > 1_500_000) {
+        await reader.cancel();
+        throw new ListingFetchError("response_too_large", { stage: "body", status, redirects, size });
+      }
+      chunks.push(item.value);
+    }
+    if (!size) throw new ListingFetchError("empty_response", { stage: "body", status, redirects, size });
+    return {
+      html: new TextDecoder().decode(Buffer.concat(chunks)),
+      meta: { status, contentType: contentType.slice(0, 80), size, redirects, durationMs: Date.now() - startedAt }
+    };
+  }
 }
