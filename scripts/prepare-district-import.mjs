@@ -43,7 +43,7 @@ export function prepareDistrictSql(raw){
  if(clean.length>20000)throw Error('Tek aktarımda en fazla 20000 kayıt');
  const sourceComments=[...sources].map(x=>'-- '+x).join('\n');
  const lines=clean.map(r=>'INSERT INTO district_sales (city_slug,district_name,period,total,retrieved_at) VALUES ('+[quoted(r.city),quoted(r.district),quoted(r.period),r.total,"datetime('now')"].join(',')+') ON CONFLICT(city_slug,district_name,period) DO UPDATE SET total=excluded.total,retrieved_at=excluded.retrieved_at;');
- return {count:clean.length,cityCount:new Set(clean.map(x=>x.city)).size,periods:[...months].sort(),sql:'-- Doğrulanmış TÜİK ilçe toplam konut satışları, kaynaklar:\n'+sourceComments+'\nBEGIN TRANSACTION;\n'+lines.join('\n')+'\nCOMMIT;\n'};
+ return {count:clean.length,cityCount:new Set(clean.map(x=>x.city)).size,periods:[...months].sort(),sql:'-- Doğrulanmış TÜİK ilçe toplam konut satışları, kaynaklar:\n'+sourceComments+'\n'+lines.join('\n')+'\n'};
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const [input,output]=process.argv.slice(2);
