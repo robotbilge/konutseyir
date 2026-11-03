@@ -371,3 +371,13 @@ main>.inner>.guide-intro{max-width:none;width:100%;box-sizing:border-box}
 .hero-proof span{border:1px solid #cce0d5;border-radius:12px;background:#edf7f0;padding:9px 12px;color:#194d3b;font-weight:700;line-height:1.45}
 .hero-proof svg{width:17px;height:17px;flex-shrink:0}
 @media(max-width:600px){.home-sales-radar-compact{display:block}.home-sales-radar-compact>.primary-link{margin-top:18px;width:100%}.reading-action-buttons{display:grid;grid-template-columns:1fr}.reading-action-buttons a{width:100%}.hero-proof{display:grid;grid-template-columns:1fr}}
+
+/* Brand message below logo; benefits replace the old top-of-hero tagline. */
+.site-header .header-brand-block{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;flex:0 0 auto;min-width:0}
+.site-header .header-brand-tagline{display:block;margin-left:48px;max-width:230px;color:var(--green-2);font-size:10px;line-height:1.25;font-weight:730;letter-spacing:0}
+.home-hero .hero-proof-top{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:stretch;gap:10px 12px;margin:0;min-width:0}
+.home-hero .hero-proof-top span{display:inline-flex;flex:1 1 250px;justify-content:center;align-items:center;gap:9px;min-height:46px;padding:10px 12px;text-align:left;white-space:normal}
+.home-hero .hero-proof-top svg{flex:0 0 18px}
+@media(max-width:1100px){.site-header .topbar{gap:16px}.site-header .header-brand-tagline{max-width:195px;font-size:9.5px}.home-hero .hero-proof-top span{flex-basis:220px}}
+@media(max-width:850px){.site-header .header-brand-tagline{margin-left:48px;max-width:210px;font-size:10px}.home-hero .hero-proof-top{display:flex;gap:9px}.home-hero .hero-proof-top span{flex:1 1 210px;justify-content:flex-start}}
+@media(max-width:600px){.site-header .header-brand-tagline{margin-left:0;max-width:225px;font-size:9px}.home-hero .hero-proof-top{display:grid;grid-template-columns:1fr;gap:8px}.home-hero .hero-proof-top span{min-height:39px;padding:8px 11px}}
