@@ -51,7 +51,7 @@ jobs:
         run: pnpm exec wrangler pages project create konutseyir --production-branch main
       - name: Deploy Pages (independent of Worker release)
         run: pnpm exec wrangler pages deploy dist --project-name konutseyir --branch main
-      - name: Verify live UX and district API coverage
+      - name: Verify live homepage layout
         run: node scripts/verify-ux-and-districts.mjs --pages-only
       - name: Verify live news indexing and critical pages
         run: node scripts/live-seo-check.mjs konutseyir
@@ -86,7 +86,7 @@ jobs:
       - name: Set news admin password secret
         run: printf '%s' "$NEWS_ADMIN_PASSWORD" | pnpm exec wrangler secret put NEWS_ADMIN_PASSWORD --config worker/wrangler.jsonc
       - name: Verify district APIs after Worker rollout
-        run: node scripts/verify-ux-and-districts.mjs
+        run: node scripts/verify-ux-and-districts.mjs --api-only
       - name: Verify live guides and notify subscribers
         run: node scripts/notify-guide-publications.mjs
 
