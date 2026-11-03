@@ -11,7 +11,7 @@ test('geçerli TÜİK ilçe toplam satış kaydı için SQL üretilir',()=>{
  assert.equal(result.count,2);
  assert.equal(result.cityCount,2);
  assert.match(result.sql,/INSERT INTO district_sales/);
- assert.match(result.sql,/COMMIT;/);
+ assert.doesNotMatch(result.sql,/BEGIN TRANSACTION|COMMIT;/);
 });
 test('başka veriyi toplam konut satışına dönüştürmeye izin verilmez',()=>{
  assert.throws(()=>prepareDistrictSql(csv(['ankara,Çankaya,2026-08,10,https://random.example/data'])),/kaynak/);
