@@ -654,7 +654,7 @@ export const toolEvidence:Record<string,{intro:string;exampleTitle:string;exampl
     "result": "32.000 TL burada canlı TCMB verisi değildir. Türetilen net karşılık TCMB’nin yayımladığı net seri değildir; aynı brüt kıyasın ilanın alan oranıyla ifadesidir. Brüt/net bilgisi eksikse tahminle tamamlamayın.",
     "checks": [
       "Şehir, veri dönemi ve TL/brüt m² birimini kontrol edin.",
-      "İlandan aktarılan fiyat ve alanı yeniden okuyun.",
+      "Forma girdiğiniz ilan fiyatını ve alan bilgilerini kaynak ilandan yeniden kontrol edin.",
       "Kira göstergesinde birim doğrulanmadan alanla çarpım yapmayın.",
       "KFE endeks puanını bu hesapta TL/m² yerine kullanmayın."
     ],
