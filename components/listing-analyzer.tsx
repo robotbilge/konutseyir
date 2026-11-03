@@ -1,6 +1,6 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
-import {ArrowUpRight,Info,ShieldCheck,Search} from 'lucide-react';
+import {ArrowUpRight,Info,ShieldCheck} from 'lucide-react';
 import {listingSummary,listingRequestBody} from '../lib/listing-summary.mjs';
 import {provinces} from '../lib/provinces.mjs';
 
@@ -16,9 +16,7 @@ export function ListingAnalyzer(){
  const [form,setForm]=useState<Listing>(emptyListing);
  useEffect(()=>{const params=new URLSearchParams(location.search),value=(key:string)=>{const n=Number(params.get(key));return Number.isFinite(n)&&n>0?n:''};const net=value('netArea')||value('area'),gross=value('grossArea'),city=params.get('city');setForm(prev=>({...prev,city:city&&provinces.includes(city)?city:prev.city,price:value('price'),netArea:net,grossArea:gross,area:gross||net,areaType:gross?'gross':net?'net':'',monthlyRent:value('rent')}))},[]);
 
- const [url,setUrl]=useState('');
- const [listingFetched,setListingFetched]=useState(false);
- const [result,setResult]=useState<Payload|null>(null);
+  const [result,setResult]=useState<Payload|null>(null);
  const [error,setError]=useState('');
  const [busy,setBusy]=useState(false);
  const summary=listingSummary(form);
@@ -28,17 +26,16 @@ export function ListingAnalyzer(){
  const userMissing=(result?.missing||[]).filter(field=>field==='city'?!form.city:field==='price'?!Number(form.price):field==='area'?!Number(form.grossArea||form.netArea):field==='monthlyRent'?!Number(form.monthlyRent):true);
  function update(key:keyof Listing,value:string){invalidate();setForm(prev=>({...prev,[key]:value}))}
  function updateArea(key:'netArea'|'grossArea',value:string){invalidate();setForm(prev=>{const next={...prev,[key]:value};const gross=key==='grossArea'?value:prev.grossArea;const net=key==='netArea'?value:prev.netArea;return {...next,area:gross||net||'',areaType:gross?'gross':net?'net':''}});setResult(null)}
- async function request(extractOnly:boolean){
-  if(!extractOnly&&!summary.ready){setError(Object.values(summary.errors)[0] as string||'İlan fiyatı ve net veya brüt alan girin.');return}
+ async function request(){
+  if(!summary.ready){setError(Object.values(summary.errors)[0] as string||'İlan fiyatı ve net veya brüt alan girin.');return}
   pending.current?.abort();const controller=new AbortController();pending.current=controller;
   const timer=setTimeout(()=>controller.abort('timeout'),25000);
   setError('');setResult(null);setBusy(true);
   try{
-   const response=await fetch('/api/tcmb-listing',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',signal:controller.signal,body:JSON.stringify(listingRequestBody(form,{url,extractOnly,listingFetched}))});
+   const response=await fetch('/api/tcmb-listing',{method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',signal:controller.signal,body:JSON.stringify(listingRequestBody(form))});
    const payload=await response.json() as Payload;
    if(pending.current!==controller)return;
-   if(payload.extraction?.serverFetch&&payload.extraction.serverFetch!=='not_requested')setListingFetched(true);
-   if(payload.listing){
+    if(payload.listing){
     const found=payload.listing;
     setForm(prev=>{
      const net=found.netArea||prev.netArea||'';
@@ -52,7 +49,7 @@ export function ListingAnalyzer(){
   }catch(cause){if(pending.current===controller)setError(controller.signal.aborted?'TCMB isteği zaman aşımına uğradı. Girdiğiniz bilgilerle yapılan hesaplar aşağıda korunuyor; karşılaştırmayı yeniden deneyebilirsiniz.':cause instanceof Error?cause.message:'Bağlantı kurulamadı.');}
   finally{clearTimeout(timer);if(pending.current===controller){pending.current=null;setBusy(false)}}
  }
- function submit(event:React.FormEvent<HTMLFormElement>){event.preventDefault();void request(false)}
+ function submit(event:React.FormEvent<HTMLFormElement>){event.preventDefault();void request()}
  const source=result?.sources;
  const comparisonDelta=result?.comparison?.grossDifferencePercent??result?.comparison?.netDifferencePercent;
  const comparisonBasis=result?.comparison?.grossDifferencePercent!=null?'brüt':'net (yaklaşık)';
@@ -62,16 +59,14 @@ export function ListingAnalyzer(){
   <div className="listing-analyzer-copy">
    <p className="eyebrow">KONUT İLANI · TCMB GÖSTERGESİ</p>
    <h2 id="listing-analyzer-title">Fiyatı, alanı ve kira getirisini hesaplayın</h2>
-   <p>İlan bağlantısını girip alınabilen bilgileri aktarın; eksikleri tamamlayın. İlan fiyatını ve en az bir alanı girin; kendi rakamlarınızın hesabı anında aşağıda görünür. TCMB kıyası ayrı başlatılır.</p>
+   <p>İlandaki il, toplam fiyat ve net veya brüt alan bilgisini girin. Kendi rakamlarınızın hesabı anında görünür; TCMB il göstergesiyle karşılaştırmayı ayrıca başlatabilirsiniz.</p>
    <div className="tcmb-tool-points"><span><ShieldCheck size={16}/> TCMB EVDS kaynaklı</span><span><Info size={16}/> İl göstergesi, mahalle emsali değildir</span></div>
    <small>İl göstergesi mahalle emsali değildir. TCMB m² birim fiyatı ve birim kira göstergesi brüt kullanım alanı üzerinden tanımlanır.</small>
   </div>
   <div className="listing-analyzer-form">
    <form onSubmit={submit}>
-    <label htmlFor="listing-url">İlan bağlantısı <span>(isteğe bağlı)</span></label>
-    <div className="listing-url-row tcmb-url-row"><input id="listing-url" type="url" placeholder="https://www.hepsiemlak.com/…" value={url} onChange={event=>{invalidate();setUrl(event.target.value);setListingFetched(false)}}/><button type="button" className="tcmb-extract" disabled={!url||busy} onClick={()=>void request(true)}><Search size={16}/>{busy?'Kontrol ediliyor…':'İlandan bilgileri al'}</button></div>
-    <p className="tcmb-form-hint">Bağlantı yalnızca Sahibinden, Hepsiemlak ve Emlakjet ilanlarında denenir. İlan sayfası bilgileri gizliyorsa eksikleri kendiniz girin.</p>
-    <p className="tcmb-input-heading"><b>Konut bilgileri</b> · İlan bağlantısı olmadan da hesaplayabilirsiniz.</p><div className="tcmb-form-grid">
+    <div className="tcmb-feedback" role="note"><strong>İlan bilgilerini kendiniz girin</strong><p>İlan sitelerinden otomatik veri alınmaz. İlandaki il, toplam fiyat, net alan ve brüt alan değerlerini aşağıdaki alanlara yazın. Hesaplama sırasında ilan sitesine veri gönderilmez.</p></div>
+    <p className="tcmb-input-heading"><b>Konut bilgileri</b> · Fiyat ile net veya brüt alandan en az birini girin.</p><div className="tcmb-form-grid">
      <label>İl<select autoComplete="address-level1" value={form.city} onChange={e=>update('city',e.target.value)}>{provinces.map(city=><option key={city} value={city}>{city}</option>)}</select></label>
      <label>İlan fiyatı (TL)<input id="analysis-price" aria-invalid={!!summary.errors.price} aria-describedby={summary.errors.price?'analysis-input-errors':undefined} type="number" min="1" step="any" inputMode="decimal" placeholder="6.500.000" value={form.price??''} onChange={e=>update('price',e.target.value)}/><small>TL</small></label>
      <label>Net alan (m²)<input id="analysis-net" aria-invalid={!!summary.errors.netArea} aria-describedby={summary.errors.netArea?'analysis-input-errors':undefined} type="number" min="1" step="any" inputMode="decimal" placeholder="55" value={form.netArea??''} onChange={e=>updateArea('netArea',e.target.value)}/><small>m²</small></label>
@@ -84,8 +79,7 @@ export function ListingAnalyzer(){
    {Object.keys(summary.errors).length>0&&<div id="analysis-input-errors" className="listing-error" role="alert">{Object.values(summary.errors).map((message,i)=><p key={i}>{String(message)}</p>)}</div>}
    <section className="listing-local-summary" aria-labelledby="listing-local-title" aria-live="polite"><h3 id="listing-local-title">Girdiğiniz bilgilerle anlık hesap</h3><p>Bu hesaplar TCMB bağlantısından bağımsızdır; fiyat ve alanları değiştirdiğinizde yenilenir.</p>{summary.netM2Price!=null||summary.grossM2Price!=null?<div className="tcmb-metric-grid">{summary.netM2Price!=null&&<article><span>Net m² fiyatı</span><strong>{money(summary.netM2Price)} / m²</strong></article>}{summary.grossM2Price!=null&&<article><span>Brüt m² fiyatı</span><strong>{money(summary.grossM2Price)} / m²</strong></article>}{summary.rent&&<><article><span>Girilen kirayla yıllık brüt kira</span><strong>{money(summary.rent.annualRent)}</strong></article><article><span>Yıllık brüt kira getirisi</span><strong>%{number(summary.rent.grossYield)}</strong></article><article><span>Basit amortisman</span><strong>{summary.rent.multiplierYears==null?'Hesaplanamaz':number(summary.rent.multiplierYears)+' yıl'}</strong></article></>}</div>:<p>Başlamak için ilan fiyatını ve net veya brüt alanı girin.</p>}<small>Aylık kira girerseniz brüt getiri ve basit amortisman da hesaplanır. Vergi, gider, boş kalma ve finansman maliyetleri dahil değildir. Bu sonuçlar ekspertiz veya yatırım tavsiyesi değildir.</small></section>
    {error&&<p className="listing-error" role="alert">{error}</p>}
-   {(result?.status==='needs_input'||result?.status==='extracted')&&<div className="tcmb-feedback" role="status"><strong>{result.extraction?.listingParsed===false?'İlan bilgileri alınamadı':result.status==='extracted'?'İlan bilgileri forma aktarıldı':'Eksik bilgileri tamamlayın'}</strong><p>{result.message||'İlandan alınabilen bilgiler forma aktarıldı.'} {userMissing.length?`Manuel kontrol edilecek alanlar: ${userMissing.map(field=>({city:'il',price:'ilan fiyatı',area:'net veya brüt alan',monthlyRent:'aylık kira'}[field]||field)).join(', ')}.`:'Formdaki bilgileri kontrol edip karşılaştırmayı başlatın.'}</p></div>}
-   {result?.extraction?.serverFetch&&result.extraction.serverFetch!=='not_requested'&&!result.extraction.listingParsed&&result.status!=='needs_input'&&<p className="tcmb-feedback" role="status">{result.message||(result.extraction.serverFetch==='fetched'?'İlan sayfasından fiyat ve alan bilgileri birlikte alınamadı. Lütfen eksikleri manuel doldurun.':'İlan bilgileri alınamadı. Mevcut form değerleriniz korunuyor; bilgileri manuel doldurabilirsiniz.')}{result.status==='available'?' Rapor, girdiğiniz bilgilerle oluşturuldu.':''}</p>}
+   {result?.status==='needs_input'&&<div className="tcmb-feedback" role="status"><strong>Eksik bilgileri tamamlayın</strong><p>{result.message||'TCMB karşılaştırması için zorunlu alanlar eksik.'} {userMissing.length?`Kontrol edilecek alanlar: ${userMissing.map(field=>({city:'il',price:'ilan fiyatı',area:'net veya brüt alan',monthlyRent:'aylık kira'}[field]||field)).join(', ')}.`:'Formdaki bilgileri kontrol edip karşılaştırmayı başlatın.'}</p></div>}
    {result?.status==='no_data'&&<div className="tcmb-feedback tcmb-unavailable" role="status"><strong>TCMB karşılaştırması yapılamadı</strong><p>{result.message||'Bu il için karşılaştırılabilir TCMB verisi bulunamadı.'} Başka bir il veya dönem verisi kullanılmadı.</p></div>}
    {result?.status==='available'&&result.comparison&&<div className="tcmb-report" aria-live="polite">
     <div className="tcmb-report-heading"><span>İL BAZLI GÖSTERGE RAPORU</span><b>{result.listing?.city}{result.listing?.district?` · ${result.listing.district}`:''}{result.listing?.neighborhood?` · ${result.listing.neighborhood}`:''}</b></div>
