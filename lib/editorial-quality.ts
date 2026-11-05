@@ -1,3 +1,4 @@
+import {daskBudgetGuide,daskBudgetGuideEvidence} from './dask-budget-guide';
 import {appraisalGapGuide,appraisalGapGuideEvidence} from './appraisal-gap-guide';
 import {saleChainGuide,saleChainGuideEvidence} from './sale-chain-guide';
 import {installmentGuide,installmentGuideEvidence} from './installment-guide';
@@ -8,6 +9,7 @@ export type EditorialSource={label:string;url:string;scope:string};
 export const editorialUpdatedAt='2026-10-16';
 
 export const guideEvidence:Record<string,{takeaways:string[];sources:EditorialSource[]}>= {
+ [daskBudgetGuide.slug]:daskBudgetGuideEvidence,
  [appraisalGapGuide.slug]:appraisalGapGuideEvidence,
  [saleChainGuide.slug]:saleChainGuideEvidence,
  [installmentGuide.slug]:installmentGuideEvidence,
