@@ -1,2 +1,12 @@
 import {InfoPage} from '../../components/info-page';
-export default function Contact(){return <InfoPage eyebrow="İLETİŞİM" title="KonutSeyir ile iletişim"><p>Soru, düzeltme talebi, içerik bildirimi ve iş birliği için <a href="mailto:iletisim@konutseyir.com">iletisim@konutseyir.com</a> adresine yazabilirsiniz.</p><p>Hata bildiriminde sayfa bağlantısını, kullandığınız değerleri ve beklediğiniz sonucu paylaşın. Kimlik numarası, tapu belgesi, banka dökümü veya parola göndermeyin.</p><h2>İçerik ve kaynak bildirimi</h2><p>Yanlış tarih, kırık kaynak bağlantısı veya hatalı hesaplama görürseniz ilgili sayfanın adresini e-postaya ekleyin. Başvurular mümkün olan en kısa sürede incelenir; otomatik yatırım veya ekspertiz danışmanlığı verilmez.</p></InfoPage>}
+import {InstagramLink} from '../../components/site-chrome';
+
+export default function Contact(){
+ return <InfoPage eyebrow="İLETİŞİM" title="KonutSeyir ile iletişim">
+  <p>Soru, düzeltme talebi, içerik bildirimi ve iş birliği için <a href="mailto:iletisim@konutseyir.com">iletisim@konutseyir.com</a> adresine yazabilirsiniz.</p>
+  <p><InstagramLink/></p>
+  <p>Hata bildiriminde sayfa bağlantısını, kullandığınız değerleri ve beklediğiniz sonucu paylaşın. Kimlik numarası, tapu belgesi, banka dökümü veya parola göndermeyin.</p>
+  <h2>İçerik ve kaynak bildirimi</h2>
+  <p>Yanlış tarih, kırık kaynak bağlantısı veya hatalı hesaplama görürseniz ilgili sayfanın adresini e-postaya ekleyin. Başvurular mümkün olan en kısa sürede incelenir; otomatik yatırım veya ekspertiz danışmanlığı verilmez.</p>
+ </InfoPage>
+}

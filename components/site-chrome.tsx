@@ -24,12 +24,24 @@ export function Header({back=false}:{back?:boolean}){
  </header>
 }
 
+export function InstagramLink(){
+ return <a className="instagram-link" href="https://www.instagram.com/konutseyir/" target="_blank" rel="noopener noreferrer">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+   <rect x="2" y="2" width="20" height="20" rx="5"/>
+   <circle cx="12" cy="12" r="4"/>
+   <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+  </svg>
+  Instagram @konutseyir
+ </a>
+}
+
 export function Footer(){return <footer className="site-footer">
  <div className="footer-main">
   <div className="footer-intro">
    <a className="brand footer-brand" href="/"><span><Building2 size={18}/></span><span>Konut<b>Seyir</b></span></a>
    <p>Konut fiyatını değil, yatırım mantığını ölçen bağımsız karar destek platformu.</p>
    <a className="footer-email" href="mailto:iletisim@konutseyir.com">iletisim@konutseyir.com</a>
+   <div className="footer-social"><InstagramLink/></div>
   </div>
   <div className="footer-nav">
    <div><strong>Hesap Araçları</strong><a href="/ev-analizi/">Konut yatırım analizi</a><a href="/hesaplama/mevduat/">Net mevduat getirisi</a><a href="/kredi-hesaplama/#maksimum-butce">Bütçeye göre konut tutarı</a><a href="/hesaplama/kira-carpani/">Kira çarpanı</a><a href="/hesaplama/net-kira/">Net kira getirisi</a><a href="/hesaplama/kira-artis-orani/">Kira artış oranı</a><a href="/hesaplama/tapu-harci/">Tapu harcı</a><a href="/hesaplama/emlak-komisyonu/">Emlakçı komisyonu</a><a href="/kredi-hesaplama/">Konut kredisi</a></div>

@@ -151,6 +151,8 @@ body{background:#f7f7f3}
 .site-footer{margin-top:84px;background:#0d241d;color:#d8e3de;border-top:0}
 .footer-main{max-width:1240px;margin:auto;padding:58px 28px 42px;display:grid;grid-template-columns:minmax(230px,.75fr) minmax(0,1.75fr);gap:72px}
 .footer-intro p{max-width:330px;color:#9eb2aa;line-height:1.65;font-size:13px}.footer-brand{color:#fff}.footer-brand b{color:#55c6a4}.footer-email{color:#b9d7cc}
+.instagram-link{display:inline-flex;align-items:center;gap:8px;min-height:24px;color:var(--green);text-decoration:underline;text-underline-offset:3px}
+.footer-social{margin-top:8px}.footer-social .instagram-link{color:#b9d7cc}.footer-social .instagram-link:hover{color:#fff}
 .footer-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:44px}.footer-nav>div{display:flex;flex-direction:column;gap:11px}.footer-nav strong{color:#fff;font-size:13px;margin-bottom:5px}.footer-nav a{color:#a9beb6;text-decoration:none;font-size:12.5px;line-height:1.4}.footer-nav a:hover{color:#fff}
 .network-strip{border-top:1px solid rgba(255,255,255,.08);border-bottom:1px solid rgba(255,255,255,.08);padding:24px max(28px,calc((100% - 1184px)/2));display:grid;grid-template-columns:280px 1fr;gap:42px;align-items:center;background:#102a22}
 .network-strip>div{display:flex;gap:22px;align-items:center}.network-strip strong{color:#fff;font-size:13px}.network-strip a{display:inline-flex;align-items:center;gap:4px;color:var(--lime);text-decoration:none;font-size:13px;font-weight:750}.network-strip p{margin:0;color:#93aaa1;font-size:12px;line-height:1.65}
