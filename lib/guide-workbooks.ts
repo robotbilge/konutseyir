@@ -1,3 +1,4 @@
+import {refinanceGuide,refinanceGuideWorkbook} from './refinance-guide';
 import {rentalMoveGuide,rentalMoveGuideWorkbook} from './rental-move-guide';
 import {daskBudgetGuide,daskBudgetGuideWorkbook} from './dask-budget-guide';
 import {appraisalGapGuide,appraisalGapGuideWorkbook} from './appraisal-gap-guide';
@@ -8,6 +9,7 @@ import {urbanGuideWorkbook} from './urban-article';
 import {urbanSlug} from './urban-sources';
 export type GuideWorkbook={question:string;deliverable:string;rows:{finding:string;evidence:string;action:string}[]};
 export const guideWorkbooks:Record<string,GuideWorkbook>={
+ [refinanceGuide.slug]:refinanceGuideWorkbook,
  [rentalMoveGuide.slug]:rentalMoveGuideWorkbook,
  [daskBudgetGuide.slug]:daskBudgetGuideWorkbook,
  [appraisalGapGuide.slug]:appraisalGapGuideWorkbook,
