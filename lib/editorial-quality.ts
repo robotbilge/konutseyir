@@ -1,3 +1,4 @@
+import {homeSaleTaxGuide,homeSaleTaxGuideEvidence} from './home-sale-tax-guide';
 import {refinanceGuide,refinanceGuideEvidence} from './refinance-guide';
 import {rentalMoveGuide,rentalMoveGuideEvidence} from './rental-move-guide';
 import {daskBudgetGuide,daskBudgetGuideEvidence} from './dask-budget-guide';
@@ -11,6 +12,7 @@ export type EditorialSource={label:string;url:string;scope:string};
 export const editorialUpdatedAt='2026-10-16';
 
 export const guideEvidence:Record<string,{takeaways:string[];sources:EditorialSource[]}>= {
+ [homeSaleTaxGuide.slug]:homeSaleTaxGuideEvidence,
  [refinanceGuide.slug]:refinanceGuideEvidence,
  [rentalMoveGuide.slug]:rentalMoveGuideEvidence,
  [daskBudgetGuide.slug]:daskBudgetGuideEvidence,
