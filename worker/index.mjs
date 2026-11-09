@@ -1,5 +1,5 @@
 import {monthlyRefreshDue} from './market-refresh.mjs';
-import {guidePublicationRequest,drainGuidePush} from './guide-publications.mjs';
+import {guidePublicationRequest,reconcileGuidePush} from './guide-publications.mjs';
 import {policyStorageSeries,policyRefreshDue,refreshPolicyRate} from './policy-rate.mjs';
 import {definitions,cityHousingSeries,goldPrice,parseFX,parseEVDS,observation,yearChange} from './data.mjs';
 import {createD1Guard} from './d1-guard.mjs';
@@ -352,7 +352,7 @@ export default {
  async scheduled(event,env,ctx){
   if(env.DB)env={...env,DB:d1Guard.wrap(env.DB)};
   const tasks=[];
-  if(event.cron==='*/5 * * * *')tasks.push(drainGuidePush(env));
+  if(event.cron==='*/5 * * * *')tasks.push(reconcileGuidePush(env));
   if(event.cron==='30 13 * * 1-5')tasks.push(refresh(env));
   const scheduledDate=new Date(event.scheduledTime),scheduledHour=scheduledDate.getUTCHours();
   // Reuse the hourly news trigger: guide retries every five minutes, feeds only at their original hours.

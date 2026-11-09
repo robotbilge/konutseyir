@@ -1,6 +1,9 @@
 import webpush from 'web-push';
 import {guideOrigin,guideManifestPath,validateGuideManifest} from '../lib/guide-publication.mjs';
 
+const guideDeliveryWindowMs=6*3600000;
+const publicationFallbackDelayMs=10*60000;
+
 const json=(data,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const esc=text=>text.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
 const equal=(a,b)=>{if(a.length!==b.length)return false;let diff=0;for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);return diff===0};
@@ -12,12 +15,17 @@ async function liveText(path,fetcher){
  return response.text();
 }
 
-export async function syncGuidePublications(env,{expectedBuildId,fetcher=fetch,now=new Date().toISOString()}={}){
+export async function syncGuidePublications(env,{expectedBuildId,fetcher=fetch,now=new Date().toISOString(),fallback=false}={}){
  const manifest=validateGuideManifest(JSON.parse(await liveText(guideManifestPath,fetcher)));
  if(expectedBuildId&&manifest.buildId!==expectedBuildId)throw Error('guide_deployment_not_live');
+ const state=await env.DB.prepare('SELECT build_id buildId FROM guide_publication_state WHERE id=1').first();
+ if(fallback){
+  // Give the deployment hook first access and avoid replaying an old backlog.
+  const buildAge=Date.parse(now)-Date.parse(manifest.buildId);
+  if(!state||state.buildId===manifest.buildId||!Number.isFinite(buildAge)||buildAge<publicationFallbackDelayMs||buildAge>guideDeliveryWindowMs)return {initialized:false,newGuides:0};
+ }
  const index=await liveText('/rehber/',fetcher);
  for(const guide of manifest.guides){if(!index.includes(`href="${guide.path}"`)&&!index.includes(`href="${guide.path.slice(0,-1)}"`))throw Error('guide_missing_from_index')}
- const state=await env.DB.prepare('SELECT id FROM guide_publication_state WHERE id=1').first();
  if(!state){
   // Initialize atomically: old articles are recorded without broadcasting them.
   await env.DB.batch([
@@ -35,7 +43,7 @@ export async function syncGuidePublications(env,{expectedBuildId,fetcher=fetch,n
  }
  if(fresh.length)await env.DB.batch(fresh.map(g=>env.DB.prepare('INSERT OR IGNORE INTO guide_publications(path,title,summary,seen_at,baseline) VALUES(?,?,?,?,0)').bind(g.path,g.title,g.summary,now)));
  // INSERT OR IGNORE makes re-deploys and concurrent calls idempotent.
- await env.DB.prepare("INSERT OR IGNORE INTO guide_push_deliveries(path,endpoint) SELECT g.path,s.endpoint FROM guide_publications g CROSS JOIN push_subscriptions s WHERE g.baseline=0 AND g.seen_at>=? AND s.created_at<=g.seen_at").bind(new Date(Date.parse(now)-6*3600000).toISOString()).run();
+ await env.DB.prepare("INSERT OR IGNORE INTO guide_push_deliveries(path,endpoint) SELECT g.path,s.endpoint FROM guide_publications g CROSS JOIN push_subscriptions s WHERE g.baseline=0 AND g.seen_at>=? AND s.created_at<=g.seen_at").bind(new Date(Date.parse(now)-guideDeliveryWindowMs).toISOString()).run();
  await env.DB.prepare('UPDATE guide_publication_state SET build_id=?,checked_at=? WHERE id=1').bind(manifest.buildId,now).run();
  return {initialized:false,newGuides:fresh.length};
 }
@@ -43,7 +51,7 @@ export async function syncGuidePublications(env,{expectedBuildId,fetcher=fetch,n
 export async function drainGuidePush(env,{now=new Date().toISOString(),send=webpush.sendNotification.bind(webpush)}={}){
  if(!env.VAPID_PUBLIC_KEY||!env.VAPID_PRIVATE_KEY)return {configured:false,sent:0,failed:0};
  webpush.setVapidDetails('mailto:bildirim@konutseyir.com',env.VAPID_PUBLIC_KEY,env.VAPID_PRIVATE_KEY);
- const cutoff=new Date(Date.parse(now)-6*3600000).toISOString(),lease=new Date(Date.parse(now)-5*60000).toISOString();
+ const cutoff=new Date(Date.parse(now)-guideDeliveryWindowMs).toISOString(),lease=new Date(Date.parse(now)-5*60000).toISOString();
  await env.DB.prepare("DELETE FROM guide_push_deliveries WHERE path IN (SELECT path FROM guide_publications WHERE seen_at<?)").bind(cutoff).run();
  const rows=(await env.DB.prepare("SELECT d.path,d.endpoint,g.title,g.summary,s.p256dh,s.auth FROM guide_push_deliveries d JOIN guide_publications g ON g.path=d.path JOIN push_subscriptions s ON s.endpoint=d.endpoint WHERE d.state IN ('pending','sending') AND d.attempts<3 AND (d.attempted_at IS NULL OR d.attempted_at<?) ORDER BY g.seen_at LIMIT 10").bind(lease).all()).results||[];
  let sent=0,failed=0;
@@ -66,6 +74,18 @@ export async function drainGuidePush(env,{now=new Date().toISOString(),send=webp
  const pending=await env.DB.prepare("SELECT COUNT(*) count FROM guide_push_deliveries WHERE state IN ('pending','sending') AND attempts<3").first();
  const unsuccessful=await env.DB.prepare("SELECT COUNT(*) count FROM guide_push_deliveries WHERE state='failed' OR (state!='sent' AND attempts>=3)").first();
  return {configured:true,sent,failed,pending:Number(pending?.count)||0,undelivered:Number(unsuccessful?.count)||0};
+}
+
+export async function reconcileGuidePush(env,deps={}){
+ if(!env.DB||!env.VAPID_PUBLIC_KEY||!env.VAPID_PRIVATE_KEY)return;
+ let publication;
+ try{
+  publication=await syncGuidePublications(env,{...deps,fallback:true});
+ }catch(error){
+  console.error('Scheduled guide publication check failed',error?.message);
+ }
+ const push=await drainGuidePush(env,deps);
+ if(publication?.newGuides||push.sent||push.failed)console.log(JSON.stringify({scheduledGuidePush:push,newGuides:publication?.newGuides??0}));
 }
 
 export async function guidePublicationRequest(request,env,deps={}){

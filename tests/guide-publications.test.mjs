@@ -5,7 +5,7 @@ import {DatabaseSync} from 'node:sqlite';
 import webpush from 'web-push';
 const vapid=webpush.generateVAPIDKeys();
 import {guideOrigin,validateGuideManifest,randomGuidePublicationAt} from '../lib/guide-publication.mjs';
-import {syncGuidePublications,drainGuidePush,guidePublicationRequest} from '../worker/guide-publications.mjs';
+import {syncGuidePublications,drainGuidePush,reconcileGuidePush,guidePublicationRequest} from '../worker/guide-publications.mjs';
 
 const now='2026-11-01T10:00:00.000Z',old={path:'/rehber/eski-yazi/',title:'Eski rehber',summary:'Eski içerik'},fresh={path:'/rehber/yeni-yazi/',title:'Yeni rehber',summary:'Yeni özgün içerik'};
 function database(){
@@ -36,6 +36,40 @@ test('verified new guide sends its own URL once; redeploys and edits do not repe
  await syncGuidePublications(env,{now,fetcher:live([old,{...fresh,title:'Updated title'}])});
  assert.equal((await drainGuidePush(env,{now,send})).sent,0);
  assert.equal(payloads.length,1);assert.equal(payloads[0].url,fresh.path);assert.equal(payloads[0].tag,'guide-yeni-yazi');
+});
+test('scheduled reconciliation discovers a live guide when the deployment hook never ran',async()=>{
+ const {env}=await setup();
+ const buildId='2026-11-01T10:02:00.000Z',calls=[],payloads=[];
+ const fetcher=async(url,init)=>{calls.push(url);return live([old,fresh],{buildId})(url,init)};
+ const send=async(_,payload)=>payloads.push(JSON.parse(payload));
+ await reconcileGuidePush(env,{now:'2026-11-01T10:10:00.000Z',fetcher,send});
+ assert.deepEqual(calls,[guideOrigin+'/guide-publications.json']);
+ assert.equal(payloads.length,0);
+ await reconcileGuidePush(env,{now:'2026-11-01T10:15:00.000Z',fetcher,send});
+ assert.equal(payloads.length,1);
+ assert.equal(payloads[0].url,fresh.path);
+ assert.ok(calls.includes(guideOrigin+fresh.path));
+ calls.length=0;
+ await reconcileGuidePush(env,{now:'2026-11-01T10:20:00.000Z',fetcher,send});
+ assert.deepEqual(calls,[guideOrigin+'/guide-publications.json']);
+ assert.equal(payloads.length,1);
+});
+test('scheduled reconciliation leaves initialization to the deployment hook and ignores old manifests',async()=>{
+ const {env,sqlite}=await setup();
+ sqlite.exec('DELETE FROM guide_publication_state');
+ const send=async()=>assert.fail('Unexpected push');
+ await reconcileGuidePush(env,{now:'2026-11-01T10:30:00.000Z',fetcher:live([old,fresh]),send});
+ assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM guide_publication_state').get().n,0);
+ await syncGuidePublications(env,{now,fetcher:live([old])});
+ await reconcileGuidePush(env,{now:'2026-11-01T17:10:00.000Z',fetcher:live([old,fresh],{buildId:'2026-11-01T10:02:00.000Z'}),send});
+ assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM guide_publications').get().n,1);
+});
+test('an unavailable live manifest does not stop retries for a queued guide',async()=>{
+ const {env}=await setup();
+ await syncGuidePublications(env,{now,fetcher:live([old,fresh])});
+ let sent=0;
+ await reconcileGuidePush(env,{now,fetcher:async()=>new Response(null,{status:503}),send:async()=>{sent++}});
+ assert.equal(sent,1);
 });
 test('concurrent drains claim each subscriber only once',async()=>{
  const {env}=await setup();await syncGuidePublications(env,{now,fetcher:live([old,fresh])});let calls=0;
