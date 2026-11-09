@@ -45,6 +45,8 @@ jobs:
           test -n "$CLOUDFLARE_API_TOKEN"
           test -n "$CLOUDFLARE_ACCOUNT_ID"
       - run: pnpm install --frozen-lockfile
+      - name: Refresh verified city snapshots
+        run: node scripts/refresh-city-snapshots.mjs
       - run: pnpm build
       - name: Ensure Pages project exists
         continue-on-error: true

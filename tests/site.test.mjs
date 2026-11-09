@@ -44,3 +44,22 @@ test('gold city list starts collapsed and removed detours are absent',()=>{const
 test('all footers use plain network domains and home checklist precedes the reading example',()=>{for(const file of walk('dist').filter(f=>f.endsWith('.html'))){const html=readFileSync(file,'utf8'),footer=html.slice(html.indexOf('<footer'));assert.match(footer,/class="network-site-link" href="https:\/\/altinseyir.com\/"/);assert.doesNotMatch(footer,/network-gold-link|AltınSeyir.com · Altın araçları/)}const home=readFileSync('dist/index.html','utf8');assert.ok(home.indexOf('HIZLI KONTROL LİSTESİ')<home.indexOf('BİR İLANI OKUMA ÖRNEĞİ'));});
 
 test('rental yield page publishes crawlable example, matching navigation, source links and SEO',()=>{const path='/hesaplama/kira-getirisi',html=readFileSync('dist'+path+'/index.html','utf8'),hub=readFileSync('dist/hesaplama/index.html','utf8');assert.match(html,/<title>Konut kira getirisi hesaplama/);assert.ok(html.includes('rel="canonical" href="https://konutseyir.com'+path+'/"'));assert.match(html,/name="description"/);assert.ok(readFileSync('dist/sitemap.xml','utf8').includes('https://konutseyir.com'+path));assert.ok(hub.includes('href="'+path+'"'));assert.match(html,/18,57 yıldır/);assert.match(html,/tahsil edilmeyen ayları/);assert.match(html,/KFE-Metaveri.pdf/);assert.match(html,/rental-price/);assert.match(html,/id="rental-rent"/);assert.doesNotMatch(html,/name="robots" content="noindex/)});
+
+test('city HTML provides official initial values and distinguishes missing district data',()=>{
+ const snapshots=JSON.parse(readFileSync('lib/city-snapshots.json','utf8'));
+ const pages=readdirSync('dist/sehirler',{withFileTypes:true}).filter(entry=>entry.isDirectory()).map(entry=>entry.name);
+ assert.deepEqual(pages.sort(),Object.keys(snapshots).sort());
+ for(const [slug,{market,sales,districts}] of Object.entries(snapshots)){
+  const html=readFileSync(`dist/sehirler/${slug}/index.html`,'utf8').replaceAll('<!-- -->','');
+  assert.ok(html.includes('TCMB EVDS · '+market.region+' · '+market.period.slice(0,7)),slug);
+  assert.ok(html.includes(market.value.toLocaleString('tr-TR',{maximumFractionDigits:2})),slug);
+  assert.ok(html.includes('TÜİK · '+sales.period+' · satış adedi'),slug);
+  assert.ok(html.includes(sales.total.toLocaleString('tr-TR')),slug);
+  assert.doesNotMatch(html,/TCMB bölgesel verisi yükleniyor|TÜİK satış verisi yükleniyor|İlçe satış sıralaması yükleniyor/,slug);
+  if(districts?.items.length){
+   assert.ok(html.includes(districts.items[0].districtName),slug);
+   assert.ok(html.includes(districts.period),slug);
+   if(districts.status==='stale')assert.match(html,/aşağıdaki liste geçmiş dönemdir/,slug);
+  }else assert.match(html,/doğrulanmış ilçe satış listesi henüz mevcut değil/,slug);
+ }
+});
