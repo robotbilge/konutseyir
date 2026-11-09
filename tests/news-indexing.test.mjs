@@ -48,3 +48,14 @@ test('core pages provide distinct decision methods and complete worked examples 
  for(const [path,fragments] of Object.entries(expected)){const html=readFileSync(`dist/${path}/index.html`,'utf8');for(const text of fragments)assert.ok(html.includes(text),path+': '+text);assert.ok(html.includes('dateTime="2026-10-31"'));assert.match(html,/name="robots" content="index,follow"/)}
  const a=netRentMetrics(4800000,240000,28000,1,24000,16000),b=netRentMetrics(4500000,450000,27000,2,32000,18000);assert.equal(a.net,268000);assert.equal(b.net,220000);assert.equal(a.netYield.toFixed(2),'5.32');assert.equal(b.netYield.toFixed(2),'4.44');
 });
+
+test('AdSense is reserved for publisher guides, the homepage and working tools',()=>{
+ for(const path of ['iletisim','gizlilik','cerez-politikasi','kullanim-kosullari','yayin-ilkeleri','hakkimizda','rehber','veri','resmi-kontroller','kontrol-listesi','hesaplama','sehirler','sehirler/istanbul']){
+  const html=readFileSync(`dist/${path}/index.html`,'utf8');
+  assert.doesNotMatch(html,/adsbygoogle\.js|name="google-adsense-account"/,path);
+  assert.match(html,/name="robots" content="index,follow"/,path);
+ }
+ for(const path of ['rehber/tapu-kontrolu','hesaplama/net-kira','ev-analizi']){
+  assert.match(readFileSync(`dist/${path}/index.html`,'utf8'),/adsbygoogle\.js/,path);
+ }
+});
