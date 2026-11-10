@@ -1,3 +1,4 @@
+import {shortStayGuide,shortStayGuideWorkbook} from './short-stay-guide';
 import {duplicateListingGuide,duplicateListingGuideWorkbook} from './duplicate-listing-guide';
 import {homeSaleTaxGuide,homeSaleTaxGuideWorkbook} from './home-sale-tax-guide';
 import {refinanceGuide,refinanceGuideWorkbook} from './refinance-guide';
@@ -12,6 +13,7 @@ import {urbanSlug} from './urban-sources';
 export type GuideWorkbook={question:string;deliverable:string;rows:{finding:string;evidence:string;action:string}[]};
 export const guideWorkbooks:Record<string,GuideWorkbook>={
  [duplicateListingGuide.slug]:duplicateListingGuideWorkbook,
+ [shortStayGuide.slug]:shortStayGuideWorkbook,
  [homeSaleTaxGuide.slug]:homeSaleTaxGuideWorkbook,
  [refinanceGuide.slug]:refinanceGuideWorkbook,
  [rentalMoveGuide.slug]:rentalMoveGuideWorkbook,

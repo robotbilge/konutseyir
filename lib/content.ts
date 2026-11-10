@@ -1,3 +1,4 @@
+import {shortStayGuide,shortStayGuideSections} from './short-stay-guide';
 import {duplicateListingGuide,duplicateListingGuideSections} from './duplicate-listing-guide';
 import {homeSaleTaxGuide,homeSaleTaxGuideSections} from './home-sale-tax-guide';
 import {refinanceGuide,refinanceGuideSections} from './refinance-guide';
@@ -145,13 +146,14 @@ export const guides=[
       "KFE fiyat hareketini izler; ilan için otomatik ekspertiz üretmez. Sonuç okumaya başlamadan serinin adını, kapsamını, birimini ve dönemini kontrol edin."
     ]
   },
- urbanGuide, energyGuide, installmentGuide, saleChainGuide, appraisalGapGuide, daskBudgetGuide, rentalMoveGuide, refinanceGuide, homeSaleTaxGuide, duplicateListingGuide
+ urbanGuide, energyGuide, installmentGuide, saleChainGuide, appraisalGapGuide, daskBudgetGuide, rentalMoveGuide, refinanceGuide, homeSaleTaxGuide, duplicateListingGuide, shortStayGuide
 ] as const;
 
 export type GuideSection={heading:string;paragraphs:string[];bullets?:string[]};
 
 export const guideExpansions:Record<string,GuideSection[]>={
  [duplicateListingGuide.slug]:duplicateListingGuideSections,
+ [shortStayGuide.slug]:shortStayGuideSections,
  [homeSaleTaxGuide.slug]:homeSaleTaxGuideSections,
  [refinanceGuide.slug]:refinanceGuideSections,
  [rentalMoveGuide.slug]:rentalMoveGuideSections,
