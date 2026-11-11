@@ -1,0 +1,31 @@
+name: Render KonutSeyir voiced Reels
+on:
+  push:
+    paths:
+      - .github/workflows/render-konutseyir-voiced-reels.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  render-voice:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Install video and Turkish speech tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg espeak-ng
+      - name: Render narrated MP4
+        run: |
+          python scripts/build_reels_voice_2026.py
+          test -s public/instagram/konutseyir_net_brut_m2_seslendirmeli_reels.mp4
+          ffprobe -v error -show_entries stream=codec_type -of csv=p=0 public/instagram/konutseyir_net_brut_m2_seslendirmeli_reels.mp4
+      - name: Commit media output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/instagram/konutseyir_net_brut_m2_seslendirmeli_reels.mp4
+          git commit -m "Publish narrated KonutSeyir net and gross m2 Reels"
+          git push
