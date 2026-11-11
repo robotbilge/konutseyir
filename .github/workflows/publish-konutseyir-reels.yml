@@ -1,0 +1,32 @@
+name: Publish KonutSeyir educational Reels asset
+on:
+  push:
+    paths:
+      - .github/workflows/publish-konutseyir-reels.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Install media dependencies
+        run: |
+          python -m pip install pillow
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+      - name: Render the vertical Reels video
+        run: |
+          python scripts/build_reels_net_brut_2026.py
+          ffmpeg -y -loglevel error -framerate 1/3.8 -i tmp_reels_frames/%02d.png -f lavfi -i "sine=frequency=110:sample_rate=22050:duration=27" -vf "fps=24,format=yuv420p" -t 26.6 -c:v libx264 -preset veryfast -crf 24 -c:a aac -b:a 64k -af "volume=0.025" -movflags +faststart -shortest public/instagram/konutseyir_net_brut_m2_reels.mp4
+          test -s public/instagram/konutseyir_net_brut_m2_reels.mp4
+      - name: Publish video to website repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/instagram/konutseyir_net_brut_m2_reels.mp4
+          git commit -m "Publish KonutSeyir net vs gross m² Reels video"
+          git push
