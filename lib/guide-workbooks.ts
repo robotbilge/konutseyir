@@ -1,3 +1,4 @@
+import {sharedTitleGuide,sharedTitleGuideWorkbook} from './shared-title-guide';
 import {shortStayGuide,shortStayGuideWorkbook} from './short-stay-guide';
 import {duplicateListingGuide,duplicateListingGuideWorkbook} from './duplicate-listing-guide';
 import {homeSaleTaxGuide,homeSaleTaxGuideWorkbook} from './home-sale-tax-guide';
@@ -14,6 +15,7 @@ export type GuideWorkbook={question:string;deliverable:string;rows:{finding:stri
 export const guideWorkbooks:Record<string,GuideWorkbook>={
  [duplicateListingGuide.slug]:duplicateListingGuideWorkbook,
  [shortStayGuide.slug]:shortStayGuideWorkbook,
+ [sharedTitleGuide.slug]:sharedTitleGuideWorkbook,
  [homeSaleTaxGuide.slug]:homeSaleTaxGuideWorkbook,
  [refinanceGuide.slug]:refinanceGuideWorkbook,
  [rentalMoveGuide.slug]:rentalMoveGuideWorkbook,

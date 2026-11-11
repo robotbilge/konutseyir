@@ -1,3 +1,4 @@
+import {sharedTitleGuide,sharedTitleGuideEvidence} from './shared-title-guide';
 import {shortStayGuide,shortStayGuideEvidence} from './short-stay-guide';
 import {duplicateListingGuide,duplicateListingGuideEvidence} from './duplicate-listing-guide';
 import {homeSaleTaxGuide,homeSaleTaxGuideEvidence} from './home-sale-tax-guide';
@@ -16,6 +17,7 @@ export const editorialUpdatedAt='2026-10-16';
 export const guideEvidence:Record<string,{takeaways:string[];sources:EditorialSource[]}>= {
  [duplicateListingGuide.slug]:duplicateListingGuideEvidence,
  [shortStayGuide.slug]:shortStayGuideEvidence,
+ [sharedTitleGuide.slug]:sharedTitleGuideEvidence,
  [homeSaleTaxGuide.slug]:homeSaleTaxGuideEvidence,
  [refinanceGuide.slug]:refinanceGuideEvidence,
  [rentalMoveGuide.slug]:rentalMoveGuideEvidence,
