@@ -1,0 +1,31 @@
+name: Render KonutSeyir natural voice Reels
+on:
+  push:
+    paths:
+      - .github/workflows/render-konutseyir-natural-voice.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install media dependencies
+        run: |
+          python -m pip install pillow edge-tts
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+      - name: Synthesize clean single-track Turkish narration and render MP4
+        run: |
+          python scripts/build_reels_natural_voice_2026.py
+          ffmpeg -v error -i public/instagram/konutseyir_net_brut_m2_dogal_ses_reels.mp4 -af "silencedetect=n=-45dB:d=2" -f null - 2> silence-check.txt || true
+          cat silence-check.txt
+          ffprobe -v error -show_entries format=duration,size -of json public/instagram/konutseyir_net_brut_m2_dogal_ses_reels.mp4
+      - name: Commit validated narration video
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/instagram/konutseyir_net_brut_m2_dogal_ses_reels.mp4
+          git commit -m "Add Turkish neural voice Reels without layered voices"
+          git push
