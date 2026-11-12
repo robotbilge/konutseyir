@@ -1,3 +1,4 @@
+import {rentalExpenseGuide,rentalExpenseGuideEvidence} from './rental-expense-guide';
 import {sharedTitleGuide,sharedTitleGuideEvidence} from './shared-title-guide';
 import {shortStayGuide,shortStayGuideEvidence} from './short-stay-guide';
 import {duplicateListingGuide,duplicateListingGuideEvidence} from './duplicate-listing-guide';
@@ -18,6 +19,7 @@ export const guideEvidence:Record<string,{takeaways:string[];sources:EditorialSo
  [duplicateListingGuide.slug]:duplicateListingGuideEvidence,
  [shortStayGuide.slug]:shortStayGuideEvidence,
  [sharedTitleGuide.slug]:sharedTitleGuideEvidence,
+ [rentalExpenseGuide.slug]:rentalExpenseGuideEvidence,
  [homeSaleTaxGuide.slug]:homeSaleTaxGuideEvidence,
  [refinanceGuide.slug]:refinanceGuideEvidence,
  [rentalMoveGuide.slug]:rentalMoveGuideEvidence,

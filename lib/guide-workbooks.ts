@@ -1,3 +1,4 @@
+import {rentalExpenseGuide,rentalExpenseGuideWorkbook} from './rental-expense-guide';
 import {sharedTitleGuide,sharedTitleGuideWorkbook} from './shared-title-guide';
 import {shortStayGuide,shortStayGuideWorkbook} from './short-stay-guide';
 import {duplicateListingGuide,duplicateListingGuideWorkbook} from './duplicate-listing-guide';
@@ -16,6 +17,7 @@ export const guideWorkbooks:Record<string,GuideWorkbook>={
  [duplicateListingGuide.slug]:duplicateListingGuideWorkbook,
  [shortStayGuide.slug]:shortStayGuideWorkbook,
  [sharedTitleGuide.slug]:sharedTitleGuideWorkbook,
+ [rentalExpenseGuide.slug]:rentalExpenseGuideWorkbook,
  [homeSaleTaxGuide.slug]:homeSaleTaxGuideWorkbook,
  [refinanceGuide.slug]:refinanceGuideWorkbook,
  [rentalMoveGuide.slug]:rentalMoveGuideWorkbook,
