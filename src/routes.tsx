@@ -27,7 +27,7 @@ const fixed:Record<string,{component:any,title:string,description:string}>={
 '/hesaplama/altin-bazli-konut':{component:null,title:'Konut kaç gram altın? Ev ve peşinat hesaplama | KonutSeyir',description:'Konut fiyatı, gram altın referansı ve birikiminizle ev için gereken altını, peşinat karşılığını ve kalan tutarı hesaplayın. Kaynak zamanını ve varsayımları görün.'},
 '/hesaplama/hisseli-tapu':{component:null,title:'Hisseli tapu ve miras payı hesaplama',description:'Tapudaki veya veraset ilamındaki pay/payda oranına göre matematiksel metrekare ve değer karşılığını hesaplayın.'},
 '/karsilastir':{component:null,title:'Yatırım araçları karşılaştırması | TÜİK reel getirileri',description:'Tutar girip TÜİK’in 1, 3, 6 ve 12 aylık nominal ve TÜFE/Yİ-ÜFE reel getirilerini inceleyin. Altın, mevduat, döviz, BIST 100 ve DİBS geçmiş dönem verileri.'},
-'/rehber':{component:null,title:'Konut satın alma ve yatırım rehberleri',description:'Kira çarpanı, net getiri, tapu ve maliyet konularında açıklamalar.'},
+'/rehber':{component:null,title:'Konut satın alma ve yatırım makaleleri',description:'Kira çarpanı, net getiri, tapu ve maliyet konularında açıklamalar.'},
 '/sehirler':{component:null,title:'Şehir konut piyasaları',description:'Bölgesel konut verilerinin kapsamı ve resmî kaynakları.'},
 '/sehir-karsilastir':{component:null,title:'Şehirler arası konut fiyat eğilimi karşılaştırması',description:'İstanbul, Ankara ve İzmir dahil şehirlerin TCMB bölgesel konut fiyat endekslerini 1, 3 veya 5 yılda karşılaştırın.'},
 '/kontrol-listesi':{component:null,title:'Ev satın alma kontrol listesi',description:'Tapu, iskân, teknik inceleme ve kiracı kontrollerinizi takip edin.'},

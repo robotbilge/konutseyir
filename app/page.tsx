@@ -1,6 +1,7 @@
 import {ArrowUpRight,BadgeCheck,Calculator as CalculatorIcon,Database,Info,SearchCheck,ShieldCheck} from 'lucide-react';
 import {Header,Footer} from '../components/site-chrome';
 import {LatestNews,MarketSnapshot} from '../components/live-data';
+import {LatestArticles} from '../components/latest-articles';
 
 export default function Home(){return <><Header/><main className="home-page">
   <section className="hero home-hero">
@@ -34,6 +35,7 @@ export default function Home(){return <><Header/><main className="home-page">
         <article><p className="eyebrow">EVİMİ SATACAĞIM</p><h3>Satışı hazırlayın, tutarı görün</h3><p>Satış fiyatından borç ve giderleri düşün; tapu ve resmî kayıt kontrollerini tamamlayın.</p><a className="home-path-primary" href="/karar-araclari#net-satis">Net satış tutarını hesapla <ArrowUpRight size={16}/></a><div><a href="/hesaplama/tapu-harci">Tapu gideri</a><a href="/resmi-kontroller">Resmî kontroller</a></div></article>
       </div>
     </section>
+    <LatestArticles/>
     <section className="home-renewal" aria-labelledby="home-renewal-title">
       <div className="home-renewal-copy">
         <p className="eyebrow">KENTSEL DÖNÜŞÜM</p>
