@@ -85,8 +85,8 @@ export function PushSignup(){
  return <div className="push-box">
   <Bell/>
   <div>
-   <b>Emlak haberleri ve yeni rehberler cihazınıza gelsin</b>
-   <p>Yeni emlak haberleri ve özgün konut rehberleri için bildirim gönderilir. İstediğiniz zaman kapatabilirsiniz.</p>
+   <b>Emlak haberleri ve yeni makaleler cihazınıza gelsin</b>
+   <p>Yeni emlak haberleri ve özgün konut makaleleri için bildirim gönderilir. İstediğiniz zaman kapatabilirsiniz.</p>
    {state==='denied'&&<small>Tarayıcı bildirim iznini engelledi. Site ayarlarından izin vermeniz gerekir.</small>}
    {state==='error'&&<small>Bildirim işlemi tamamlanamadı. {publicKey?'Tekrar deneyin.':'Sayfayı yenileyip tekrar deneyin.'}</small>}
   </div>

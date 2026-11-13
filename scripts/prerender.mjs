@@ -11,7 +11,7 @@ const analyticsHead='<script src="/analytics.js?v=consent-1" data-measurement-id
 const esc=s=>s.replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
 const canonicalPath=path=>path==='/'?'/':`${path.replace(/\/+$/,'')}/`;
 const canonicalUrl=path=>`${base}${canonicalPath(path)}`;
-const label=part=>decodeURIComponent(part).replaceAll('-',' ').replace(/(^|\s)\S/g,c=>c.toLocaleUpperCase('tr-TR'));
+const label=part=>part==='rehber'?'Makaleler':decodeURIComponent(part).replaceAll('-',' ').replace(/(^|\s)\S/g,c=>c.toLocaleUpperCase('tr-TR'));
 const jsonLd=(path,m)=>{
  const url=canonicalUrl(path),parts=path.split('/').filter(Boolean),items=[{'@type':'Organization','@id':`${base}/#organization`,name:'KonutSeyir',url:base,email:'iletisim@konutseyir.com',logo:`${base}/icon-512.png`},{'@type':'WebSite','@id':`${base}/#website`,name:'KonutSeyir',url:base,publisher:{'@id':`${base}/#organization`}}];
  if(parts.length)items.push({'@type':'BreadcrumbList',itemListElement:[{'@type':'ListItem',position:1,name:'Ana sayfa',item:`${base}/`},...parts.map((part,index)=>({'@type':'ListItem',position:index+2,name:label(part),item:canonicalUrl('/'+parts.slice(0,index+1).join('/'))}))]});
