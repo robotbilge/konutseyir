@@ -22,7 +22,8 @@ test('CPI annual change uses previous year same month and never fabricates a mis
  const rows=[{period:'2026-09-01',value:137.23,retrieved_at:'2026-10-27T10:00:00Z'},{period:'2025-09-01',value:105.78}];const result=observation('cpi',rows,{state:'available'},Date.parse('2026-10-27'));assert.equal(result.status,'available');assert.equal(result.annualChange.toFixed(2),'29.73');assert.equal(observation('cpi',rows.slice(0,1),{state:'available'}).annualChange,null);assert.equal(observation('cpi',rows,{state:'error'},Date.parse('2026-10-27')).status,'cached');
 });
 import worker from '../worker/index.mjs';
-test('market API refreshes missed CPI observations and reuses them on the next view',async()=>{
+test('market API refreshes missed CPI observations and reuses them on the next view',async(t)=>{
+ t.mock.timers.enable({apis:['Date'],now:new Date('2026-10-27T12:00:00Z')});
  const observations=new Map([['cpi',[{period:'2025-09-01',value:100,retrieved_at:'2026-10-01T00:00:00Z'}]]]),states=new Map([['cpi',{state:'available',attempted_at:'2020-01-01'}],['policy:repo:v1',{state:'available',attempted_at:new Date().toISOString()}]]);
  const db={prepare(sql){return {args:[],bind(...args){this.args=args;return this},async first(){return states.get(this.args[0])||null},async all(){return {results:observations.get(this.args[0])||[]}},async run(){if(sql.includes('source_status'))states.set(this.args[0],{state:this.args[1],attempted_at:this.args[2]});return {success:true}}}},async batch(statements){for(const statement of statements){const [series,period,value,retrieved_at]=statement.args;const rows=observations.get(series)||[];observations.set(series,[...rows.filter(r=>r.period!==period),{period,value,retrieved_at}])}return []}};
  const original=globalThis.fetch;let calls=0;globalThis.fetch=async()=>{calls++;return Response.json({items:[{Tarih:'2026-09',TP_TEST_CPI:'129.73'},{Tarih:'2025-09',TP_TEST_CPI:'100'}]})};
