@@ -1,3 +1,4 @@
+import {homePropertyTaxGuide,homePropertyTaxGuideEvidence} from './home-property-tax-guide';
 import {newTenantRentGuide,newTenantRentGuideEvidence} from './new-tenant-rent-guide';
 import {prepaidHomeGuide,prepaidHomeGuideEvidence} from './prepaid-home-guide';
 import {mortgagedHomeGuide,mortgagedHomeGuideEvidence} from './mortgaged-home-guide';
@@ -26,6 +27,7 @@ export const guideEvidence:Record<string,{takeaways:string[];sources:EditorialSo
  [mortgagedHomeGuide.slug]:mortgagedHomeGuideEvidence,
  [prepaidHomeGuide.slug]:prepaidHomeGuideEvidence,
  [newTenantRentGuide.slug]:newTenantRentGuideEvidence,
+ [homePropertyTaxGuide.slug]:homePropertyTaxGuideEvidence,
  [homeSaleTaxGuide.slug]:homeSaleTaxGuideEvidence,
  [refinanceGuide.slug]:refinanceGuideEvidence,
  [rentalMoveGuide.slug]:rentalMoveGuideEvidence,
