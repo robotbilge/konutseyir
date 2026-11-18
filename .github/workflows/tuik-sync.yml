@@ -2,7 +2,7 @@ name: TÜİK konut satışlarını güncelle
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [main, fix/tuik-district-sync-2026]
     paths:
       - .github/workflows/tuik-sync.yml
       - scripts/sync-tuik.mjs

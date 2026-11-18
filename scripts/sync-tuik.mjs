@@ -7,7 +7,13 @@ const csvParts=[];for(const file of files){const text=await readFile(`${director
 const rows=parseTuikSales(csvParts.join('\n'));await writeFile('tuik-city-sales.sql',salesSql(rows));console.log(`${rows.length} doğrulanmış şehir-ay kaydı hazırlandı; son dönem ${rows.at(-1)?.period}.`);
 
 console.log('TÜİK CSV sütunları:',csvParts[0].split(/\r?\n/)[0]);
-const combinedCsv=csvParts.join('\n'),embeddedDistrictRows=parseTuikDistrictSales(combinedCsv);
+const combinedCsv=csvParts.join('\n');
+const diagnosticLines=combinedCsv.split(/\r?\n/).slice(1).filter(Boolean);
+const diagnosticHeader=csvParts[0].split(/\r?\n/)[0].split(',');
+const diagnosticAreaIndex=diagnosticHeader.indexOf('REF_AREA');
+const diagnosticAreas=[...new Set(diagnosticLines.map(line=>line.split(',')[diagnosticAreaIndex]))];
+console.log('TÜİK REF_AREA örneği:',diagnosticAreas.slice(0,60).join('|'));
+const embeddedDistrictRows=parseTuikDistrictSales(combinedCsv);
 if(embeddedDistrictRows.length){await writeFile('tuik-district-sales.sql',districtSalesSql(embeddedDistrictRows));console.log(`${embeddedDistrictRows.length} doğrulanmış ilçe-ay kaydı ana TÜİK dosyasından hazırlandı.`)}
 if(!embeddedDistrictRows.length)console.log('İlçe satırı bulunamadı; ilçe verisi güncellenmiş sayılmaz.');
 
