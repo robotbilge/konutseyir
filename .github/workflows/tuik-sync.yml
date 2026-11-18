@@ -70,7 +70,7 @@ jobs:
           if [ -s tuik-district-sales.sql ]; then
             pnpm exec wrangler d1 execute konutseyir-data --remote --config worker/wrangler.jsonc --file tuik-district-sales.sql
           else
-            echo "TÜİK yanıtında ilçe kaydı bulunmadı; mevcut ilçe verileri korunuyor."
+            echo "TÜİK'in genel konut satışı akışı il düzeyinde; mevcut doğrulanmış ilçe verileri tarihsel kayıt olarak korunuyor."
           fi
       - name: İlçe satış kapsamını doğrula
         if: always()
