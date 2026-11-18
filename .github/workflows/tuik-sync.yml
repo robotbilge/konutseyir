@@ -2,7 +2,7 @@ name: TÜİK konut satışlarını güncelle
 on:
   workflow_dispatch:
   push:
-    branches: [main, fix/tuik-district-sync-2026]
+    branches: [main, 'fix/tuik-district-*']
     paths:
       - .github/workflows/tuik-sync.yml
       - scripts/sync-tuik.mjs
@@ -49,6 +49,11 @@ jobs:
           token=$(jq -r '.access_token // empty' token.json)
           test -n "$token"
           echo "::add-mask::$token"
+          curl --silent --show-error --max-time 60 \
+            --output tuik-dataflows.xml \
+            "https://nsiws.tuik.gov.tr/rest/dataflow/TR/all/latest?detail=allstubs" \
+            --header "Authorization: Bearer $token"
+          node scripts/inspect-tuik-dataflows.mjs tuik-dataflows.xml
           mkdir -p tuik-data
           for offset in 2 1; do
             period=$(date -u -d "$offset months ago" +%Y-%m)
