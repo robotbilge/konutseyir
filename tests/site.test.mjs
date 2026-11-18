@@ -59,7 +59,7 @@ test('city HTML provides official initial values and distinguishes missing distr
   if(districts?.items.length){
    assert.ok(html.includes(districts.items[0].districtName),slug);
    assert.ok(html.includes(districts.period),slug);
-   if(districts.status==='stale')assert.match(html,/aşağıdaki liste geçmiş dönemdir/,slug);
+   if(districts.status==='stale'){assert.match(html,/Bu güncel bir sıralama değildir/,slug);assert.match(html,new RegExp(`${districts.period} ilçe satış sıralaması`),slug)}
   }else assert.match(html,/doğrulanmış ilçe satış listesi henüz mevcut değil/,slug);
  }
 });
