@@ -6,8 +6,10 @@ on:
     paths:
       - .github/workflows/tuik-sync.yml
       - scripts/sync-tuik.mjs
+      - scripts/sync-tuik-districts.mjs
       - worker/tuik.mjs
       - migrations/0003_city_sales.sql
+      - migrations/0004_district_sales.sql
   schedule:
     - cron: '15 8 16-23 * *'
 permissions:
@@ -64,15 +66,23 @@ jobs:
           test -n "$(find tuik-data -name '*.csv' -print -quit)"
       - name: TÜİK verisini doğrula ve SQL hazırla
         run: node scripts/sync-tuik.mjs
+      - name: TÜİK tüm ilçe satışlarını indir
+        run: |
+          curl --fail --silent --show-error --retry 3 --retry-all-errors --max-time 90 \
+            --output tuik-district-map-data.json \
+            'https://cip.tuik.gov.tr/Home/GetMapData?kaynak=medas&duzey=4&gostergeNo=KNT-GK217340-O27002&kayitSayisi=24&period=aylik'
+          curl --fail --silent --show-error --retry 3 --retry-all-errors --max-time 90 \
+            --output tuik-district-geometry.json 'https://cip.tuik.gov.tr/assets/geometri/nuts4.json'
+          curl --fail --silent --show-error --retry 3 --retry-all-errors --max-time 90 \
+            --output tuik-province-geometry.json 'https://cip.tuik.gov.tr/assets/geometri/nuts3.json'
+      - name: TÜİK ilçe verisini doğrula ve SQL hazırla
+        run: node scripts/sync-tuik-districts.mjs
       - name: Doğrulanmış satışları D1'e yaz
         run: |
           pnpm exec wrangler d1 execute konutseyir-data --remote --config worker/wrangler.jsonc --file tuik-city-sales.sql
-          if [ -s tuik-district-sales.sql ]; then
-            pnpm exec wrangler d1 execute konutseyir-data --remote --config worker/wrangler.jsonc --file tuik-district-sales.sql
-          else
-            echo "TÜİK'in genel konut satışı akışı il düzeyinde; mevcut doğrulanmış ilçe verileri tarihsel kayıt olarak korunuyor."
-          fi
+          test -s tuik-district-sales.sql
+          pnpm exec wrangler d1 execute konutseyir-data --remote --config worker/wrangler.jsonc --file tuik-district-sales.sql
       - name: İlçe satış kapsamını doğrula
-        if: always()
         run: |
-          pnpm exec wrangler d1 execute konutseyir-data --remote --config worker/wrangler.jsonc --command "SELECT city_slug, MAX(period) AS latest_period, COUNT(*) AS row_count FROM district_sales GROUP BY city_slug ORDER BY city_slug"
+          cat tuik-district-sync-summary.json
+          pnpm exec wrangler d1 execute konutseyir-data --remote --config worker/wrangler.jsonc --command "SELECT MAX(period) AS latest_period, COUNT(DISTINCT city_slug) AS province_count, COUNT(*) AS row_count FROM district_sales WHERE period=(SELECT MAX(period) FROM district_sales)"
