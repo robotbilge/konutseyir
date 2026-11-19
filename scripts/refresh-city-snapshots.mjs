@@ -13,8 +13,10 @@ function marketSnapshot(data,slug){
     !['available','cached'].includes(data.status)||!Number.isFinite(data.value)||data.value<=0||
     typeof data.period!=='string'||!month.test(data.period.slice(0,7))||!Number.isFinite(Date.parse(data.period))||
     !Number.isFinite(Date.parse(data.retrievedAt)))return null;
+ const history=Array.isArray(data.history)?data.history.filter(row=>typeof row?.period==='string'&&month.test(row.period.slice(0,7))&&Number.isFinite(row.value)&&row.value>0).slice(-61).map(({period,value})=>({period,value})):[];
+ if(history.length<2)return null;
  const {region,value,period,retrievedAt,status}=data;
- return {region,value,period,retrievedAt,status,annualChange:optionalNumber(data.annualChange)};
+ return {region,value,period,retrievedAt,status,annualChange:optionalNumber(data.annualChange),history};
 }
 
 function salesSnapshot(data,slug){
