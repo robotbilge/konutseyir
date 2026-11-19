@@ -60,7 +60,7 @@ function useCityData<T extends {period?:string|null}>(url:string,initialData?:T|
 const sourceTime=(value:string)=>new Date(value.replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})$/,'$1T$2Z')).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'});
 
 const monthLabel=(period:string,short=false)=>new Intl.DateTimeFormat('tr-TR',{month:short?'short':'long',year:'numeric',timeZone:'UTC'}).format(new Date(`${period}-01T00:00:00Z`));
-const signedRate=(value:number|null)=>value===null?'Hesaplanamadı':`${value>=0?'+':''}%${value.toLocaleString('tr-TR',{maximumFractionDigits:2})}`;
+const signedRate=(value:number|null)=>value===null?'Hesaplanamadı':`${value>=0?'+':''}${value.toLocaleString('tr-TR',{maximumFractionDigits:2})}%`;
 
 function CityMarketChart({history}:{history:{period:string;value:number}[]}){
  const chart=marketChart(history),[selectedPeriod,setSelectedPeriod]=useState<string|null>(null),selected=chart.items.find((item:{period:string})=>item.period===selectedPeriod)??chart.latest;
