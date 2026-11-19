@@ -1,5 +1,6 @@
 import {IndexReading,SalesReading} from './market-reading';
 import {ceilToHundredth} from '../lib/standard-math.mjs';
+import {marketChart} from '../lib/market-chart.mjs';
 import {useEffect,useState} from 'react';
 import {ArrowUpRight,Landmark,Newspaper,Percent} from 'lucide-react';
 
@@ -58,12 +59,33 @@ function useCityData<T extends {period?:string|null}>(url:string,initialData?:T|
 
 const sourceTime=(value:string)=>new Date(value.replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})$/,'$1T$2Z')).toLocaleString('tr-TR',{timeZone:'Europe/Istanbul'});
 
+const monthLabel=(period:string,short=false)=>new Intl.DateTimeFormat('tr-TR',{month:short?'short':'long',year:'numeric',timeZone:'UTC'}).format(new Date(`${period}-01T00:00:00Z`));
+const signedRate=(value:number|null)=>value===null?'Hesaplanamadı':`${value>=0?'+':''}%${value.toLocaleString('tr-TR',{maximumFractionDigits:2})}`;
+
+function CityMarketChart({history}:{history:{period:string;value:number}[]}){
+ const chart=marketChart(history),[selectedPeriod,setSelectedPeriod]=useState<string|null>(null),selected=chart.items.find((item:{period:string})=>item.period===selectedPeriod)??chart.latest;
+ if(!selected||!chart.baseline||!chart.latest||chart.min===null||chart.max===null)return null;
+ const baseline=chart.baseline,latest=chart.latest,min=chart.min,max=chart.max,range=Math.max(max-min,1),height=(value:number)=>`${16+(value-min)/range*84}%`,tickIndexes=new Set(chart.items.map((_:unknown,index:number)=>index).filter((index:number)=>index===0||index===chart.items.length-1||index%3===0));
+ return <figure className="market-chart" aria-labelledby="market-chart-title">
+  <figcaption><div><b id="market-chart-title">2024’ten bugüne endeks değişimi</b><span>{monthLabel(baseline.period)} ilk mevcut dönemdir.</span></div><strong>{signedRate(latest.sinceBaseline)}</strong></figcaption>
+  <div className="market-chart-detail" aria-live="polite"><b>{monthLabel(selected.period)}</b><dl><div><dt>Endeks</dt><dd>{selected.value.toLocaleString('tr-TR',{maximumFractionDigits:2})}</dd></div><div><dt>Önceki aya göre</dt><dd>{signedRate(selected.monthlyChange)}</dd></div><div><dt>Yıllık değişim</dt><dd>{signedRate(selected.annualChange)}</dd></div><div><dt>2024 başlangıcına göre</dt><dd>{signedRate(selected.sinceBaseline)}</dd></div></dl></div>
+  <div className="market-chart-scroll" tabIndex={0} aria-label="Aylık endeks grafiği; ayrıntı için sütunları seçin">
+   <div className="market-chart-plot">
+    <div className="market-chart-scale" aria-hidden="true"><span>{max.toLocaleString('tr-TR',{maximumFractionDigits:1})}</span><span>{((max+min)/2).toLocaleString('tr-TR',{maximumFractionDigits:1})}</span><span>{min.toLocaleString('tr-TR',{maximumFractionDigits:1})}</span></div>
+    <div className="market-chart-bars" style={{gridTemplateColumns:`repeat(${chart.items.length},minmax(16px,1fr))`}}>{chart.items.map((item:{period:string;value:number;monthlyChange:number|null;annualChange:number|null;sinceBaseline:number|null})=><button key={item.period} type="button" className={item.period===selected.period?'selected':''} style={{height:height(item.value)}} onMouseEnter={()=>setSelectedPeriod(item.period)} onFocus={()=>setSelectedPeriod(item.period)} onClick={()=>setSelectedPeriod(item.period)} aria-label={`${monthLabel(item.period)}; endeks ${item.value.toLocaleString('tr-TR')}; aylık ${signedRate(item.monthlyChange)}; yıllık ${signedRate(item.annualChange)}; 2024 başlangıcına göre ${signedRate(item.sinceBaseline)}`}><span>{item.value.toLocaleString('tr-TR',{maximumFractionDigits:1})}</span></button>)}</div>
+    <div className="market-chart-axis" style={{gridTemplateColumns:`repeat(${chart.items.length},minmax(16px,1fr))`}}>{chart.items.map((item:{period:string},index:number)=>tickIndexes.has(index)?<span key={item.period} style={{gridColumn:index+1}}>{monthLabel(item.period,true)}</span>:null)}</div>
+   </div>
+  </div>
+  <small>Dikey ölçek sıfırdan başlamaz; endeks düzeyindeki aylık hareketi görünür kılmak için en düşük ve en yüksek gözleme göre ölçeklenir. Endeks, TL veya konut fiyatı değildir.</small>
+ </figure>;
+}
+
 export function CityMarket({slug,region,initialData}:{slug:string,region:string,initialData?:CityMarketData|null}){
  const {data,error}=useCityData(`/api/city-market?slug=${encodeURIComponent(slug)}`,initialData);
  if(!data)return <span className="waiting">{error?'Bölgesel seri şu anda alınamadı.':'Yayıma hazır doğrulanmış bölgesel endeks kaydı yok.'}</span>;
  if(data.value==null||!data.period)return <span className="waiting">Bölgesel seride güncel kayıt bulunamadı.</span>;
- const history=Array.isArray(data.history)?data.history:[],max=Math.max(...history.map(x=>Number(x.value)||0),1),coverage=data.region||region;
- return <><div className="city-live"><span>Endeks değeri</span><strong>{Number(data.value).toLocaleString('tr-TR',{maximumFractionDigits:2})}</strong><small>TCMB EVDS · {coverage} · {data.period.slice(0,7)}</small>{data.retrievedAt&&<small>Son başarılı aktarım: {sourceTime(data.retrievedAt)} (TSİ)</small>}{(error||data.status==='cached')&&<small role="status">Güncel kaynak doğrulanamadı. Son başarılı kayıt gösteriliyor.</small>}{data.annualChange!=null&&<b>Yıllık değişim %{Number(data.annualChange).toLocaleString('tr-TR',{maximumFractionDigits:2})}</b>}</div>{history.length>1&&<div className="mini-history" aria-label="Son 24 aylık konut fiyat endeksi"><div className="mini-bars">{history.map(item=><i key={item.period} title={`${item.period}: ${Number(item.value).toLocaleString('tr-TR')}`} style={{height:`${Math.max(8,Number(item.value)/max*100)}%`}}/>)}</div><small>{history[0].period}–{history.at(-1)?.period} endeks seyri</small></div>}<IndexReading value={Number(data.value)} annualChange={typeof data.annualChange==='number'?data.annualChange:null} period={data.period} region={coverage}/></>
+ const history=Array.isArray(data.history)?data.history:[],coverage=data.region||region;
+ return <><div className="city-live"><span>Endeks değeri</span><strong>{Number(data.value).toLocaleString('tr-TR',{maximumFractionDigits:2})}</strong><small>TCMB EVDS · {coverage} · {data.period.slice(0,7)}</small>{data.retrievedAt&&<small>Son başarılı aktarım: {sourceTime(data.retrievedAt)} (TSİ)</small>}{(error||data.status==='cached')&&<small role="status">Güncel kaynak doğrulanamadı. Son başarılı kayıt gösteriliyor.</small>}{data.annualChange!=null&&<b>Yıllık değişim %{Number(data.annualChange).toLocaleString('tr-TR',{maximumFractionDigits:2})}</b>}</div>{history.length>1&&<CityMarketChart history={history}/>}<IndexReading value={Number(data.value)} annualChange={typeof data.annualChange==='number'?data.annualChange:null} period={data.period} region={coverage}/></>
 }
 
 export function CitySales({slug,initialData}:{slug:string,initialData?:CitySalesData|null}){
