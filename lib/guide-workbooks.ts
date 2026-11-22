@@ -17,6 +17,15 @@ import {urbanGuideWorkbook} from './urban-article';
 import {urbanSlug} from './urban-sources';
 export type GuideWorkbook={question:string;deliverable:string;rows:{finding:string;evidence:string;action:string}[]};
 export const guideWorkbooks:Record<string,GuideWorkbook>={
+ 'konut-piyasasi-ekim-2026-satis-fiyat-kira':{
+ question:'Ulusal konut verileri seçtiğiniz ilan hakkında ne söylüyor, ne söylemiyor?',
+ deliverable:'TÜİK satış dönemi, TCMB fiyat ve kira endeksi, aynı tarihli emsaller ve kendi alım bütçenizden oluşan karar tablosu.',
+ rows:[
+ {finding:'Ulusal yıllık fiyat artışı tek dairenin beklenen getirisi gibi yorumlanıyor.',evidence:'TCMB Ekim 2026 KFE bülteni, il/bölge kapsamı ve ilan emsalleri.',action:'Endeksi genel eğilim için kullanın; ilanı benzer alan ve konumdaki konutlarla karşılaştırın.'},
+ {finding:'Kira endeksi mevcut kiracı artış oranı sayılıyor.',evidence:'TCMB Yeni Kiracı Kira Endeksi tanımı, mevcut kira sözleşmesi ve TÜİK ilgili TÜFE bülteni.',action:'Yeni kiralama eğilimi ile sözleşme yenileme hesabını ayırın.'},
+ {finding:'Brüt kira getirisi giderler düşülmeden karar ölçütü oluyor.',evidence:'Gerçek kira teklifi, aidat, boş kalma ve bakım giderleri.',action:'Net kira ve toplam alım maliyetini aynı dönem üzerinden hesaplayın.'}
+ ]},
+
  [duplicateListingGuide.slug]:duplicateListingGuideWorkbook,
  [shortStayGuide.slug]:shortStayGuideWorkbook,
  [sharedTitleGuide.slug]:sharedTitleGuideWorkbook,
