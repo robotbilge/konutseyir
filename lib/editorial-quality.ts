@@ -19,6 +19,19 @@ export type EditorialSource={label:string;url:string;scope:string};
 export const editorialUpdatedAt='2026-10-16';
 
 export const guideEvidence:Record<string,{takeaways:string[];sources:EditorialSource[]}>= {
+  "konut-piyasasi-ekim-2026-satis-fiyat-kira": {
+    takeaways: [
+      "Ekim 2026'da 131.072 konut satıldı; ilk ve ikinci el satış adetleri farklı oranlarda azaldı.",
+      "TCMB KFE yıllık nominal %21,1 artarken reel %6,6 geriledi; endeks tek dairenin fiyatı değildir.",
+      "Yeni kiracı kira endeksi sözleşme yenileme oranı değildir; yatırımda net kira ve maliyetleri ayrı hesaplayın."
+    ],
+    sources: [
+      {label:"TÜİK · Konut ve İş Yeri Satış İstatistikleri, Ekim 2026 (17 Kasım 2026)",url:"https://veriportali.tuik.gov.tr/tr/press/58348",scope:"İlk el, ikinci el, ipotekli ve diğer satış adetleri ile yıllık değişimler."},
+      {label:"TCMB · Konut Fiyat Endeksi, Ekim 2026 (17 Kasım 2026)",url:"https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB%20TR/Main%20Page%20Site%20Area/Veriler/Konut%20Fiyat%20Endeksi",scope:"Ulusal ve bölgesel nominal/reel fiyat endeksi ile yeni kiracı kira endeksi; tek konut fiyatı veya yasal kira artış oranı değildir."},
+      {label:"TCMB · KFE veri ve metaveri",url:"https://www.tcmb.gov.tr/wps/wcm/connect/tr/tcmb%20tr/main%20menu/istatistikler/reel%20sektor%20istatistikleri/konut%20fiyat%20endeksi/",scope:"Endeks yönteminin ve serilerin kapsamının doğrulanması."}
+    ]
+  },
+
  [duplicateListingGuide.slug]:duplicateListingGuideEvidence,
  [shortStayGuide.slug]:shortStayGuideEvidence,
  [sharedTitleGuide.slug]:sharedTitleGuideEvidence,
