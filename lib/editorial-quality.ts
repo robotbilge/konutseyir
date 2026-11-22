@@ -19,6 +19,18 @@ export type EditorialSource={label:string;url:string;scope:string};
 export const editorialUpdatedAt='2026-10-16';
 
 export const guideEvidence:Record<string,{takeaways:string[];sources:EditorialSource[]}>= {
+ "konut-kredisi-yeni-duzenleme-2026-ikinci-ev":{
+ takeaways:[
+  "19 Kasım 2026 tarihli 11604 sayılı kararla yüzde 75 kredi-değer oranı indirimi en az iki mevcut konutu bulunanlara uygulanıyor.",
+  "İkinci konutta normal kredi-değer oranları uygulanabilse de enerji sınıfı, ekspertiz ve banka onayı belirleyici.",
+  "Yüzde 50 veya altı hisseli tapu ve 6306 sayılı Kanun kapsamındaki riskli yapılar için sınırlı istisnalar var."
+ ],
+ sources:[
+  {label:"BDDK 11604 sayılı Kurul Kararı, 19 Kasım 2026",url:"https://www.bddk.org.tr/Mevzuat/DokumanGetir/1352",scope:"Mevcut konut sayısı, yüzde 75 indirim, hisseli tapu ve riskli yapı istisnaları."},
+  {label:"BDDK 11364 sayılı Kurul Kararı, 29 Ocak 2026",url:"https://www.bddk.org.tr/Mevzuat/EkGetir/1210?ekId=307",scope:"Enerji sınıfı ve ekspertiz değeri bazında kredi-değer oranları."},
+  {label:"TCMB Para Politikası Kurulu Toplantı Özeti 2026-47",url:"https://www.tcmb.gov.tr/wps/wcm/connect/TR/TCMB+TR/Main+Menu/Duyurular/Basin/2026/DUY2026-47",scope:"16 Ekim 2026 haftasına ait geçmiş dönem konut kredisi faiz göstergesi; güncel banka teklifi değildir."}
+ ]},
+
   "konut-piyasasi-ekim-2026-satis-fiyat-kira": {
     takeaways: [
       "Ekim 2026'da 131.072 konut satıldı; ilk ve ikinci el satış adetleri farklı oranlarda azaldı.",
