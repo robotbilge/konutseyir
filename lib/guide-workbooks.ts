@@ -17,6 +17,15 @@ import {urbanGuideWorkbook} from './urban-article';
 import {urbanSlug} from './urban-sources';
 export type GuideWorkbook={question:string;deliverable:string;rows:{finding:string;evidence:string;action:string}[]};
 export const guideWorkbooks:Record<string,GuideWorkbook>={
+ 'konut-kredisi-yeni-duzenleme-2026-ikinci-ev':{
+ question:'İkinci ev alımında hangi kredi-değer üst sınırı ve ne kadar nakit gerekir?',
+ deliverable:'Mevcut konut sayısı, aile mülkiyeti, enerji sınıfı, ekspertiz değeri, kredi üst sınırı, peşinat ve banka tekliflerini içeren kontrol tablosu.',
+ rows:[
+ {finding:'Bir mevcut konutu olan kişi eski %75 indirimini uyguluyor.',evidence:'BDDK 11604 kararı ve kişi/eş/18 yaş altı çocukların tapu kayıtları.',action:'İki mevcut konut şartını kontrol edin; normal oranı ancak diğer koşullar uygunsa uygulayın.'},
+ {finding:'Kredi üst sınırı satış fiyatına göre hesaplanıyor.',evidence:'BDDK 11364 tablosu, enerji kimlik belgesi ve bankanın kabul ettiği ekspertiz değeri.',action:'Doğru değer aralığını ve enerji sınıfını seçerek azami kredi ve peşinatı yeniden hesaplayın.'},
+ {finding:'Yüksek kredi üst sınırı bankadan kesin onay gibi görülüyor.',evidence:'Bankanın yazılı teklifi, gelir belgesi, ödeme planı ve toplam maliyet.',action:'Kredi limiti ile kredi onayını ayırın; aylık taksit ve toplam maliyeti doğrulayın.'}
+ ]},
+
  'konut-piyasasi-ekim-2026-satis-fiyat-kira':{
  question:'Ulusal konut verileri seçtiğiniz ilan hakkında ne söylüyor, ne söylemiyor?',
  deliverable:'TÜİK satış dönemi, TCMB fiyat ve kira endeksi, aynı tarihli emsaller ve kendi alım bütçenizden oluşan karar tablosu.',
