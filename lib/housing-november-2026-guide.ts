@@ -35,4 +35,5 @@ export const housingNovemberSections=[
   'Ekim 2026 tablosu, satış adedinde daralma ile nominal fiyat artışının aynı anda görülebileceğini ortaya koyuyor. Konut alımında asıl soru “Türkiye’de fiyat arttı mı?” değil, “Bu konutun doğrulanmış emsallere ve benim nakit akışıma göre değeri ne?” olmalı.',
   'KonutSeyir Ev Analizi ile ilanınızın m² fiyatını, kira varsayımlarını ve maliyetini ayrı ayrı değerlendirebilirsiniz. Verilerin kapsadığı coğrafyayı ve dönemi kontrol edin; site çıktısını ekspertiz veya yatırım garantisi yerine kullanmayın.'
  ]}
-] as const;
+
+];
