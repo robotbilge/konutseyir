@@ -23,11 +23,17 @@ jobs:
           assert im.size == (1080,1350)
           im.save('public/instagram/konut_piyasasi_ekim_2026_post.jpg',quality=91,optimize=True)
           print('JPEG OK',im.size)
+          from pathlib import Path
+          import subprocess
+          subprocess.run(['rsvg-convert','-w','1080','-h','1350','public/instagram/konut_kredisi_yeni_donem_2026.svg','-o','/tmp/konut_kredisi_2026.png'],check=True)
+          mortgage=Image.open('/tmp/konut_kredisi_2026.png').convert('RGB')
+          assert mortgage.size==(1080,1350)
+          mortgage.save('public/instagram/konut_kredisi_yeni_donem_2026.jpg',quality=92,optimize=True)
           PY
       - name: Commit rendered image
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/instagram/konut_piyasasi_ekim_2026_post.jpg
+          git add public/instagram/konut_piyasasi_ekim_2026_post.jpg public/instagram/konut_kredisi_yeni_donem_2026.jpg
           git commit -m "Render housing market Instagram post"
           git push
