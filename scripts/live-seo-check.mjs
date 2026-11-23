@@ -9,6 +9,8 @@ const preview=base!==origin;
 const attrs=tag=>Object.fromEntries([...tag.matchAll(/([\w:-]+)\s*=\s*["']([^"']*)["']/g)].map(m=>[m[1].toLowerCase(),m[2]]));
 const robots=html=>[...html.matchAll(/<meta\b[^>]*>/gi)].map(m=>attrs(m[0])).filter(a=>a.name?.toLowerCase()==='robots').map(a=>a.content?.toLowerCase()||'').join(',');
 const canonical=html=>[...html.matchAll(/<link\b[^>]*>/gi)].map(m=>attrs(m[0])).find(a=>a.rel==='canonical')?.href;
+const title=html=>html.match(/<title>([^<]+)<\/title>/i)?.[1]?.trim();
+const description=html=>[...html.matchAll(/<meta\b[^>]*>/gi)].map(m=>attrs(m[0])).find(a=>a.name?.toLowerCase()==='description')?.content?.trim();
 const noindex=value=>/\bnoindex\b/i.test(value||'')&&/\bfollow\b/i.test(value||'')&&!/\bnofollow\b/i.test(value||'');
 async function get(path,{news=false,canonicalUrl,allowPreviewHeader=true}={}){
  const url=path.startsWith('https://')?path:(preview&&path.startsWith('/api/')?origin:base)+path;
@@ -37,7 +39,21 @@ if(site==='altinseyir'){
  await get('https://api.altinseyir.com/api/alerts/public-key');
 }else{
  for(const path of ['/haberler','/haberler/','/haberler.html','/haberler/index.html','/haberler/haber','/haberler/haber/','/haberler/haber/index.html','/haberler/haber.html','/haberler/legacy-path?slug=test'])await get(path,{news:true});
- for(const path of ['/ev-analizi/','/hesaplama/emlak-komisyonu/','/hesaplama/kira-artis-orani/','/hesaplama/tapu-harci/','/hesaplama/kira-getirisi/','/hesaplama/mevduat/','/hesaplama/altin-bazli-konut/','/sehir-karsilastir/','/rehber/']){const page=await get(path,{canonicalUrl:origin+path});if(path==='/hesaplama/emlak-komisyonu/')assert.match(page.body,/<link\b[^>]*rel="modulepreload"/,'Current route module must preload in the delivered HTML');}
+ const indexed=[];
+ for(let offset=0;offset<urls.length;offset+=8){
+  const batch=urls.slice(offset,offset+8);
+  indexed.push(...await Promise.all(batch.map(async url=>{
+   const u=new URL(url),page=await get(u.pathname,{canonicalUrl:url});
+   assert.ok(title(page.body),`${url}: title missing`);
+   assert.ok(description(page.body),`${url}: meta description missing`);
+   assert.match(page.body,/<h1\b/i,`${url}: h1 missing from first HTML`);
+   return {url,title:title(page.body),description:description(page.body),body:page.body};
+  })));
+ }
+ assert.equal(new Set(indexed.map(page=>page.title)).size,indexed.length,'Indexable pages must have unique titles');
+ assert.equal(new Set(indexed.map(page=>page.description)).size,indexed.length,'Indexable pages must have unique descriptions');
+ const commission=indexed.find(page=>page.url===origin+'/hesaplama/emlak-komisyonu/');
+ assert.match(commission?.body||'',/<link\b[^>]*rel="modulepreload"/,'Current route module must preload in the delivered HTML');
  const news=JSON.parse((await get('/api/news?limit=1')).body);assert.ok(news.items?.[0]?.slug,'News feed must remain available');
  await get('/haberler/haber?slug='+encodeURIComponent(news.items[0].slug),{news:true});
  const push=JSON.parse((await get('/api/push/config')).body);assert.equal(push.configured,true,'Push configuration must stay active');
