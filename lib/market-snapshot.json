@@ -1,0 +1,77 @@
+{
+  "version": 1,
+  "generatedAt": "2026-11-23T10:47:48.736Z",
+  "sourceUrl": "https://konutseyir.com/api/market-data",
+  "data": [
+    {
+      "series": "usd",
+      "value": 50.4936,
+      "period": "2026-11-20",
+      "status": "available",
+      "annualChange": null,
+      "twelveMonthAverage": null,
+      "twelveMonthAveragePeriod": null,
+      "retrievedAt": "2026-11-22T13:30:19.337Z"
+    },
+    {
+      "series": "eur",
+      "value": 55.397,
+      "period": "2026-11-20",
+      "status": "available",
+      "annualChange": null,
+      "twelveMonthAverage": null,
+      "twelveMonthAveragePeriod": null,
+      "retrievedAt": "2026-11-22T13:30:19.337Z"
+    },
+    {
+      "series": "cpi",
+      "value": 140.77,
+      "period": "2026-10-01",
+      "status": "available",
+      "annualChange": 29.768749175924203,
+      "twelveMonthAverage": 31.22591045703016,
+      "twelveMonthAveragePeriod": "2026-10-01",
+      "retrievedAt": "2026-11-23T05:10:29.088Z"
+    },
+    {
+      "series": "housing",
+      "value": 240.93,
+      "period": "2026-10-01",
+      "status": "available",
+      "annualChange": 21.149494644742806,
+      "twelveMonthAverage": null,
+      "twelveMonthAveragePeriod": null,
+      "retrievedAt": "2026-11-22T13:30:21.294Z"
+    },
+    {
+      "series": "deposit",
+      "value": 41.97,
+      "period": "2026-11-13",
+      "status": "available",
+      "annualChange": null,
+      "twelveMonthAverage": null,
+      "twelveMonthAveragePeriod": null,
+      "retrievedAt": "2026-11-22T13:30:21.856Z"
+    },
+    {
+      "series": "deposit1m",
+      "value": 41.59,
+      "period": "2026-11-13",
+      "status": "available",
+      "annualChange": null,
+      "twelveMonthAverage": null,
+      "twelveMonthAveragePeriod": null,
+      "retrievedAt": "2026-11-22T13:30:22.537Z"
+    },
+    {
+      "series": "policy",
+      "value": 36,
+      "period": "2026-10-23",
+      "status": "available",
+      "annualChange": null,
+      "twelveMonthAverage": null,
+      "twelveMonthAveragePeriod": null,
+      "retrievedAt": "2026-11-23T05:10:32.756Z"
+    }
+  ]
+}
