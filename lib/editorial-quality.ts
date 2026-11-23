@@ -14,7 +14,7 @@ import {saleChainGuide,saleChainGuideEvidence} from './sale-chain-guide';
 import {installmentGuide,installmentGuideEvidence} from './installment-guide';
 import {energyGuide,energyGuideEvidence} from './energy-guide';
 import {urbanGuideEvidence} from './urban-article';
-import {urbanSlug} from './urban-sources';
+import {urbanSlug,urbanSources} from './urban-sources';
 export type EditorialSource={label:string;url:string;scope:string};
 export const editorialUpdatedAt='2026-10-16';
 
@@ -775,5 +775,27 @@ export const toolEvidence:Record<string,{intro:string;exampleTitle:string;exampl
         "scope": "Seri adı, coğrafi kapsam, birim ve dönemi kaynaktan kontrol etmek için; banka teklifi değildir."
       }
     ]
+  },
+  "kira-getirisi": {
+    "intro": "Brüt getiri yıllık kirayı satış fiyatına böler. Net hesap tahsil edilmeyen ayları, yıllık gideri ve girdiğiniz vergiyi düşer; paydaya alım giderlerini de ekler. TCMB il birim kira göstergesi kullanılırsa dönem ve brüt alan kapsamı sonuçta ayrıca gösterilir.",
+    "exampleTitle": "Örnek: brüt oran ile net oranı ayırın",
+    "exampleSteps": ["5.000.000 TL satış fiyatı ve 30.000 TL aylık kira için yıllık brüt kira 360.000 TL, brüt getiri %7,20 olur.","Bir boş ay, 30.000 TL yıllık gider ve 20.000 TL örnek vergiyle net kira 280.000 TL'ye iner.","200.000 TL alım gideriyle toplam yatırım 5.200.000 TL; net getiri yaklaşık %5,38 ve basit net amortisman 18,57 yıldır."],
+    "result": "Amortisman bugünkü sabit net kira varsayımıdır; gelecekte gerçekleşecek geri ödeme tarihi değildir. TCMB il göstergesi mahalle emsali veya dairenizin kesin kirası değildir.",
+    "checks": ["Bilinen sözleşme kirası varsa gösterge yerine o tutarı ve tahsil edilebilir ay sayısını kullanın.","Kiracının ödediği gideri malik giderine ikinci kez eklemeyin.","TCMB verisinde il, dönem, TL/brüt m² birimi ve çekim tarihini kontrol edin."],
+    "sources": [
+      {"label":"TCMB · KFE metaverisi","url":"https://www.tcmb.gov.tr/wps/wcm/connect/b4628fa9-11a7-4426-aee6-dae67fc56200/KFE-Metaveri.pdf?MOD=AJPERES","scope":"Değerlemesi yapılan konutların birim kira kapsamı, brüt alan yöntemi ve coğrafi düzey; tek konutun kesin kirası değildir."},
+      {"label":"TCMB · Elektronik Veri Dağıtım Sistemi","url":"https://evds3.tcmb.gov.tr/","scope":"İl birim kira serisinin dönem, birim ve kapsamını kontrol etmek için; ilan emsali veya kira teklifi değildir."},
+      {"label":"GİB · Hazır Beyan rehberleri","url":"https://intvrg.gib.gov.tr/hazirbeyan/pdflink.html","scope":"Kira gelirinin ilgili gelir yılı beyan rehberini kontrol etmek için; kişiye özel vergi hesabı değildir."}
+    ],
+    "faqs": [{"q":"Brüt ve net kira getirisi neden farklıdır?","a":"Brüt oran yalnız yıllık kirayı satış fiyatına böler. Net oran boşluk, gider ve girdiğiniz vergiyi düşer; alım giderlerini de yatırım tutarına ekler."},{"q":"TCMB il birim kirası evimin beklenen kirası mıdır?","a":"Hayır. İl düzeyindeki değerleme raporlarından üretilen göstergedir; mahalle, bina, kat, nitelik ve sözleşme koşullarını tek başına temsil etmez."}]
+  },
+  "kentsel-donusum": {
+    "intro": "Bir bağımsız bölüm için yazılı yapım bedelini, aşama ödemelerini, geçici barınmayı ve yalnız doğruladığınız destek/kredi takvimini aylık nakit akışında birleştirir. Hak sahipliği, bina riski veya destek onayı hesaplanmaz.",
+    "exampleTitle": "Örnek: toplam katkı ile en yüksek nakit açığı aynı değildir",
+    "exampleSteps": ["2.400.000 TL yapım bedeli, 18 ay teslim süresi ve üç aşamalı ödeme planı önce aylara dağıtılır.","Geçici kira, taşınma, depozito ve diğer başlangıç giderleri ayrı nakit çıkışları olarak eklenir.","Doğrulanmış hibe, kredi ve kira desteği kendi ödeme aylarında düşülür; geç gelen destek ara dönemdeki en yüksek nakit ihtiyacını azaltmayabilir."],
+    "result": "Toplam özkaynak ihtiyacı dönem toplamını, en yüksek nakit açığı ise ödeme takvimindeki en zor ayı gösterir. Destek adı veya program duyurusu kişisel onay anlamına gelmez.",
+    "checks": ["Tek bağımsız bölüme düşen KDV dahil bedeli ve fiyat artış maddesini yazılı tekliften alın.","Hibe, kredi ve kira desteğinin tutarını, hak sahibini ve ödeme ayını ilgili kurumdan doğrulayın.","Teslim gecikmesi, geçici kira artışı ve kredi taksitleri için ayrı olumsuz senaryo çalıştırın."],
+    "sources": urbanSources,
+    "faqs": [{"q":"Araç destek hakkım olup olmadığını belirler mi?","a":"Hayır. Yalnız sizin doğruladığınız tutar ve takvimi senaryoya ekler; hak sahipliği ve başvuru onayı ilgili kurum tarafından değerlendirilir."},{"q":"En yüksek nakit açığı toplam maliyet midir?","a":"Hayır. En yüksek açık, mevcut birikim ve zamanlanmış girişler dikkate alındığında herhangi bir ayda gereken ek nakdi gösterir; toplam gider ayrı sonuçtur."}]
   }
 };
