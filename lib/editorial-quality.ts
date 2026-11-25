@@ -19,6 +19,19 @@ export type EditorialSource={label:string;url:string;scope:string};
 export const editorialUpdatedAt='2026-10-16';
 
 export const guideEvidence:Record<string,{takeaways:string[];sources:EditorialSource[]}>= {
+ "konut-kredisi-faiz-karsilastirmasi-kasim-2026-sigorta-maliyeti":{
+ takeaways:[
+  "2 milyon TL, 120 ay örneğinde aylık %3,10 ve %3,45 arasındaki taksit farkı yaklaşık 6.567 TL'dir; işlem giderleri hariçtir.",
+  "Hayat sigortalı ve sigortasız kampanyaların toplam maliyeti yalnız aylık faizle karşılaştırılamaz.",
+  "BDDK'nın kredi-değer üst sınırı ile bankanın faiz teklifi ve kredi onayı farklı kararlardır."
+ ],
+ sources:[
+  {label:"Türkiye İş Bankası · Konut Kredisi Ürün Sayfası (25 Kasım 2026 erişimi)",url:"https://www.isbank.com.tr/konut-kredisi",scope:"Hayat sigortalı aylık %3,10 ve hayat sigortasız aylık %3,45 örnek kampanya oranları; müşteri bazında değişebilir."},
+  {label:"Türkiye İş Bankası · Ev Kredisi (25 Kasım 2026 erişimi)",url:"https://www.isbank.com.tr/ev-kredisi",scope:"Bankanın müşteri bazında değişebilen faiz ve kredi koşulları."},
+  {label:"BDDK · 11604 sayılı Kurul Kararı",url:"https://www.bddk.org.tr/Mevzuat/DokumanGetir/1352",scope:"Mevcut konut sayısına göre kredi-değer oranı sınırlaması; faiz belirleme kararı değildir."},
+  {label:"Ticaret Bakanlığı · Konut finansmanı sözleşmeleri hakkında bilgilendirme",url:"https://tuketici.ticaret.gov.tr/yayinlar/tuketici-bilgi-rehberi/konut-finansmani-sozlesmeleri-hakkinda-bilgilendirme",scope:"Sözleşme öncesi bilgi ve ödeme planı kontrolü."}
+ ]},
+
  "konut-kredisi-yeni-duzenleme-2026-ikinci-ev":{
  takeaways:[
   "19 Kasım 2026 tarihli 11604 sayılı kararla yüzde 75 kredi-değer oranı indirimi en az iki mevcut konutu bulunanlara uygulanıyor.",
