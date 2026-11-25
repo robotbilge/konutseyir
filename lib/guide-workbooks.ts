@@ -17,6 +17,15 @@ import {urbanGuideWorkbook} from './urban-article';
 import {urbanSlug} from './urban-sources';
 export type GuideWorkbook={question:string;deliverable:string;rows:{finding:string;evidence:string;action:string}[]};
 export const guideWorkbooks:Record<string,GuideWorkbook>={
+ 'konut-kredisi-faiz-karsilastirmasi-kasim-2026-sigorta-maliyeti':{
+ question:'İki bankanın konut kredisi teklifinden hangisi toplam nakit çıkışına göre avantajlı?',
+ deliverable:'Aynı anapara ve vadede taksit, toplam ödeme, sigorta, tahsis ve ekspertiz masraflarını içeren karşılaştırma tablosu.',
+ rows:[
+ {finding:'Aylık faiz düşük ama sigorta primi bilinmiyor.',evidence:'Her iki kampanyanın yazılı ödeme planı ve poliçe primi/yenileme şartları.',action:'Toplam taksit ve sigorta giderlerini ayrı hesaplayın; poliçeyi sıfır masraf varsaymayın.'},
+ {finding:'Taksit karşılaştırmasında farklı vadeler veya kredi tutarları kullanılmış.',evidence:'Bankaların tarihli ve imzalı kredi teklifleri.',action:'Aynı anapara ve vadeyi sağlayan tekliflerle yeniden karşılaştırın.'},
+ {finding:'İlan edilmiş azami limit kesin kredi onayı gibi değerlendiriliyor.',evidence:'Banka ön değerlendirme ve ekspertiz koşulları, BDDK üst sınırı.',action:'Limit ile onayı ayırın, peşinat ve aylık nakit rezervi kontrolünü tamamlayın.'}
+ ]},
+
  'konut-kredisi-yeni-duzenleme-2026-ikinci-ev':{
  question:'İkinci ev alımında hangi kredi-değer üst sınırı ve ne kadar nakit gerekir?',
  deliverable:'Mevcut konut sayısı, aile mülkiyeti, enerji sınıfı, ekspertiz değeri, kredi üst sınırı, peşinat ve banka tekliflerini içeren kontrol tablosu.',
