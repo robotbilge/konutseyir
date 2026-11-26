@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1350" viewBox="0 0 1080 1350">
+<rect width="1080" height="1350" fill="#073f36"/>
+<circle cx="1040" cy="70" r="280" fill="#0b5146"/>
+<g font-family="DejaVu Sans, sans-serif">
+<text x="76" y="100" font-size="36" font-weight="bold" fill="#d8f58a">KonutSeyir</text>
+<text x="76" y="153" font-size="23" fill="#c4ddd5">26 KASIM 2026 · KONUT SAHİPLERİ İÇİN</text>
+<text x="76" y="264" font-size="64" font-weight="bold" fill="white">Emlak vergisinde</text>
+<text x="76" y="342" font-size="64" font-weight="bold" fill="white">son gün</text>
+<rect x="76" y="397" width="928" height="206" rx="26" fill="#d8f58a"/>
+<text x="118" y="492" font-size="80" font-weight="bold" fill="#073f36">30 KASIM</text>
+<text x="121" y="554" font-size="34" font-weight="bold" fill="#073f36">2026 PAZARTESİ · 2. TAKSİT</text>
+<text x="76" y="682" font-size="33" font-weight="bold" fill="white">Ödemeden önce üç kontrol</text>
+<g fill="#ffffff">
+<rect x="76" y="720" width="928" height="103" rx="18"/>
+<rect x="76" y="844" width="928" height="103" rx="18"/>
+<rect x="76" y="968" width="928" height="103" rx="18"/>
+</g>
+<g fill="#073f36" font-size="33" font-weight="bold">
+<text x="113" y="783">Doğru taşınmaz ve sicil</text>
+<text x="113" y="907">Doğru vergi yılı ve taksit</text>
+<text x="113" y="1031">Ödeme kaydı ve makbuz</text>
+</g>
+<text x="76" y="1130" font-size="25" fill="#c4ddd5">Kaynak: GİB vergi takvimi · Kontrol: 26.11.2026</text>
+<text x="76" y="1170" font-size="24" fill="#c4ddd5">Kesin tutarı ilgili belediyeden doğrulayın.</text>
+<path d="M76 1212h928" stroke="#497b6c" stroke-width="2"/>
+<text x="76" y="1264" font-size="29" font-weight="bold" fill="#d8f58a">Profildeki site bağlantısı · Makaleler</text>
+<text x="76" y="1310" font-size="24" fill="white">konutseyir.com</text>
+</g></svg>

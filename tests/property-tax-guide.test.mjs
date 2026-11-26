@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+const path='/rehber/emlak-vergisi-ikinci-taksit-2026-kira-rezervi/';
+test('November tax guide has one publication identity and consistent SEO and budget arithmetic',()=>{
+ const html=readFileSync(`dist${path}index.html`,'utf8');
+ assert.ok(html.includes(`rel="canonical" href="https://konutseyir.com${path}"`));
+ assert.match(html,/"datePublished":"2026-11-26"/);
+ assert.match(html,/"dateModified":"2026-11-26"/);
+ assert.match(html,/30 Kasım 2026 Pazartesi/);
+ assert.match(html,/354.000 TL/);
+ assert.match(html,/29.500 TL/);
+ assert.equal(30000*12-6000,354000);
+ assert.equal(6000/12,500);
+ assert.match(html,/belediyenin kişisel tahakkuk kaydıdır/);
+ const manifest=JSON.parse(readFileSync('dist/guide-publications.json','utf8'));
+ assert.equal(manifest.guides.filter(g=>g.path===path).length,1);
+ assert.ok(readFileSync('dist/rehber/index.html','utf8').includes(path.slice(0,-1)));
+ assert.ok(readFileSync('dist/sitemap.xml','utf8').includes(path));
+});

@@ -1,3 +1,4 @@
+import {propertyTaxGuide,propertyTaxEvidence} from './property-tax-november-2026';
 import {newTenantRentGuide,newTenantRentGuideEvidence} from './new-tenant-rent-guide';
 import {prepaidHomeGuide,prepaidHomeGuideEvidence} from './prepaid-home-guide';
 import {mortgagedHomeGuide,mortgagedHomeGuideEvidence} from './mortgaged-home-guide';
@@ -19,6 +20,7 @@ export type EditorialSource={label:string;url:string;scope:string};
 export const editorialUpdatedAt='2026-10-16';
 
 export const guideEvidence:Record<string,{takeaways:string[];sources:EditorialSource[]}>= {
+ [propertyTaxGuide.slug]:propertyTaxEvidence,
  "konut-kredisi-faiz-karsilastirmasi-kasim-2026-sigorta-maliyeti":{
  takeaways:[
   "2 milyon TL, 120 ay örneğinde aylık %3,10 ve %3,45 arasındaki taksit farkı yaklaşık 6.567 TL'dir; işlem giderleri hariçtir.",
