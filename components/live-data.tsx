@@ -26,11 +26,8 @@ export function MarketSnapshot(){
  return <section className="market-snapshot" aria-label="Güncel piyasa göstergeleri"><div><p className="eyebrow">RESMÎ VERİLER</p><h2>Faiz ve enflasyon verileri</h2><a href="/veri">Kaynak ve çekim saatleri →</a></div>{cards.map(({icon:Icon,...item})=><article key={item.label}><Icon/><span>{item.label}</span><strong>{item.value}</strong><small>{item.policy?'Yürürlük tarihi':'Dönem'}: {item.policy?(item.detail||'Son doğrulanmış dönem'):cpiPeriod(item.detail)}</small>{!item.policy&&<><small>Aylık yayımlanır · TÜİK / TCMB EVDS</small><small>Son doğrulama: {verifiedTime(cpi?.retrievedAt)} (TSİ)</small></>}{item.policy&&<><small>Son doğrulama: {verifiedTime(policy?.retrievedAt)} (TSİ)</small></>}</article>)}</section>
 }
 
-function newsImageFor(item:any,index:number){
- const text=`\u00a0${item?.title||''} ${item?.category||''}`.toLocaleLowerCase('tr-TR');
- if(/kira|tapu|vergi|sözleşme|hukuk|satış/.test(text))return '/images/articles/home-documents.jpg';
- if(/kredi|faiz|bütçe|maliyet|yatırım/.test(text))return '/images/articles/housing-budget.jpg';
- return ['/images/articles/housing-market.jpg','/images/articles/home-documents.jpg','/images/articles/housing-budget.jpg'][index%3];
+function newsImageFor(_item:any,index:number){
+ return ['/images/articles/housing-market.jpg','/images/articles/housing-budget.jpg','/images/articles/home-documents.jpg'][index%3];
 }
 export function LatestNews(){
  const[items,setItems]=useState<any[]>([]);
