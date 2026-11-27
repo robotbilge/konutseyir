@@ -16,7 +16,7 @@ verify('ana sayfada önceki dönem uyarısı yok',!home.includes('İlçe verisi 
 verify('rehberler buton görünümünde',home.includes('reading-action-buttons')&&css.includes('.reading-action-buttons a'));
 verify('hero sonrası üç kullanıcı avantajı görünür',home.includes('className="value-strip home-value-strip inner"')&&home.includes('Ücretsiz ve üyeliksiz başlayın')&&home.includes('Kaynağı ve veri dönemini görün')&&home.includes('Varsayımları siz belirleyin')&&css.includes('.home-value-strip'));
 verify('son makaleler ve web push ana sayfada öne çıkar',home.includes('<LatestArticles/>')&&home.includes('<PushSignup variant="home"/>')&&home.includes('Ana ekrana nasıl eklerim?'));
-verify('ana sayfa hero bölümünde görsel arka plan var',home.includes('className="home-hero-image"')&&css.includes(".home-page>.home-hero .home-hero-image")&&css.includes("url('/images/articles/housing-market.jpg')")&&css.includes('.home-page>.home-hero::before'));
+verify('ana sayfa hero bölümünde görsel arka plan var',home.includes('className="home-hero-image"')&&css.includes(".home-page>.home-hero .home-hero-image")&&home.includes('src="/images/articles/housing-market.jpg"')&&css.includes('.home-page>.home-hero::before'));
 verify('footer alan adı bağlantısı',footer.includes('href="https://konutseyir.com/" aria-label="KonutSeyir ana sayfası">konutseyir.com</a>'));
 if (!local){
   if(!apiOnly){

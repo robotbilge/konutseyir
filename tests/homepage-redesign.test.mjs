@@ -12,7 +12,7 @@ test('homepage surfaces recent illustrated articles before user pathways and off
   assert.match(html,/class="home-hero-image"[^>]*src="\/images\/articles\/housing-market\.jpg"/);
   const css=readFileSync('src/style.css','utf8');
   assert.match(css,/\.home-page>\.home-hero::before/);
-  assert.match(css,/url\('\/images\/articles\/housing-market\.jpg'\)/);
+  assert.match(css,/\.home-page>\.home-hero \.home-hero-image/);
   assert.match(html,/Ücretsiz ve üyeliksiz başlayın/);
   assert.match(html,/Kaynağı ve veri dönemini görün/);
   assert.match(html,/Varsayımları siz belirleyin/);
