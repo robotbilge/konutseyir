@@ -9,6 +9,10 @@ test('homepage surfaces recent illustrated articles before user pathways and off
   const notifications=html.indexOf('id="home-push-title"');
   const pathways=html.indexOf('id="home-user-paths-title"');
   assert.ok(articles>=0&&articles<notifications&&notifications<pathways,'homepage content order');
+  assert.match(html,/class="home-hero-image"[^>]*src="\/images\/articles\/housing-market\.jpg"/);
+  const css=readFileSync('src/style.css','utf8');
+  assert.match(css,/\.home-page>\.home-hero::before/);
+  assert.match(css,/\.home-page>\.home-hero \.home-hero-image/);
   assert.match(html,/Ücretsiz ve üyeliksiz başlayın/);
   assert.match(html,/Kaynağı ve veri dönemini görün/);
   assert.match(html,/Varsayımları siz belirleyin/);

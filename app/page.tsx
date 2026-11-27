@@ -6,6 +6,7 @@ import {PushSignup} from '../components/push-signup';
 
 export default function Home(){return <><Header/><main className="home-page">
   <section className="hero home-hero">
+    <img className="home-hero-image" src="/images/articles/housing-market.jpg" alt="" aria-hidden="true" width="1200" height="720" fetchPriority="high" decoding="async"/>
     <div className="hero-copy">
       <p className="eyebrow">KONUT KARARINIZI RAKAMLARLA DEĞERLENDİRİN</p>
       <h1>Bir evin fiyatını değil, <em>kararınızın bütününü</em> görün.</h1>
