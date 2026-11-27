@@ -26,7 +26,7 @@ test('homepage surfaces recent illustrated articles before user pathways and off
   assert.match(css,/\.home-renewal-image/);
   assert.match(css,/\.news-card-image/);
   assert.match(css,/\.home-sales-radar-image/);
-  assert.match(css,/\.home-sales-radar-compact p:not\(\.eyebrow\)\{color:#d3e9dd\}/);
+  assert.match(css,/\.home-sales-radar\.home-sales-radar-compact>div>p:not\(\.eyebrow\)\{color:#d3e9dd\}/);
   assert.match(html,/Ücretsiz ve üyeliksiz başlayın/);
   assert.match(html,/Kaynağı ve veri dönemini görün/);
   assert.match(html,/Varsayımları siz belirleyin/);

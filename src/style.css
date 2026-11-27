@@ -479,3 +479,5 @@ main>.inner>.guide-intro{max-width:none;width:100%;box-sizing:border-box}
 @media(prefers-reduced-motion:reduce){.home-user-path-grid article{transition:none}.home-user-path-grid article:hover{transform:none}}
 
 .home-sales-radar-compact p:not(.eyebrow){color:#d3e9dd}
+
+.home-sales-radar.home-sales-radar-compact>div>p:not(.eyebrow){color:#d3e9dd}
