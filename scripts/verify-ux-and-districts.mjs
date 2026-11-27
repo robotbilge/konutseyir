@@ -16,11 +16,13 @@ verify('ana sayfada önceki dönem uyarısı yok',!home.includes('İlçe verisi 
 verify('rehberler buton görünümünde',home.includes('reading-action-buttons')&&css.includes('.reading-action-buttons a'));
 verify('hero sonrası üç kullanıcı avantajı görünür',home.includes('className="value-strip home-value-strip inner"')&&home.includes('Ücretsiz ve üyeliksiz başlayın')&&home.includes('Kaynağı ve veri dönemini görün')&&home.includes('Varsayımları siz belirleyin')&&css.includes('.home-value-strip'));
 verify('son makaleler ve web push ana sayfada öne çıkar',home.includes('<LatestArticles/>')&&home.includes('<PushSignup variant="home"/>')&&home.includes('Ana ekrana nasıl eklerim?'));
+verify('ana sayfa hero bölümünde görsel arka plan var',home.includes('className="home-hero-image"')&&css.includes(".home-page>.home-hero .home-hero-image")&&css.includes("url('/images/articles/housing-market.jpg')")&&css.includes('.home-page>.home-hero::before'));
 verify('footer alan adı bağlantısı',footer.includes('href="https://konutseyir.com/" aria-label="KonutSeyir ana sayfası">konutseyir.com</a>'));
 if (!local){
   if(!apiOnly){
   const page = await fetch(base+'/',{signal:AbortSignal.timeout(15000)}).then(r=>{if(!r.ok)throw Error('Homepage HTTP '+r.status);return r.text()});
   verify('canlı logo altında finansal karar desteği',page.includes('Kamu Verileriyle Karar Destek Platformu')&&page.includes('header-brand-tagline'));
+  verify('canlı ana sayfada görsel hero arka planı var',page.includes('home-hero-image')&&page.includes('/images/articles/housing-market.jpg'));
   verify('canlı kullanıcı avantajları, makaleler ve bildirim paneli görünür',page.includes('Ücretsiz ve üyeliksiz başlayın')&&page.includes('Kaynağı ve veri dönemini görün')&&page.includes('Varsayımları siz belirleyin')&&page.includes('Konut gündemindeki son yazılar')&&page.includes('Tüm makaleler')&&page.includes('KonutSeyir’i ana ekranınıza ekleyin.')&&page.includes('Ana ekrana nasıl eklerim?')&&(page.match(/class="latest-article-image"/g)||[]).length===3&&(page.match(/src="\/images\/articles\//g)||[]).length===3);
   verify('canlı ana sayfada eski ilçe uyarısı yok',!page.includes('İlçe verisi 2026-08'));
   verify('canlı footer alan adı bağlantısı',/<a[^>]+href="https:\/\/konutseyir\.com\/"[^>]*>konutseyir\.com<\/a>/.test(page));
