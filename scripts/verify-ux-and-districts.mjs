@@ -14,7 +14,8 @@ verify('logo altında finansal karar desteği',footer.includes('header-brand-tag
 verify('ana sayfada ilçe liste bileşeni kaldırılmış',!home.includes('<DistrictSalesRanking'));
 verify('ana sayfada önceki dönem uyarısı yok',!home.includes('İlçe verisi 2026-08'));
 verify('rehberler buton görünümünde',home.includes('reading-action-buttons')&&css.includes('.reading-action-buttons a'));
-verify('üç kullanıcı avantajı eski etiketin yerinde',home.includes('hero-proof hero-proof-top')&&home.includes('Hesaplamaya üyelik olmadan başlayın')&&home.includes('Verilerin hangi döneme ait olduğunu görün')&&home.includes('Hesaplama varsayımlarını kendiniz belirleyin')&&!home.includes('className="trust-label"')&&css.includes('.hero-proof-top'));
+verify('hero sonrası üç kullanıcı avantajı görünür',home.includes('className="value-strip home-value-strip inner"')&&home.includes('Ücretsiz ve üyeliksiz başlayın')&&home.includes('Kaynağı ve veri dönemini görün')&&home.includes('Varsayımları siz belirleyin')&&css.includes('.home-value-strip'));
+verify('son makaleler ve web push ana sayfada öne çıkar',home.includes('<LatestArticles/>')&&home.includes('<PushSignup variant="home"/>')&&home.includes('Ana ekrana nasıl eklerim?'));
 verify('footer alan adı bağlantısı',footer.includes('href="https://konutseyir.com/" aria-label="KonutSeyir ana sayfası">konutseyir.com</a>'));
 if (!local){
   if(!apiOnly){

@@ -2,16 +2,16 @@ import {ArrowUpRight,BadgeCheck,Calculator as CalculatorIcon,Database,Info,Searc
 import {Header,Footer} from '../components/site-chrome';
 import {LatestNews,MarketSnapshot} from '../components/live-data';
 import {LatestArticles} from '../components/latest-articles';
+import {PushSignup} from '../components/push-signup';
 
 export default function Home(){return <><Header/><main className="home-page">
   <section className="hero home-hero">
-    <div className="hero-proof hero-proof-top" aria-label="KonutSeyir kullanım avantajları"><span><ShieldCheck/> Hesaplamaya üyelik olmadan başlayın</span><span><CalculatorIcon/> Verilerin hangi döneme ait olduğunu görün</span><span><Database/> Hesaplama varsayımlarını kendiniz belirleyin</span></div>
     <div className="hero-copy">
-      <p className="eyebrow">SATILIK KONUT İLANI ANALİZİ</p>
-      <h1>Satılık konut ilanını m² fiyatı ve <em>kira göstergeleriyle</em> karşılaştırın.</h1>
-      <p className="hero-tagline">Bir evin fiyatını değil, <strong>yatırım mantığını</strong> ölçün.</p>
-      <p className="lead">İlan bilgilerini bağlantıdan aktarın. Brüt m² fiyatını TCMB’nin il göstergesiyle; kira, getiri ve amortismanı ayrı ayrı inceleyin.</p>
-      <div className="hero-actions"><a className="primary-link" href="/ev-analizi">İlanı analiz et <ArrowUpRight size={17}/></a><a className="text-link" href="/veri">Veri kaynakları <ArrowUpRight size={16}/></a></div>
+      <p className="eyebrow">KONUT KARARINIZI RAKAMLARLA DEĞERLENDİRİN</p>
+      <h1>Bir evin fiyatını değil, <em>kararınızın bütününü</em> görün.</h1>
+      <p className="hero-tagline">İlanı, kredi yükünü ve kira senaryosunu <strong>kendi varsayımlarınızla</strong> inceleyin.</p>
+      <p className="lead">Satılık konut ilanının net ve brüt m² fiyatını; TCMB’nin il göstergesi, kira, getiri ve amortisman verilerinden ayrı okuyun.</p>
+      <div className="hero-actions"><a className="primary-link" href="/ev-analizi">İlanımı analiz et <ArrowUpRight size={17}/></a><a className="text-link" href="/hesaplama">Hesap araçlarını gör <ArrowUpRight size={16}/></a></div>
       
     </div>
     <aside className="hero-analysis-preview" aria-labelledby="hero-analysis-title">
@@ -26,6 +26,27 @@ export default function Home(){return <><Header/><main className="home-page">
       
     </aside>
   </section>
+  <section className="value-strip home-value-strip inner" aria-label="KonutSeyir nasıl çalışır?">
+    <div><span><ShieldCheck aria-hidden="true"/></span><p><b>Ücretsiz ve üyeliksiz başlayın</b><small>Hesaplama araçlarını hesap açmadan kullanın.</small></p></div>
+    <div><span><Database aria-hidden="true"/></span><p><b>Kaynağı ve veri dönemini görün</b><small>Veri tarihi ve kapsamı sonuçla birlikte gösterilir.</small></p></div>
+    <div><span><CalculatorIcon aria-hidden="true"/></span><p><b>Varsayımları siz belirleyin</b><small>Kira, vade ve giderleri kendi senaryonuza göre girin.</small></p></div>
+  </section>
+  <div className="inner home-top-content">
+    <LatestArticles/>
+    <section className="home-push" aria-labelledby="home-push-title">
+      <div className="home-push-intro">
+        <p className="eyebrow">YENİ MAKALELERİ KAÇIRMAYIN</p>
+        <h2 id="home-push-title">KonutSeyir’i ana ekranınıza ekleyin.</h2>
+        <p>Yeni makale yayımlandığında bildirim almak için cihazınızda izin verin.</p>
+        <details>
+          <summary>Ana ekrana nasıl eklerim?</summary>
+          <p><b>iPhone:</b> Safari’de Paylaş → Ana Ekrana Ekle. Ana ekrandaki KonutSeyir’i açın ve bildirim iznini aşağıdaki düğmeden verin.</p>
+          <p><b>Android:</b> Tarayıcı menüsünden Uygulamayı yükle veya Ana ekrana ekle seçeneğini kullanın. KonutSeyir’i açıp bildirim iznini aşağıdaki düğmeden verin.</p>
+        </details>
+      </div>
+      <PushSignup variant="home"/>
+    </section>
+  </div>
   <div className="inner home-content">
     <section className="home-user-paths" aria-labelledby="home-user-paths-title">
       <header><p className="eyebrow">İHTİYACINIZA GÖRE İLERLEYİN</p><h2 id="home-user-paths-title">Konut için hangi adımı atıyorsunuz?</h2><p>Bir sonraki adımı seçin; her araç kendi karar sorusuna odaklanır.</p></header>
@@ -35,7 +56,6 @@ export default function Home(){return <><Header/><main className="home-page">
         <article><p className="eyebrow">EVİMİ SATACAĞIM</p><h3>Satışı hazırlayın, tutarı görün</h3><p>Satış fiyatından borç ve giderleri düşün; tapu ve resmî kayıt kontrollerini tamamlayın.</p><a className="home-path-primary" href="/karar-araclari#net-satis">Net satış tutarını hesapla <ArrowUpRight size={16}/></a><div><a href="/hesaplama/tapu-harci">Tapu gideri</a><a href="/resmi-kontroller">Resmî kontroller</a></div></article>
       </div>
     </section>
-    <LatestArticles/>
     <section className="home-renewal" aria-labelledby="home-renewal-title">
       <div className="home-renewal-copy">
         <p className="eyebrow">KENTSEL DÖNÜŞÜM</p>
