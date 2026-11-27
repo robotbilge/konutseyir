@@ -477,3 +477,5 @@ main>.inner>.guide-intro{max-width:none;width:100%;box-sizing:border-box}
 @media(max-width:900px){.home-sales-radar-compact{grid-template-columns:minmax(0,1fr) minmax(150px,220px)}.home-sales-radar-compact>.primary-link{grid-column:1/-1;justify-self:start}}
 @media(max-width:680px){.home-user-path-grid{grid-template-columns:1fr}.home-path-image{height:190px}.home-renewal-image{height:170px}.latest-news>div{grid-template-columns:1fr}.news-card-image{height:190px}.home-sales-radar-compact{display:grid;grid-template-columns:1fr;padding:22px}.home-sales-radar-image{height:190px}.home-sales-radar-compact>.primary-link{width:100%}}
 @media(prefers-reduced-motion:reduce){.home-user-path-grid article{transition:none}.home-user-path-grid article:hover{transform:none}}
+
+.home-sales-radar-compact p:not(.eyebrow){color:#d3e9dd}
