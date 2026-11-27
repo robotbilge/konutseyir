@@ -26,11 +26,17 @@ export function MarketSnapshot(){
  return <section className="market-snapshot" aria-label="Güncel piyasa göstergeleri"><div><p className="eyebrow">RESMÎ VERİLER</p><h2>Faiz ve enflasyon verileri</h2><a href="/veri">Kaynak ve çekim saatleri →</a></div>{cards.map(({icon:Icon,...item})=><article key={item.label}><Icon/><span>{item.label}</span><strong>{item.value}</strong><small>{item.policy?'Yürürlük tarihi':'Dönem'}: {item.policy?(item.detail||'Son doğrulanmış dönem'):cpiPeriod(item.detail)}</small>{!item.policy&&<><small>Aylık yayımlanır · TÜİK / TCMB EVDS</small><small>Son doğrulama: {verifiedTime(cpi?.retrievedAt)} (TSİ)</small></>}{item.policy&&<><small>Son doğrulama: {verifiedTime(policy?.retrievedAt)} (TSİ)</small></>}</article>)}</section>
 }
 
+function newsImageFor(item:any,index:number){
+ const text=`\u00a0${item?.title||''} ${item?.category||''}`.toLocaleLowerCase('tr-TR');
+ if(/kira|tapu|vergi|sözleşme|hukuk|satış/.test(text))return '/images/articles/home-documents.jpg';
+ if(/kredi|faiz|bütçe|maliyet|yatırım/.test(text))return '/images/articles/housing-budget.jpg';
+ return ['/images/articles/housing-market.jpg','/images/articles/home-documents.jpg','/images/articles/housing-budget.jpg'][index%3];
+}
 export function LatestNews(){
  const[items,setItems]=useState<any[]>([]);
  useEffect(()=>{const controller=new AbortController();fetch('/api/news?limit=3',{signal:controller.signal}).then(r=>r.ok?r.json():Promise.reject()).then(j=>setItems(j.items||[])).catch(()=>{});return()=>controller.abort()},[]);
  if(!items.length)return null;
- return <section className="latest-news"><header><div><p className="eyebrow">KONUT GÜNDEMİ</p><h2>Piyasayı etkileyen son gelişmeler</h2></div><a href="/haberler">Tüm haberler <ArrowUpRight/></a></header><div>{items.map(item=><article key={item.slug}><Newspaper/><span>{item.sourceName}</span><h3><a href={`/haberler/haber?slug=${encodeURIComponent(item.slug)}`}>{item.title}</a></h3><small>{new Intl.DateTimeFormat('tr-TR',{dateStyle:'medium',timeZone:'Europe/Istanbul'}).format(new Date(item.publishedAt))}</small></article>)}</div></section>
+ return <section className="latest-news"><header><div><p className="eyebrow">KONUT GÜNDEMİ</p><h2>Piyasayı etkileyen son gelişmeler</h2></div><a href="/haberler">Tüm haberler <ArrowUpRight/></a></header><div>{items.map((item,index)=><article key={item.slug}><img className="news-card-image" src={newsImageFor(item,index)} alt="" width="1200" height="720" loading="lazy" decoding="async"/><div className="news-card-source"><Newspaper/><span>{item.sourceName}</span></div><h3><a href={`/haberler/haber?slug=${encodeURIComponent(item.slug)}`}>{item.title}</a></h3><small>{new Intl.DateTimeFormat('tr-TR',{dateStyle:'medium',timeZone:'Europe/Istanbul'}).format(new Date(item.publishedAt))}</small></article>)}</div></section>
 }
 
 type CityMarketData={
