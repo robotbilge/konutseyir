@@ -17,6 +17,11 @@ verify('rehberler buton görünümünde',home.includes('reading-action-buttons')
 verify('hero sonrası üç kullanıcı avantajı görünür',home.includes('className="value-strip home-value-strip inner"')&&home.includes('Ücretsiz ve üyeliksiz başlayın')&&home.includes('Kaynağı ve veri dönemini görün')&&home.includes('Varsayımları siz belirleyin')&&css.includes('.home-value-strip'));
 verify('son makaleler ve web push ana sayfada öne çıkar',home.includes('<LatestArticles/>')&&home.includes('<PushSignup variant="home"/>')&&home.includes('Ana ekrana nasıl eklerim?'));
 verify('ana sayfa hero bölümünde görsel arka plan var',home.includes('className="home-hero-image"')&&css.includes(".home-page>.home-hero .home-hero-image")&&home.includes('src="/images/articles/housing-market.jpg"')&&css.includes('.home-page>.home-hero::before'));
+const liveData = readFileSync('components/live-data.tsx','utf8');
+verify('üç kullanıcı yolunda konuyla ilgili görseller var',[...home.matchAll(/className="home-path-image"/g)].length===3&&css.includes('.home-path-image'));
+verify('Kentsel Dönüşüm alanı görsel ve vurgulu',home.includes('className="home-renewal-image"')&&css.includes('.home-renewal-image')&&css.includes('.home-renewal{border:1px solid #b5d3c2'));
+verify('Konut satış radarı görsel ve vurgulu',home.includes('TÜRKİYE KONUT SATIŞ RADARI')&&home.includes('className="home-sales-radar-image"')&&css.includes('.home-sales-radar-image'));
+verify('son gelişmeler kartlarında tematik görseller var',liveData.includes('className="news-card-image"')&&liveData.includes('function newsImageFor')&&css.includes('.news-card-image'));
 verify('footer alan adı bağlantısı',footer.includes('href="https://konutseyir.com/" aria-label="KonutSeyir ana sayfası">konutseyir.com</a>'));
 if (!local){
   if(!apiOnly){
