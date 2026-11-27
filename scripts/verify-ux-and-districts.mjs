@@ -20,7 +20,7 @@ verify('ana sayfa hero bölümünde görsel arka plan var',home.includes('classN
 const liveData = readFileSync('components/live-data.tsx','utf8');
 verify('üç kullanıcı yolunda konuyla ilgili görseller var',[...home.matchAll(/className="home-path-image"/g)].length===3&&css.includes('.home-path-image'));
 verify('Kentsel Dönüşüm alanı görsel ve vurgulu',home.includes('className="home-renewal-image"')&&css.includes('.home-renewal-image')&&css.includes('.home-renewal{border:1px solid #b5d3c2'));
-verify('Konut satış radarı görsel ve vurgulu',home.includes('TÜRKİYE KONUT SATIŞ RADARI')&&home.includes('className="home-sales-radar-image"')&&css.includes('.home-sales-radar-image'));
+verify('Konut satış radarı görsel ve vurgulu',home.includes('TÜRKİYE KONUT SATIŞ RADARI')&&home.includes('className="home-sales-radar-image"')&&css.includes('.home-sales-radar-image')&&css.includes('.home-sales-radar.home-sales-radar-compact>div>p:not(.eyebrow)'));
 verify('son gelişmeler kartlarında tematik görseller var',liveData.includes('className="news-card-image"')&&liveData.includes('function newsImageFor')&&liveData.includes('housing-budget.jpg')&&css.includes('.news-card-image'));
 verify('footer alan adı bağlantısı',footer.includes('href="https://konutseyir.com/" aria-label="KonutSeyir ana sayfası">konutseyir.com</a>'));
 if (!local){
