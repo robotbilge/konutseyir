@@ -1,3 +1,4 @@
+import {socialRentalGuide,socialRentalWorkbook} from './social-rental-november-2026';
 import {propertyTaxGuide,propertyTaxWorkbook} from './property-tax-november-2026';
 import {newTenantRentGuide,newTenantRentGuideWorkbook} from './new-tenant-rent-guide';
 import {prepaidHomeGuide,prepaidHomeGuideWorkbook} from './prepaid-home-guide';
@@ -18,6 +19,7 @@ import {urbanGuideWorkbook} from './urban-article';
 import {urbanSlug} from './urban-sources';
 export type GuideWorkbook={question:string;deliverable:string;rows:{finding:string;evidence:string;action:string}[]};
 export const guideWorkbooks:Record<string,GuideWorkbook>={
+ [socialRentalGuide.slug]:socialRentalWorkbook,
  [propertyTaxGuide.slug]:propertyTaxWorkbook,
  'konut-kredisi-faiz-karsilastirmasi-kasim-2026-sigorta-maliyeti':{
  question:'İki bankanın konut kredisi teklifinden hangisi toplam nakit çıkışına göre avantajlı?',
