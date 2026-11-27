@@ -16,12 +16,15 @@ async function saveSubscription(subscription:PushSubscription){
  if(!response.ok)throw Error('Push subscription could not be saved');
 }
 
-export function PushSignup(){
- const[state,setState]=useState<'loading'|'ready'|'active'|'unsupported'|'unconfigured'|'denied'|'error'>('loading');
+export function PushSignup({variant='default'}:{variant?:'default'|'home'}={}){
+ const[state,setState]=useState<'loading'|'ready'|'active'|'unsupported'|'install-required'|'unconfigured'|'denied'|'error'>('loading');
  const[publicKey,setKey]=useState('');
  const[busy,setBusy]=useState(false);
 
  useEffect(()=>{
+  const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isInstalled=window.matchMedia('(display-mode: standalone)').matches||(navigator as Navigator&{standalone?:boolean}).standalone===true;
+  if(isIOS&&!isInstalled){setState('install-required');return}
   if(!('serviceWorker'in navigator)||!('PushManager'in window)||!('Notification'in window)){
    setState('unsupported');
    return;
@@ -79,14 +82,16 @@ export function PushSignup(){
   finally{setBusy(false)}
  }
 
- if(state==='loading')return <div className="push-box"><Bell/><p>Bildirim durumu kontrol ediliyor…</p></div>;
- if(state==='unsupported')return <div className="push-box"><BellOff/><p>Bu tarayıcı Web Push bildirimini desteklemiyor.</p></div>;
- if(state==='unconfigured')return <div className="push-box"><BellOff/><p>Bildirim servisi şu anda kullanılamıyor.</p></div>;
- return <div className="push-box">
+ const variantClass=variant==='home'?' push-box-home':'';
+ if(state==='loading')return <div className={'push-box'+variantClass} role="status"><Bell/><p>Bildirim durumu kontrol ediliyor…</p></div>;
+ if(state==='unsupported')return <div className={'push-box'+variantClass} role="status"><BellOff/><p>Bu tarayıcı Web Push bildirimini desteklemiyor.</p></div>;
+ if(state==='install-required')return <div className={'push-box'+variantClass} role="status"><BellOff/><p>iPhone veya iPad’de bildirimleri açmak için önce Safari’den Ana Ekrana Ekle’yi seçin, KonutSeyir’i ana ekrandan açın ve burada tekrar deneyin.</p></div>;
+ if(state==='unconfigured')return <div className={'push-box'+variantClass} role="status"><BellOff/><p>Bildirim servisi şu anda kullanılamıyor.</p></div>;
+ return <div className={'push-box'+variantClass}>
   <Bell/>
   <div>
-   <b>Emlak haberleri ve yeni makaleler cihazınıza gelsin</b>
-   <p>Yeni emlak haberleri ve özgün konut makaleleri için bildirim gönderilir. İstediğiniz zaman kapatabilirsiniz.</p>
+   <b>{variant==='home'?'Bildirimleri kendi isteğinizle açın':'Emlak haberleri ve yeni makaleler cihazınıza gelsin'}</b>
+   <p>{variant==='home'?'Ana ekrana ekledikten sonra izin verin; yalnızca izin verdiğinizde bildirim gönderilir.':'Yeni emlak haberleri ve özgün konut makaleleri için bildirim gönderilir. İstediğiniz zaman kapatabilirsiniz.'}</p>
    {state==='denied'&&<small>Tarayıcı bildirim iznini engelledi. Site ayarlarından izin vermeniz gerekir.</small>}
    {state==='error'&&<small>Bildirim işlemi tamamlanamadı. {publicKey?'Tekrar deneyin.':'Sayfayı yenileyip tekrar deneyin.'}</small>}
   </div>
