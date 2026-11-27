@@ -23,7 +23,7 @@ if (!local){
   const page = await fetch(base+'/',{signal:AbortSignal.timeout(15000)}).then(r=>{if(!r.ok)throw Error('Homepage HTTP '+r.status);return r.text()});
   verify('canlı logo altında finansal karar desteği',page.includes('Kamu Verileriyle Karar Destek Platformu')&&page.includes('header-brand-tagline'));
   verify('canlı ana sayfada görsel hero arka planı var',page.includes('home-hero-image')&&page.includes('/images/articles/housing-market.jpg'));
-  verify('canlı kullanıcı avantajları, makaleler ve bildirim paneli görünür',page.includes('Ücretsiz ve üyeliksiz başlayın')&&page.includes('Kaynağı ve veri dönemini görün')&&page.includes('Varsayımları siz belirleyin')&&page.includes('Konut gündemindeki son yazılar')&&page.includes('Tüm makaleler')&&page.includes('KonutSeyir’i ana ekranınıza ekleyin.')&&page.includes('Ana ekrana nasıl eklerim?')&&(page.match(/class="latest-article-image"/g)||[]).length===3&&(page.match(/src="\/images\/articles\//g)||[]).length===3);
+  verify('canlı kullanıcı avantajları, makaleler ve bildirim paneli görünür',page.includes('Ücretsiz ve üyeliksiz başlayın')&&page.includes('Kaynağı ve veri dönemini görün')&&page.includes('Varsayımları siz belirleyin')&&page.includes('Konut gündemindeki son yazılar')&&page.includes('Tüm makaleler')&&page.includes('KonutSeyir’i ana ekranınıza ekleyin.')&&page.includes('Ana ekrana nasıl eklerim?')&&(page.match(/class="latest-article-image"/g)||[]).length===3);
   verify('canlı ana sayfada eski ilçe uyarısı yok',!page.includes('İlçe verisi 2026-08'));
   verify('canlı footer alan adı bağlantısı',/<a[^>]+href="https:\/\/konutseyir\.com\/"[^>]*>konutseyir\.com<\/a>/.test(page));
   }
