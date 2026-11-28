@@ -1,3 +1,4 @@
+import {housingExpectationsGuide,housingExpectationsSections} from './housing-expectations-november-2026';
 import {socialRentalGuide,socialRentalSections} from './social-rental-november-2026';
 import {propertyTaxGuide,propertyTaxSections} from './property-tax-november-2026';
 import {mortgageOfferGuide,mortgageOfferGuideSections} from './mortgage-offer-november-2026';
@@ -156,12 +157,13 @@ export const guides=[
       "KFE fiyat hareketini izler; ilan için otomatik ekspertiz üretmez. Sonuç okumaya başlamadan serinin adını, kapsamını, birimini ve dönemini kontrol edin."
     ]
   },
- socialRentalGuide, propertyTaxGuide, mortgageOfferGuide, newMortgageRuleGuide, housingNovemberGuide, urbanGuide, energyGuide, installmentGuide, saleChainGuide, appraisalGapGuide, daskBudgetGuide, rentalMoveGuide, refinanceGuide, homeSaleTaxGuide, duplicateListingGuide, shortStayGuide, sharedTitleGuide, rentalExpenseGuide, mortgagedHomeGuide, prepaidHomeGuide, newTenantRentGuide
+ housingExpectationsGuide, socialRentalGuide, propertyTaxGuide, mortgageOfferGuide, newMortgageRuleGuide, housingNovemberGuide, urbanGuide, energyGuide, installmentGuide, saleChainGuide, appraisalGapGuide, daskBudgetGuide, rentalMoveGuide, refinanceGuide, homeSaleTaxGuide, duplicateListingGuide, shortStayGuide, sharedTitleGuide, rentalExpenseGuide, mortgagedHomeGuide, prepaidHomeGuide, newTenantRentGuide
 ] as const;
 
 export type GuideSection={heading:string;paragraphs:string[];bullets?:string[]};
 
 export const guideExpansions:Record<string,GuideSection[]>={
+ [housingExpectationsGuide.slug]:housingExpectationsSections,
  [socialRentalGuide.slug]:socialRentalSections,
  [propertyTaxGuide.slug]:propertyTaxSections,
  [mortgageOfferGuide.slug]:mortgageOfferGuideSections,

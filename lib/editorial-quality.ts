@@ -1,3 +1,4 @@
+import {housingExpectationsGuide,housingExpectationsEvidence} from './housing-expectations-november-2026';
 import {socialRentalGuide,socialRentalEvidence} from './social-rental-november-2026';
 import {propertyTaxGuide,propertyTaxEvidence} from './property-tax-november-2026';
 import {newTenantRentGuide,newTenantRentGuideEvidence} from './new-tenant-rent-guide';
@@ -21,6 +22,7 @@ export type EditorialSource={label:string;url:string;scope:string};
 export const editorialUpdatedAt='2026-10-16';
 
 export const guideEvidence:Record<string,{takeaways:string[];sources:EditorialSource[]}>= {
+ [housingExpectationsGuide.slug]:housingExpectationsEvidence,
  [socialRentalGuide.slug]:socialRentalEvidence,
  [propertyTaxGuide.slug]:propertyTaxEvidence,
  "konut-kredisi-faiz-karsilastirmasi-kasim-2026-sigorta-maliyeti":{
